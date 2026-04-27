@@ -125,6 +125,48 @@ const DOMAIN_LABELS: Record<string, string> = {
   logicReasoning: "Logic",
 };
 
+interface ReactiveState {
+  reputation: number; reputationPct: number; verified: boolean;
+  slashed: boolean; slashExpiresAt: number; followerCount: number;
+  quorum: number; threshold: number; thresholdPct: number;
+  slashTimeRemaining: number; meetsThreshold: boolean;
+}
+
+async function fetchReactiveState(address: string): Promise<ReactiveState | null> {
+  const rpc          = process.env.ETHEREUM_SEPOLIA_RPC;
+  const repStateAddr = process.env.REPUTATION_STATE_ADDRESS;
+  if (!rpc || !repStateAddr) return null;
+
+  try {
+    const { ethers } = await import("ethers");
+    const provider   = new ethers.JsonRpcProvider(rpc);
+    const repState   = new ethers.Contract(repStateAddr, [
+      "function getCurrentStatus(bytes32 node) external view returns (uint256,bool,bool,uint256,uint256,uint256)",
+      "function getQuorum(bytes32 node) external view returns (uint256)",
+      "function verificationThreshold() external view returns (uint256)",
+    ], provider);
+    const ensName = `${address.slice(2, 10).toLowerCase()}.composia.eth`;
+    const node    = ethers.namehash(ensName);
+    const [status, quorum, threshold] = await Promise.all([
+      repState.getCurrentStatus(node),
+      repState.getQuorum(node),
+      repState.verificationThreshold(),
+    ]);
+    const rep       = Number(status[0]);
+    const thresh    = Number(threshold);
+    const expiresAt = Number(status[3]);
+    return {
+      reputation: rep, reputationPct: rep / 100,
+      verified: status[1], slashed: status[2],
+      slashExpiresAt: expiresAt, followerCount: Number(status[4]),
+      quorum: Number(quorum), threshold: thresh, thresholdPct: thresh / 100,
+      slashTimeRemaining: status[2] && expiresAt > 0
+        ? Math.max(0, expiresAt - Math.floor(Date.now() / 1000)) : 0,
+      meetsThreshold: rep >= thresh,
+    };
+  } catch { return null; }
+}
+
 export default async function AgentProfilePage({
   params,
   searchParams,
@@ -134,7 +176,10 @@ export default async function AgentProfilePage({
 }) {
   const { address } = params;
   const devOwner = searchParams?.devOwner === "1";
-  const profile = await buildProfile(address);
+  const [profile, reactive] = await Promise.all([
+    buildProfile(address),
+    fetchReactiveState(address),
+  ]);
 
   if (!profile) {
     return (
@@ -387,57 +432,156 @@ export default async function AgentProfilePage({
         </div>
       </div>
 
-      {/* ── ENS IDENTITY ── */}
+      {/* ── ENS IDENTITY + REACTIVE STATE ── */}
       {(() => {
-        const ensLabel   = address.slice(2, 10).toLowerCase();
-        const ensName    = `${ensLabel}.composia.eth`;
-        const ensAppUrl  = `https://app.ens.domains/${ensName}`;
-        const configured = !!process.env.ENS_REGISTRAR_ADDRESS;
+        const label   = address.slice(2, 10).toLowerCase();
+        const ensName = `${label}.composia.eth`;
+        const repStateAddr = process.env.REPUTATION_STATE_ADDRESS;
+        const layer1Active = !!process.env.ENS_REGISTRAR_ADDRESS;
+        const layer2Active = !!reactive;
+
         return (
-          <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold">ENS Identity</h2>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full border ${
-                configured
-                  ? "bg-green-500/10 text-green-400 border-green-500/20"
-                  : "bg-gray-700/40 text-gray-500 border-gray-700"
-              }`}>
-                {configured ? "✓ Registered on Sepolia" : "Pending registration"}
-              </span>
+          <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-semibold">ENS Identity</h2>
+                <div className="font-mono text-composia-cyan text-sm mt-0.5">{ensName}</div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                {layer2Active ? (
+                  reactive!.slashed ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full border bg-red-500/10 text-red-400 border-red-500/20">
+                      ⚡ Slashed
+                    </span>
+                  ) : reactive!.verified ? (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full border bg-green-500/10 text-green-400 border-green-500/20">
+                      ✓ Verified (live)
+                    </span>
+                  ) : (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full border bg-yellow-500/10 text-yellow-400 border-yellow-500/20">
+                      ⚠ Below threshold
+                    </span>
+                  )
+                ) : layer1Active ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full border bg-blue-500/10 text-blue-400 border-blue-700/30">
+                    Layer 1 only
+                  </span>
+                ) : (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full border bg-gray-700/40 text-gray-500 border-gray-700">
+                    Pending
+                  </span>
+                )}
+              </div>
             </div>
 
-            <div className="font-mono text-composia-cyan text-sm">{ensName}</div>
+            {/* Layer 2 reactive state panel */}
+            {layer2Active && reactive && (
+              <div className="space-y-3">
+                <div className="text-[10px] text-gray-500 uppercase tracking-wide">Layer 2 — Reactive State</div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {[
-                ["gensyn:accuracy",      `${rep.accuracy}%`],
-                ["gensyn:verifications", rep.verifications.toLocaleString()],
-                ["gensyn:up_address",    profile.upAddress ? profile.upAddress.slice(0, 18) + "…" : "—"],
-                ["url",                  `composia.app/agent/${address.slice(0, 10)}…`],
-              ].map(([key, val]) => (
-                <div key={key} className="bg-composia-dark/60 rounded px-2 py-1.5 space-y-0.5">
-                  <div className="font-mono text-[9px] text-gray-500">{key}</div>
-                  <div className="text-gray-300">{val}</div>
+                {/* Reputation bar */}
+                <div className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-gray-400">Reputation</span>
+                    <span className={reactive.meetsThreshold ? "text-green-400" : "text-yellow-400"}>
+                      {reactive.reputationPct.toFixed(1)}%
+                      <span className="text-gray-600 ml-1">
+                        (threshold {reactive.thresholdPct.toFixed(0)}%)
+                      </span>
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${reactive.meetsThreshold ? "bg-green-400" : "bg-yellow-400"}`}
+                      style={{ width: `${Math.min(reactive.reputationPct, 100)}%` }}
+                    />
+                  </div>
+                  <div
+                    className="h-0.5 w-px bg-gray-500 absolute"
+                    style={{ left: `${reactive.thresholdPct}%` }}
+                  />
                 </div>
-              ))}
+
+                {/* Stats grid */}
+                <div className="grid grid-cols-3 gap-2 text-xs">
+                  <div className="bg-composia-dark/60 rounded px-2 py-2 text-center">
+                    <div className="text-gray-500 text-[9px]">Followers</div>
+                    <div className="font-bold mt-0.5">{reactive.followerCount}</div>
+                  </div>
+                  <div className="bg-composia-dark/60 rounded px-2 py-2 text-center">
+                    <div className="text-gray-500 text-[9px]">Quorum</div>
+                    <div className="font-bold mt-0.5">{reactive.quorum}</div>
+                  </div>
+                  <div className={`rounded px-2 py-2 text-center ${
+                    reactive.slashed
+                      ? "bg-red-500/10 border border-red-500/20"
+                      : reactive.verified
+                      ? "bg-green-500/10 border border-green-500/20"
+                      : "bg-composia-dark/60"
+                  }`}>
+                    <div className="text-gray-500 text-[9px]">Status</div>
+                    <div className={`font-bold mt-0.5 text-[10px] ${
+                      reactive.slashed ? "text-red-400" : reactive.verified ? "text-green-400" : "text-yellow-400"
+                    }`}>
+                      {reactive.slashed ? "SLASHED" : reactive.verified ? "ACTIVE" : "PENDING"}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Slash expiry */}
+                {reactive.slashed && reactive.slashTimeRemaining > 0 && (
+                  <div className="text-xs text-red-400 bg-red-500/5 border border-red-500/10 rounded px-3 py-2">
+                    Slash expires in{" "}
+                    <span className="font-mono font-bold">
+                      {reactive.slashTimeRemaining > 86400
+                        ? `${Math.floor(reactive.slashTimeRemaining / 86400)}d`
+                        : `${Math.floor(reactive.slashTimeRemaining / 3600)}h`}
+                    </span>{" "}
+                    · Verification restores automatically if rep ≥ {reactive.thresholdPct.toFixed(0)}%
+                  </div>
+                )}
+
+                {/* Composability callout */}
+                <div className="text-[10px] text-gray-600 bg-composia-dark/40 rounded px-3 py-2 space-y-0.5">
+                  <div className="text-gray-500 font-medium">DeFi composability</div>
+                  <div className="font-mono">isCurrentlyVerified({label.slice(0,4)}…) → <span className={reactive.verified && !reactive.slashed ? "text-green-400" : "text-red-400"}>{String(reactive.verified && !reactive.slashed)}</span></div>
+                  <div className="font-mono">getQuorum({label.slice(0,4)}…) → <span className="text-composia-cyan">{reactive.quorum}</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Layer 1 — static text records */}
+            <div className="space-y-2">
+              <div className="text-[10px] text-gray-500 uppercase tracking-wide">Layer 1 — Historical (ENS text records)</div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                {[
+                  ["gensyn:accuracy",      `${rep.accuracy}%`],
+                  ["gensyn:verifications", rep.verifications.toLocaleString()],
+                  ["gensyn:verified_since","set at registration"],
+                  ["gensyn:up_address",    profile.upAddress ? profile.upAddress.slice(0, 14) + "…" : "—"],
+                ].map(([key, val]) => (
+                  <div key={key} className="bg-composia-dark/60 rounded px-2 py-1.5 space-y-0.5">
+                    <div className="font-mono text-[9px] text-gray-500">{key}</div>
+                    <div className="text-gray-300">{val}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="flex gap-2 pt-1">
-              <a
-                href={ensAppUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 transition-colors"
-              >
-                View on ENS App ↗
+            {/* Links */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              <a href={`https://app.ens.domains/${ensName}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 transition-colors">
+                ENS App ↗
               </a>
-              <a
-                href={`https://sepolia.etherscan.io/enslookup-search?search=${ensName}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 transition-colors"
-              >
-                Sepolia Etherscan ↗
+              <a href={`https://sepolia.etherscan.io/address/${repStateAddr}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 transition-colors">
+                ReputationState ↗
+              </a>
+              <a href={`/api/reputation/${address}`} target="_blank" rel="noopener noreferrer"
+                className="text-xs border border-gray-700 px-3 py-1.5 rounded-lg hover:border-gray-500 transition-colors">
+                Raw JSON ↗
               </a>
             </div>
           </div>

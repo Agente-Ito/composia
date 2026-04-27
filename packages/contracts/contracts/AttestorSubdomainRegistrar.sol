@@ -23,20 +23,32 @@ interface IPublicResolver {
 /**
  * @title AttestorSubdomainRegistrar
  * @notice Creates {label}.composia.eth subdomains on Ethereum Sepolia for Gensyn agents.
- *         Called by the Composia listener after creating a Lukso Universal Profile.
+ *
+ * Callers:
+ *   - Owner (deployer / oracle): auto-generated names, text record updates
+ *   - ENSNameManager (authorized): custom names requested by agents
  *
  * Setup:
  *   1. Deploy this contract
  *   2. deployer calls NameWrapper.setApprovalForAll(address(this), true)
- *   3. Now this contract can create subdomains under composia.eth
+ *   3. deployer calls setAuthorized(ENSNameManager, true)
  */
 contract AttestorSubdomainRegistrar is Ownable {
     INameWrapper    public immutable nameWrapper;
     IPublicResolver public immutable resolver;
-    bytes32         public immutable parentNode; // namehash("composia.eth")
+    bytes32         public immutable parentNode;
+
+    // Contracts that are allowed to call registerSubdomain (e.g. ENSNameManager)
+    mapping(address => bool) public authorized;
 
     event SubdomainRegistered(bytes32 indexed node, string label, address agentEoa);
     event TextRecordsUpdated(bytes32 indexed node);
+    event AuthorizationChanged(address indexed caller, bool ok);
+
+    modifier onlyOwnerOrAuthorized() {
+        require(msg.sender == owner() || authorized[msg.sender], "Not authorized");
+        _;
+    }
 
     constructor(
         address initialOwner,
@@ -49,11 +61,20 @@ contract AttestorSubdomainRegistrar is Ownable {
         parentNode  = _parentNode;
     }
 
+    // ── Admin ─────────────────────────────────────────────────────────────────
+
+    function setAuthorized(address caller, bool ok) external onlyOwner {
+        authorized[caller] = ok;
+        emit AuthorizationChanged(caller, ok);
+    }
+
+    // ── Core operations ───────────────────────────────────────────────────────
+
     /**
-     * @notice Create a subdomain for an agent and write all text records in one tx.
-     * @param label    The subdomain label (e.g. first 8 hex chars of the agent EOA)
-     * @param agentEoa Agent's Ethereum address — written as addr(60) coin type
-     * @param keys     Text record keys (e.g. "gensyn:accuracy")
+     * @notice Create a subdomain and write all text records in one transaction.
+     * @param label    Subdomain label (auto-generated or custom)
+     * @param agentEoa Agent's Ethereum EOA — written as addr(60) coin type
+     * @param keys     Text record keys
      * @param values   Text record values (same length as keys)
      */
     function registerSubdomain(
@@ -61,39 +82,34 @@ contract AttestorSubdomainRegistrar is Ownable {
         address           agentEoa,
         string[] calldata keys,
         string[] calldata values
-    ) external onlyOwner returns (bytes32 node) {
+    ) external onlyOwnerOrAuthorized returns (bytes32 node) {
         require(keys.length == values.length, "Keys/values length mismatch");
 
-        // Create the subdomain — owner = this contract so we can write text records
         node = nameWrapper.setSubnodeRecord(
             parentNode,
             label,
-            address(this), // registrar owns subnode → can write to resolver
+            address(this),
             address(resolver),
-            0,             // ttl
-            0,             // fuses: none for MVP (identity anchor via text records)
-            0              // expiry: inherit parent
+            0, 0, 0
         );
 
-        // Write text records
         for (uint256 i = 0; i < keys.length; i++) {
             resolver.setText(node, keys[i], values[i]);
         }
 
-        // Write ETH address as multi-coin addr(60)
         resolver.setAddr(node, 60, abi.encodePacked(agentEoa));
 
         emit SubdomainRegistered(node, label, agentEoa);
     }
 
     /**
-     * @notice Update text records for an existing subdomain (e.g. after reputation update).
+     * @notice Update text records for an existing subdomain.
      */
     function updateTextRecords(
         bytes32  node,
         string[] calldata keys,
         string[] calldata values
-    ) external onlyOwner {
+    ) external onlyOwnerOrAuthorized {
         require(keys.length == values.length, "Keys/values length mismatch");
         for (uint256 i = 0; i < keys.length; i++) {
             resolver.setText(node, keys[i], values[i]);

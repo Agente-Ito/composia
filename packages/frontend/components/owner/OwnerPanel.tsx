@@ -5,6 +5,7 @@ import ProfileEditor from "./ProfileEditor";
 import ControllersManager from "./ControllersManager";
 import FollowAgents from "./FollowAgents";
 import SocialRecovery from "./SocialRecovery";
+import EnsNameManager from "./EnsNameManager";
 
 interface Props {
   agentAddress: string;
@@ -14,13 +15,14 @@ interface Props {
   devOwner?: boolean;
 }
 
-type TabId = "profile" | "controllers" | "follow" | "recovery";
+type TabId = "profile" | "controllers" | "follow" | "recovery" | "ens";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "profile",     label: "Edit Profile" },
   { id: "controllers", label: "Controllers" },
   { id: "follow",      label: "Follow Agents" },
   { id: "recovery",    label: "Social Recovery" },
+  { id: "ens",         label: "ENS Name" },
 ];
 
 export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwner = false }: Props) {
@@ -130,6 +132,9 @@ export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwne
         )}
         {activeTab === "recovery" && (
           <SocialRecovery upAddress={upAddress} />
+        )}
+        {activeTab === "ens" && (
+          <EnsNameManager agentAddress={agentAddress} />
         )}
       </div>
     </div>
