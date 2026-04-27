@@ -1,0 +1,24 @@
+{
+  "name": "attestor",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "dev": "pnpm -r --parallel dev",
+    "test": "pnpm -r test",
+    "contracts:test": "pnpm --filter @attestor/contracts test",
+    "contracts:build": "pnpm --filter @attestor/contracts build",
+    "deploy:lukso": "pnpm --filter @attestor/contracts deploy:lukso",
+    "deploy:sepolia": "pnpm --filter @attestor/contracts deploy:sepolia",
+    "listener:dev": "pnpm --filter @attestor/listener dev",
+    "frontend:dev": "pnpm --filter @attestor/frontend dev"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

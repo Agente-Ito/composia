@@ -1,0 +1,27 @@
+{
+  "name": "@attestor/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "hardhat compile",
+    "test": "hardhat test",
+    "node": "hardhat node",
+    "deploy:local": "hardhat run scripts/deploy-local.ts --network localhost",
+    "deploy:lukso": "hardhat run scripts/deploy-lukso.ts --network lukso-testnet",
+    "deploy:sepolia": "hardhat run scripts/deploy-sepolia.ts --network sepolia",
+    "simulate": "hardhat run scripts/simulate.ts --network lukso-testnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "hardhat": "^2.22.0",
+    "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "@erc725/erc725.js": "^0.24.0",
+    "@lukso/lsp-smart-contracts": "^0.15.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "dotenv": "^16.4.0",
+    "ethers": "^6.13.0"
+  }
+}

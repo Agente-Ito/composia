@@ -1,0 +1,48 @@
+import { ethers } from "hardhat";
+import * as fs from "fs";
+import * as path from "path";
+
+async function main() {
+  const [deployer] = await ethers.getSigners();
+  console.log("Deploying to Ethereum Sepolia...");
+  console.log("Deployer:", deployer.address);
+  console.log("Balance:", ethers.formatEther(await ethers.provider.getBalance(deployer.address)), "ETH\n");
+
+  // Deploy SyncerContract
+  // relayer = deployer (for hackathon demo, the script calls receiveMessage directly)
+  console.log("Deploying SyncerContract...");
+  const SyncerContract = await ethers.getContractFactory("SyncerContract");
+  const syncer = await SyncerContract.deploy(
+    deployer.address,  // owner
+    deployer.address,  // relayer (demo: same as deployer)
+    "lukso-testnet"    // sourceChain
+  );
+  await syncer.waitForDeployment();
+  const syncerAddress = await syncer.getAddress();
+  console.log("SyncerContract:", syncerAddress);
+
+  // Append to .env.deployed
+  const envPath = path.resolve(__dirname, "../../../.env.deployed");
+  const existing = fs.existsSync(envPath)
+    ? fs.readFileSync(envPath, "utf8")
+    : "";
+
+  const lines = existing
+    .split("\n")
+    .filter((l) => !l.startsWith("SYNCER_ETHEREUM_ADDRESS=") && !l.startsWith("SYNCER_NETWORK="));
+
+  fs.writeFileSync(
+    envPath,
+    [...lines, `SYNCER_ETHEREUM_ADDRESS=${syncerAddress}`, `SYNCER_NETWORK=sepolia`]
+      .filter(Boolean)
+      .join("\n") + "\n"
+  );
+
+  console.log("\nAddress written to .env.deployed");
+  console.log("\n✓ Sepolia deployment complete!");
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
