@@ -6,6 +6,12 @@ import type {
   MonthActivity,
   Collaborator,
 } from "./types";
+import {
+  calculateComposiaScore,
+  calcVolumeScore,
+  calcActivityScore,
+} from "./score";
+import type { ComposiaScore } from "./score";
 
 // Deterministic hash — same address always produces the same values
 function djb2(s: string): number {
@@ -76,11 +82,12 @@ export interface ExtendedAgentData {
   reliability: ReliabilityMetrics;
   history: AgentHistory;
   activityTimeline: MonthActivity[];
+  composiaScore: ComposiaScore;
 }
 
 export function generateMockExtendedData(
   address: string,
-  core: { accuracy: number; verifications: number; joinedAt: number }
+  core: { accuracy: number; verifications: number; joinedAt: number; lastUpdated?: number }
 ): ExtendedAgentData {
   const seed = fh(address, "seed");
 
@@ -246,6 +253,30 @@ export function generateMockExtendedData(
     reliability,
     history,
     activityTimeline,
+    composiaScore: calculateComposiaScore({
+      accuracy:              core.accuracy,
+      verifications:         core.verifications,
+      correct:               Math.round(core.accuracy / 100 * core.verifications),
+      joinedAt:              core.joinedAt,
+      lastUpdated:           core.lastUpdated
+                               ?? Math.floor(Date.now() / 1000) - ranged(fh(address, "lastact"), 0, 14) * 86400,
+      followerCount:         socialGraph.collaboratorsCount,
+      avgFollowerReputation: clamp(core.accuracy - ranged(fh(address, "fqual"), 0, 15), 50, 99),
+      endorsementCount:      socialGraph.endorsementCount,
+      consecutiveDaysActive: history.consecutiveDaysActive,
+      trendingUp:            consistency === "rising",
+      // Use real mock values for accuracy + consistency so they match existing UI signals
+      overrides: {
+        accuracy:    clamp(core.accuracy * Math.min(1, core.verifications / 100), 0, 100),
+        consistency: clamp(reliability.consistencyScore * 100, 0, 100),
+        volume:      calcVolumeScore(core.verifications),
+        activity:    calcActivityScore(
+                       core.lastUpdated
+                         ?? Math.floor(Date.now() / 1000) - ranged(fh(address, "lastact"), 0, 14) * 86400,
+                       history.consecutiveDaysActive,
+                     ),
+      },
+    }),
   };
 }
 

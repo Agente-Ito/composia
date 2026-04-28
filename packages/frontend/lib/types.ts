@@ -69,6 +69,8 @@ export interface AgentReputation {
   reliability: ReliabilityMetrics;
   history: AgentHistory;
   activityTimeline: MonthActivity[];
+  // Composia multi-dimensional score
+  composiaScore?: import("./score").ComposiaScore;
 }
 
 export interface AgentProfile {

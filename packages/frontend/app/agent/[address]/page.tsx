@@ -1,7 +1,9 @@
 import { getAgentFromRegistry, getSyncerReputation } from "@/lib/contracts";
 import { generateMockExtendedData, previewCoreData, previewUpAddress, previewKmAddress, previewClaimed, previewSynced } from "@/lib/mock-data";
 import { AgentProfile, ChainStatus } from "@/lib/types";
+import { calculateComposiaScore } from "@/lib/score";
 import ReputationGauge from "@/components/ReputationGauge";
+import ComposiaScoreCard from "@/components/ComposiaScoreCard";
 import SpecializationRadar from "@/components/SpecializationRadar";
 import ReliabilityScorecard from "@/components/ReliabilityScorecard";
 import SocialNetworkGraph from "@/components/SocialNetworkGraph";
@@ -71,7 +73,7 @@ async function buildProfile(address: string): Promise<AgentProfile | null> {
     });
   }
 
-  const extended = generateMockExtendedData(address, { accuracy: onChain.accuracy, verifications: onChain.verifications, joinedAt: onChain.joinedAt });
+  const extended = generateMockExtendedData(address, { accuracy: onChain.accuracy, verifications: onChain.verifications, joinedAt: onChain.joinedAt, lastUpdated: onChain.lastUpdated });
   return {
     agentAddress: address,
     upAddress:  onChain.upAddress,
@@ -298,6 +300,11 @@ export default async function AgentProfilePage({
           </div>
         </div>
       </div>
+
+      {/* ── 2b. COMPOSIA SCORE ──────────────────────────────────────────── */}
+      {rep.composiaScore && (
+        <ComposiaScoreCard score={rep.composiaScore} />
+      )}
 
       {/* ── 3. CAPABILITIES & BADGES ─────────────────────────────────────── */}
       <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
