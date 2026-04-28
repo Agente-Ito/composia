@@ -18,15 +18,16 @@ const queue: Job[] = [];
 const dlq: Job[] = [];
 let running = false;
 
-export function enqueue(agent: string, accuracy: number, verifications: number): void {
+export function enqueue(agent: string, accuracy: number, verifications: number, peerId?: string): void {
   // Deduplicate: if a job for this agent is already queued, update it instead of adding
   const existing = queue.find((j) => j.agent.toLowerCase() === agent.toLowerCase());
   if (existing) {
     existing.accuracy = accuracy;
     existing.verifications = verifications;
+    if (peerId) existing.peerId = peerId;
     return;
   }
-  queue.push({ agent, accuracy, verifications, attempts: 0, firstSeen: Date.now() });
+  queue.push({ agent, accuracy, verifications, peerId, attempts: 0, firstSeen: Date.now() });
 }
 
 export function getDLQ(): Job[] {
