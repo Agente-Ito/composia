@@ -267,6 +267,20 @@ export default async function AgentProfilePage({
               <span className="shrink-0 bg-green-500/10 text-green-400 text-xs px-2 py-1 rounded-full border border-green-500/20">
                 ✓ Verified on Gensyn
               </span>
+              {(profile as AgentProfile & { createdByKeeper?: boolean; keeperTxHash?: string | null }).createdByKeeper && (
+                <a
+                  href={
+                    (profile as AgentProfile & { keeperTxHash?: string | null }).keeperTxHash
+                      ? `https://explorer.execution.testnet.lukso.network/tx/${(profile as AgentProfile & { keeperTxHash?: string | null }).keeperTxHash}`
+                      : `https://explorer.execution.testnet.lukso.network/address/${profile.upAddress}`
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="shrink-0 bg-[#00D4FF]/10 text-[#00D4FF] text-xs px-2 py-1 rounded-full border border-[#00D4FF]/20 hover:bg-[#00D4FF]/20 transition-colors"
+                >
+                  ⚙ KeeperHub ↗
+                </a>
+              )}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {[

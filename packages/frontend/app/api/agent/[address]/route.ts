@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import { getAgentFromRegistry, getSyncerReputation } from "@/lib/contracts";
 import { generateMockExtendedData } from "@/lib/mock-data";
 import { AgentProfile, ChainStatus } from "@/lib/types";
+import { keeperLog } from "@/lib/keeper-log";
 
 const PUBLIC_RESOLVER_ABI = [
   "function text(bytes32 node, string calldata key) external view returns (string memory)",
@@ -137,7 +138,15 @@ export async function GET(
 
   const [ens] = await Promise.all([getENSData(address)]);
 
-  const profile: AgentProfile & { ens?: Record<string, string> | null } = {
+  const keeperEntry = keeperLog
+    .getRecent(100)
+    .find((e) => e.agent.toLowerCase() === address.toLowerCase() && e.status === "created");
+
+  const profile: AgentProfile & {
+    ens?: Record<string, string> | null;
+    createdByKeeper: boolean;
+    keeperTxHash: string | null;
+  } = {
     agentAddress: address,
     upAddress: data.upAddress,
     kmAddress: data.kmAddress ?? null,
@@ -152,6 +161,8 @@ export async function GET(
     },
     syncedChains,
     ens,
+    createdByKeeper: !!keeperEntry,
+    keeperTxHash:    keeperEntry?.txHash ?? null,
   };
 
   return NextResponse.json(profile);

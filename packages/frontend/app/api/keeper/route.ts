@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ethers } from "ethers";
 import path from "path";
 import fs from "fs";
+import { keeperLog } from "@/lib/keeper-log";
 
 // ── LSP3 keys (keccak256 of human-readable names) ────────────────────────────
 function lsp3Key(name: string) {
@@ -316,6 +317,26 @@ export async function POST(req: NextRequest) {
     for (const event of eligible) {
       const result = await processAgent(signer, registryAddress, event);
       results.push(result);
+
+      const ts = Math.floor(Date.now() / 1000);
+      if (result.action === "created" || result.action === "updated") {
+        keeperLog.append({
+          timestamp: ts,
+          action: "run",
+          agent: result.agent,
+          status: result.action,
+          upAddress: result.upAddress,
+          kmAddress: result.kmAddress,
+        });
+      } else if (result.action === "error") {
+        keeperLog.append({
+          timestamp: ts,
+          action: "run",
+          agent: result.agent,
+          status: "failed",
+          error: result.error,
+        });
+      }
     }
 
     return NextResponse.json({ ok: true, configured: true, events, results });

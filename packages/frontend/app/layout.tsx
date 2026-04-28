@@ -60,8 +60,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Links */}
           <div className="flex items-center gap-1">
             {[
-              { href: "/grid",  label: "Grid" },
-              { href: "/demo",  label: "Demo" },
+              { href: "/grid",    label: "Grid" },
+              { href: "/demo",    label: "Demo" },
+              { href: "/keeper",  label: "Keeper" },
               { href: "/agent/0x70997970C51812dc3A010C7d01b50e0d17dc79C8", label: "Profile" },
             ].map((link) => (
               <a
