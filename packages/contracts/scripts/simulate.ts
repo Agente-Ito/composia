@@ -33,7 +33,7 @@ async function main() {
 
   const MockGensyn = await ethers.getContractAt("MockGensyn", MOCK_GENSYN_ADDRESS);
 
-  console.log("--- ATTESTOR Demo Simulation ---");
+  console.log("--- COMPOSIA Demo Simulation ---");
   console.log(`Agent:         ${DEMO_AGENT}`);
   console.log(`Accuracy:      ${DEMO_ACCURACY}%`);
   console.log(`Verifications: ${DEMO_VERIFICATIONS}`);

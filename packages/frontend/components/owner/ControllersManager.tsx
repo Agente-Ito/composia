@@ -70,8 +70,8 @@ const ERC725Y_ABI = [
 ];
 const KM_ABI = ["function execute(bytes calldata payload) external returns (bytes memory)"];
 
-const ATTESTOR_ADDRESS = (
-  process.env.NEXT_PUBLIC_ATTESTOR_ADDRESS ?? ""
+const COMPOSIA_ADDRESS = (
+  process.env.NEXT_PUBLIC_COMPOSIA_ADDRESS ?? ""
 ).toLowerCase();
 
 export default function ControllersManager({ upAddress, kmAddress }: Props) {
@@ -278,8 +278,8 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
           </div>
         ) : (
           controllers.map((ctrl, i) => {
-            const isAttestor =
-              ATTESTOR_ADDRESS && ctrl.address.toLowerCase() === ATTESTOR_ADDRESS;
+            const isComposiaOracle =
+              COMPOSIA_ADDRESS && ctrl.address.toLowerCase() === COMPOSIA_ADDRESS;
             return (
               <div
                 key={ctrl.address}
@@ -291,7 +291,7 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
                     <span className="font-mono text-xs break-all" style={{ color: "#c8e6ea" }}>
                       {ctrl.address.slice(0, 10)}…{ctrl.address.slice(-6)}
                     </span>
-                    {isAttestor && (
+                    {isComposiaOracle && (
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded border"
                         style={{
@@ -316,7 +316,7 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
                     ))}
                   </div>
                 </div>
-                {!isAttestor && (
+                {!isComposiaOracle && (
                   <button
                     onClick={() => revokeController(ctrl.address, i)}
                     className="shrink-0 text-[10px] px-2 py-1 rounded border transition-colors hover:border-red-400/50 hover:text-red-400"

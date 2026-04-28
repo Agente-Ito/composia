@@ -92,7 +92,7 @@ export class UPManager {
 
   /**
    * Create a Universal Profile + LSP6 KeyManager for an agent and register both
-   * in AttestorRegistry.
+   * in ComposiaRegistry.
    *
    * The LSP6KeyManager in @lukso/lsp-smart-contracts@0.15.0 has no ownership concept
    * (no owner/transferOwnership/acceptOwnership on KM). Ownership is managed at the
@@ -171,7 +171,7 @@ export class UPManager {
     await tx5.wait();
     console.log(`[up-manager] UP.pendingOwner = ${job.agent} (ready to claim via UP.acceptOwnership())`);
 
-    // ── 6. Register in AttestorRegistry ───────────────────────────────────────
+    // ── 6. Register in ComposiaRegistry ───────────────────────────────────────
     const registerTx = await this.registry.registerUP(job.agent, upAddress, kmAddress);
     await registerTx.wait();
 

@@ -4,14 +4,14 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title AttestorRegistry
+ * @title ComposiaRegistry
  * @notice Central registry mapping Gensyn agent addresses to Lukso Universal Profile
  *         addresses. Also stores on-chain reputation snapshots and manages the claim flow.
  *
  *         Universal Profiles are deployed off-chain by the listener (ethers.js direct
  *         contract deployment) and registered here. This avoids LSPFactory.js backend issues.
  */
-contract AttestorRegistry is Ownable {
+contract ComposiaRegistry is Ownable {
     struct ReputationData {
         uint96  accuracy;      // 0-100
         uint96  verifications; // total count
@@ -35,33 +35,33 @@ contract AttestorRegistry is Ownable {
     mapping(address => uint256) public agentJoinedAt;
 
     /// Address allowed to register and update profiles (listener wallet)
-    address public attestor;
+    address public oracle;
 
     address[] private _allAgents;
 
     event ProfileRegistered(address indexed agent, address indexed upAddress);
     event ReputationUpdated(address indexed agent, uint96 accuracy, uint96 verifications);
     event ProfileClaimed(address indexed agent, address indexed upAddress, address indexed newOwner);
-    event AttestorChanged(address indexed oldAttestor, address indexed newAttestor);
+    event OracleChanged(address indexed oldOracle, address indexed newOracle);
     event SyncStatusUpdated(address indexed agent, bool synced);
 
-    modifier onlyAttestor() {
-        require(msg.sender == attestor, "Not attestor");
+    modifier onlyOracle() {
+        require(msg.sender == oracle, "Not oracle");
         _;
     }
 
-    constructor(address initialOwner, address _attestor) Ownable(initialOwner) {
-        attestor = _attestor;
+    constructor(address initialOwner, address _oracle) Ownable(initialOwner) {
+        oracle = _oracle;
     }
 
     // ─── Admin ───────────────────────────────────────────────────────────────
 
-    function setAttestor(address _attestor) external onlyOwner {
-        emit AttestorChanged(attestor, _attestor);
-        attestor = _attestor;
+    function setOracle(address _oracle) external onlyOwner {
+        emit OracleChanged(oracle, _oracle);
+        oracle = _oracle;
     }
 
-    // ─── Write (attestor only) ───────────────────────────────────────────────
+    // ─── Write (oracle only) ───────────────────────────────────────────────
 
     /**
      * @notice Register a Universal Profile + LSP6 KeyManager for a Gensyn agent.
@@ -69,7 +69,7 @@ contract AttestorRegistry is Ownable {
      *         Composia retains SETDATA permission via the KM so it can keep
      *         writing gensyn:* reputation keys after the agent claims ownership.
      */
-    function registerUP(address agent, address upAddress, address kmAddress) external onlyAttestor {
+    function registerUP(address agent, address upAddress, address kmAddress) external onlyOracle {
         require(agent != address(0) && upAddress != address(0) && kmAddress != address(0), "Zero address");
         require(agentToUP[agent] == address(0), "UP already registered");
 
@@ -90,7 +90,7 @@ contract AttestorRegistry is Ownable {
         address agent,
         uint96  accuracy,
         uint96  verifications
-    ) external onlyAttestor {
+    ) external onlyOracle {
         require(agentToUP[agent] != address(0), "Agent not registered");
         require(accuracy <= 100, "Accuracy must be 0-100");
 
@@ -106,7 +106,7 @@ contract AttestorRegistry is Ownable {
     /**
      * @notice Mark agent data as synced to other chains.
      */
-    function markSynced(address agent) external onlyAttestor {
+    function markSynced(address agent) external onlyOracle {
         agentReputation[agent].synced = true;
         emit SyncStatusUpdated(agent, true);
     }

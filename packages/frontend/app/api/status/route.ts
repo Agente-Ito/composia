@@ -17,7 +17,7 @@ export async function GET() {
       agentCount: agents.length,
       timestamp: new Date().toISOString(),
       contracts: {
-        registry:    !!process.env.ATTESTOR_REGISTRY_ADDRESS,
+        registry:    !!process.env.COMPOSIA_REGISTRY_ADDRESS,
         mockGensyn:  !!process.env.MOCK_GENSYN_ADDRESS,
         syncerSepolia: !!process.env.SYNCER_ETHEREUM_ADDRESS,
       },

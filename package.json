@@ -1,5 +1,5 @@
 {
-  "name": "attestor",
+  "name": "composia",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
@@ -9,12 +9,12 @@
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
     "test": "pnpm -r test",
-    "contracts:test": "pnpm --filter @attestor/contracts test",
-    "contracts:build": "pnpm --filter @attestor/contracts build",
-    "deploy:lukso": "pnpm --filter @attestor/contracts deploy:lukso",
-    "deploy:sepolia": "pnpm --filter @attestor/contracts deploy:sepolia",
-    "listener:dev": "pnpm --filter @attestor/listener dev",
-    "frontend:dev": "pnpm --filter @attestor/frontend dev"
+    "contracts:test": "pnpm --filter @composia/contracts test",
+    "contracts:build": "pnpm --filter @composia/contracts build",
+    "deploy:lukso": "pnpm --filter @composia/contracts deploy:lukso",
+    "deploy:sepolia": "pnpm --filter @composia/contracts deploy:sepolia",
+    "listener:dev": "pnpm --filter @composia/listener dev",
+    "frontend:dev": "pnpm --filter @composia/frontend dev"
   },
   "engines": {
     "node": ">=18.0.0",

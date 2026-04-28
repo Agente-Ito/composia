@@ -14,11 +14,11 @@ async function main() {
   const mockGensynAddress = await mockGensyn.getAddress();
   console.log("MockGensyn:       ", mockGensynAddress);
 
-  const AttestorRegistry = await ethers.getContractFactory("AttestorRegistry");
-  const registry = await AttestorRegistry.deploy(deployer.address, deployer.address);
+  const ComposiaRegistry = await ethers.getContractFactory("ComposiaRegistry");
+  const registry = await ComposiaRegistry.deploy(deployer.address, deployer.address);
   await registry.waitForDeployment();
   const registryAddress = await registry.getAddress();
-  console.log("AttestorRegistry: ", registryAddress);
+  console.log("ComposiaRegistry: ", registryAddress);
 
   // Hardhat account #0 private key (well-known, safe for local only)
   const deployerKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
@@ -29,9 +29,9 @@ async function main() {
     `NEXT_PUBLIC_BASE_URL=http://localhost:3000`,
     `LUKSO_TESTNET_RPC=http://localhost:8545`,
     `MOCK_GENSYN_ADDRESS=${mockGensynAddress}`,
-    `ATTESTOR_REGISTRY_ADDRESS=${registryAddress}`,
+    `COMPOSIA_REGISTRY_ADDRESS=${registryAddress}`,
     `DEPLOYER_PRIVATE_KEY=${deployerKey}`,
-    `ATTESTOR_PRIVATE_KEY=${deployerKey}`,
+    `COMPOSIA_PRIVATE_KEY=${deployerKey}`,
   ];
   fs.writeFileSync(envPath, lines.join("\n") + "\n");
   console.log("\n✓ .env.local updated with local addresses");
@@ -40,9 +40,9 @@ async function main() {
   const deployedPath = path.resolve(__dirname, "../../../.env.deployed");
   fs.writeFileSync(deployedPath, [
     `MOCK_GENSYN_ADDRESS=${mockGensynAddress}`,
-    `ATTESTOR_REGISTRY_ADDRESS=${registryAddress}`,
+    `COMPOSIA_REGISTRY_ADDRESS=${registryAddress}`,
     `DEPLOYER_PRIVATE_KEY=${deployerKey}`,
-    `ATTESTOR_PRIVATE_KEY=${deployerKey}`,
+    `COMPOSIA_PRIVATE_KEY=${deployerKey}`,
     `LUKSO_TESTNET_RPC=http://localhost:8545`,
     `NETWORK=local`,
     `DEPLOYED_AT=${new Date().toISOString()}`,

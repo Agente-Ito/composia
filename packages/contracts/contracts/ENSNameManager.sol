@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-interface IAttestorSubdomainRegistrar {
+interface IComposiaSubdomainRegistrar {
     function registerSubdomain(
         string   calldata label,
         address           agentEoa,
@@ -39,7 +39,7 @@ interface IReputationState {
  */
 contract ENSNameManager is Ownable {
 
-    IAttestorSubdomainRegistrar public registrar;
+    IComposiaSubdomainRegistrar public registrar;
     IReputationState            public reputationState;
 
     uint256 public constant MIN_LABEL_LEN = 3;
@@ -58,7 +58,7 @@ contract ENSNameManager is Ownable {
         address _registrar,
         address _reputationState
     ) Ownable(initialOwner) {
-        registrar      = IAttestorSubdomainRegistrar(_registrar);
+        registrar      = IComposiaSubdomainRegistrar(_registrar);
         reputationState = IReputationState(_reputationState);
     }
 

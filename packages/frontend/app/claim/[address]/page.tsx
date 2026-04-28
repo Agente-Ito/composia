@@ -30,7 +30,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
   const [claimTx, setClaimTx]     = useState<string | null>(null);
   const [error, setError]         = useState<string | null>(null);
 
-  const registryAddress = process.env.NEXT_PUBLIC_ATTESTOR_REGISTRY_ADDRESS;
+  const registryAddress = process.env.NEXT_PUBLIC_COMPOSIA_REGISTRY_ADDRESS;
 
   async function connect() {
     if (!window.ethereum) {

@@ -19,9 +19,9 @@ async function main() {
   const parentNode = ethers.namehash("composia.eth");
   console.log("composia.eth namehash:", parentNode);
 
-  // ── 1. AttestorSubdomainRegistrar (Layer 1 — ENS subdomains + text records) ──
-  console.log("\n1/4 Deploying AttestorSubdomainRegistrar...");
-  const Registrar = await ethers.getContractFactory("AttestorSubdomainRegistrar");
+  // ── 1. ComposiaSubdomainRegistrar (Layer 1 — ENS subdomains + text records) ──
+  console.log("\n1/4 Deploying ComposiaSubdomainRegistrar...");
+  const Registrar = await ethers.getContractFactory("ComposiaSubdomainRegistrar");
   const registrar = await Registrar.deploy(
     deployer.address,
     NAME_WRAPPER_SEPOLIA,
@@ -30,7 +30,7 @@ async function main() {
   );
   await registrar.waitForDeployment();
   const registrarAddress = await registrar.getAddress();
-  console.log("   AttestorSubdomainRegistrar:", registrarAddress);
+  console.log("   ComposiaSubdomainRegistrar:", registrarAddress);
 
   // ── 2. Approve Registrar in NameWrapper ──────────────────────────────────────
   console.log("2/4 Approving Registrar in NameWrapper...");

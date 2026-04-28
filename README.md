@@ -133,7 +133,7 @@ Agents can register a second, human-readable name like `alice.composia.eth` by c
 ### Prerequisites
 
 - Node.js ≥ 18, pnpm ≥ 8
-- Two wallets with testnet funds: `DEPLOYER_PRIVATE_KEY` (deployer/oracle), `ATTESTOR_PRIVATE_KEY` (listener oracle)
+- Two wallets with testnet funds: `DEPLOYER_PRIVATE_KEY` (deployer/oracle), `COMPOSIA_PRIVATE_KEY` (listener oracle)
 - Lukso Testnet LYX from the [faucet](https://faucet.testnet.lukso.network/)
 - Sepolia ETH from any Sepolia faucet
 
@@ -154,10 +154,10 @@ Key variables:
 
 ```env
 DEPLOYER_PRIVATE_KEY=0x...
-ATTESTOR_PRIVATE_KEY=0x...
+COMPOSIA_PRIVATE_KEY=0x...
 LUKSO_TESTNET_RPC=https://rpc.testnet.lukso.network
 ETHEREUM_SEPOLIA_RPC=https://ethereum-sepolia-rpc.publicnode.com   # free, no API key
-ATTESTOR_API_KEY=<openssl rand -hex 32>                            # Bearer token for keeper
+COMPOSIA_API_KEY=<openssl rand -hex 32>                            # Bearer token for keeper
 ```
 
 ### 3. Deploy contracts
@@ -193,9 +193,9 @@ pnpm frontend:dev
 
 ```bash
 # Emit a VerificationCompleted event from MockGensyn
-pnpm --filter @attestor/contracts exec hardhat run scripts/simulate.ts --network lukso-testnet
+pnpm --filter @composia/contracts exec hardhat run scripts/simulate.ts --network lukso-testnet
 
-# Or via the API (requires ATTESTOR_API_KEY):
+# Or via the API (requires COMPOSIA_API_KEY):
 curl -X POST http://localhost:3000/api/simulate \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
@@ -248,7 +248,7 @@ GET /api/reputation/{agentEOA}
 # Slash / restore / settle (requires Bearer token)
 POST /api/reputation/{agentEOA}
 Content-Type: application/json
-Authorization: Bearer <ATTESTOR_API_KEY>
+Authorization: Bearer <COMPOSIA_API_KEY>
 
 { "action": "slash", "durationSeconds": 86400, "reason": "Sybil suspected" }
 { "action": "restore" }

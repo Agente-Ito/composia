@@ -90,7 +90,7 @@ export async function POST(
 ) {
   const { address } = params;
 
-  const apiKey = process.env.ATTESTOR_API_KEY;
+  const apiKey = process.env.COMPOSIA_API_KEY;
   if (apiKey) {
     const auth = req.headers.get("authorization");
     if (auth !== `Bearer ${apiKey}`) {

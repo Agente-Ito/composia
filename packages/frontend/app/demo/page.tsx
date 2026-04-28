@@ -476,7 +476,7 @@ export default function DemoPage() {
                 ["gensyn:reputation", `${accuracy}%`],
                 ["gensyn:verifications", verifications.toLocaleString()],
                 ["gensyn:correct", correct.toLocaleString()],
-                ["AddressPermissions:Permissions", "SETDATA (attestor) + ALL (agent)"],
+                ["AddressPermissions:Permissions", "SETDATA (composia) + ALL (agent)"],
               ].map(([key, val]) => (
                 <div key={key} className="flex justify-between text-[10px]">
                   <span className="font-mono text-gray-500 truncate mr-2">{key}</span>
@@ -722,7 +722,7 @@ export default function DemoPage() {
             </div>
             {keeperConfigured === false ? (
               <p className="text-[11px] text-gray-600 italic">
-                Configure MOCK_GENSYN_ADDRESS + ATTESTOR_REGISTRY_ADDRESS to enable live scanning.
+                Configure MOCK_GENSYN_ADDRESS + COMPOSIA_REGISTRY_ADDRESS to enable live scanning.
               </p>
             ) : keeperEvents.length === 0 ? (
               <p className="text-[11px] text-gray-600 italic">

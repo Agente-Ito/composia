@@ -21,7 +21,7 @@ function getProvider(rpcUrl: string) {
 
 export async function getAgentFromRegistry(agentAddress: string) {
   const rpc = process.env.LUKSO_TESTNET_RPC || "https://rpc.testnet.lukso.network";
-  const registryAddress = process.env.ATTESTOR_REGISTRY_ADDRESS;
+  const registryAddress = process.env.COMPOSIA_REGISTRY_ADDRESS;
 
   if (!registryAddress) return null;
 
@@ -46,7 +46,7 @@ export async function getAgentFromRegistry(agentAddress: string) {
 
 export async function getAllAgentsFromRegistry(): Promise<string[]> {
   const rpc = process.env.LUKSO_TESTNET_RPC || "https://rpc.testnet.lukso.network";
-  const registryAddress = process.env.ATTESTOR_REGISTRY_ADDRESS;
+  const registryAddress = process.env.COMPOSIA_REGISTRY_ADDRESS;
 
   if (!registryAddress) return [];
 

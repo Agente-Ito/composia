@@ -1,5 +1,5 @@
 {
-  "name": "@attestor/contracts",
+  "name": "@composia/contracts",
   "version": "1.0.0",
   "private": true,
   "scripts": {

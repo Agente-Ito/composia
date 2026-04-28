@@ -16,20 +16,20 @@ async function main() {
   const mockGensynAddress = await mockGensyn.getAddress();
   console.log("   MockGensyn:", mockGensynAddress);
 
-  // 2. Deploy AttestorRegistry
-  //    Deployer is both the owner and the attestor initially.
-  //    After setting up the listener wallet, call setAttestor(listenerWallet).
-  console.log("2/2 Deploying AttestorRegistry...");
-  const AttestorRegistry = await ethers.getContractFactory("AttestorRegistry");
-  const attestorRegistry = await AttestorRegistry.deploy(deployer.address, deployer.address);
-  await attestorRegistry.waitForDeployment();
-  const attestorRegistryAddress = await attestorRegistry.getAddress();
-  console.log("   AttestorRegistry:", attestorRegistryAddress);
+  // 2. Deploy ComposiaRegistry
+  //    Deployer is both the owner and the oracle initially.
+  //    After setting up the listener wallet, call setOracle(listenerWallet).
+  console.log("2/2 Deploying ComposiaRegistry...");
+  const ComposiaRegistry = await ethers.getContractFactory("ComposiaRegistry");
+  const composiaRegistry = await ComposiaRegistry.deploy(deployer.address, deployer.address);
+  await composiaRegistry.waitForDeployment();
+  const composiaRegistryAddress = await composiaRegistry.getAddress();
+  console.log("   ComposiaRegistry:", composiaRegistryAddress);
 
   // Write addresses to .env-style file for other packages to consume
   const addresses = {
     MOCK_GENSYN_ADDRESS: mockGensynAddress,
-    ATTESTOR_REGISTRY_ADDRESS: attestorRegistryAddress,
+    COMPOSIA_REGISTRY_ADDRESS: composiaRegistryAddress,
     DEPLOYER_ADDRESS: deployer.address,
     NETWORK: "lukso-testnet",
     DEPLOYED_AT: new Date().toISOString(),

@@ -27,8 +27,8 @@ const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 async function buildProfile(address: string): Promise<AgentProfile | null> {
   const registryConfigured = !!(
-    process.env.ATTESTOR_REGISTRY_ADDRESS &&
-    process.env.ATTESTOR_REGISTRY_ADDRESS !== "0x..."
+    process.env.COMPOSIA_REGISTRY_ADDRESS &&
+    process.env.COMPOSIA_REGISTRY_ADDRESS !== "0x..."
   );
 
   const onChain = registryConfigured ? await getAgentFromRegistry(address) : null;

@@ -263,7 +263,7 @@ async function processAgent(
 
 // ── Route handler ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ATTESTOR_API_KEY;
+  const apiKey = process.env.COMPOSIA_API_KEY;
   if (apiKey) {
     const authHeader = req.headers.get("authorization");
     if (authHeader !== `Bearer ${apiKey}`) {
@@ -276,14 +276,14 @@ export async function POST(req: NextRequest) {
   const lookbackBlocks: number        = body.lookbackBlocks ?? 500;
 
   const rpc             = process.env.LUKSO_TESTNET_RPC;
-  const privateKey      = process.env.ATTESTOR_PRIVATE_KEY;
+  const privateKey      = process.env.COMPOSIA_PRIVATE_KEY;
   const gensynAddress   = process.env.MOCK_GENSYN_ADDRESS;
-  const registryAddress = process.env.ATTESTOR_REGISTRY_ADDRESS;
+  const registryAddress = process.env.COMPOSIA_REGISTRY_ADDRESS;
 
   if (!rpc || !gensynAddress || !registryAddress) {
     return NextResponse.json({
       ok: false,
-      error: "Keeper not configured (need LUKSO_TESTNET_RPC, MOCK_GENSYN_ADDRESS, ATTESTOR_REGISTRY_ADDRESS)",
+      error: "Keeper not configured (need LUKSO_TESTNET_RPC, MOCK_GENSYN_ADDRESS, COMPOSIA_REGISTRY_ADDRESS)",
       configured: false,
       events: [],
       results: [],
@@ -301,7 +301,7 @@ export async function POST(req: NextRequest) {
     if (!privateKey) {
       return NextResponse.json({
         ok: false,
-        error: "ATTESTOR_PRIVATE_KEY not set — cannot process events",
+        error: "COMPOSIA_PRIVATE_KEY not set — cannot process events",
         configured: true,
         events,
         results: [],

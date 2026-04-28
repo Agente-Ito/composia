@@ -73,7 +73,7 @@ async function processWithRetry(job: Job, handler: JobHandler): Promise<void> {
 
   // Exhausted retries → move to DLQ
   dlq.push(job);
-  const alertMsg = `[ATTESTOR] Job failed after ${MAX_ATTEMPTS} attempts for agent ${job.agent}`;
+  const alertMsg = `[COMPOSIA] Job failed after ${MAX_ATTEMPTS} attempts for agent ${job.agent}`;
   console.error(`[queue] Dead-letter: ${alertMsg}`);
   await notify(alertMsg);
 }

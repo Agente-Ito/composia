@@ -18,17 +18,17 @@ function requireEnv(key: string): string {
 
 async function main() {
   const luksoRpc          = requireEnv("LUKSO_TESTNET_RPC");
-  const attestorKey       = requireEnv("ATTESTOR_PRIVATE_KEY");
+  const oracleKey       = requireEnv("COMPOSIA_PRIVATE_KEY");
   const mockGensynAddress = requireEnv("MOCK_GENSYN_ADDRESS");
-  const registryAddress   = requireEnv("ATTESTOR_REGISTRY_ADDRESS");
+  const registryAddress   = requireEnv("COMPOSIA_REGISTRY_ADDRESS");
 
   const provider = new ethers.JsonRpcProvider(luksoRpc);
-  const signer   = new ethers.Wallet(attestorKey, provider);
+  const signer   = new ethers.Wallet(oracleKey, provider);
 
-  console.log("[attestor] Starting listener...");
-  console.log(`[attestor] Attestor wallet: ${signer.address}`);
-  console.log(`[attestor] MockGensyn:      ${mockGensynAddress}`);
-  console.log(`[attestor] Registry:        ${registryAddress}`);
+  console.log("[composia] Starting listener...");
+  console.log(`[composia] Composia oracle: ${signer.address}`);
+  console.log(`[composia] MockGensyn:      ${mockGensynAddress}`);
+  console.log(`[composia] Registry:        ${registryAddress}`);
 
   const upManager = new UPManager(registryAddress, signer);
   const processor = makeProcessor(upManager);
@@ -42,7 +42,7 @@ async function main() {
   process.on("SIGTERM", shutdown);
 
   function shutdown() {
-    console.log("\n[attestor] Shutting down...");
+    console.log("\n[composia] Shutting down...");
     listener.stop();
     stopProcessing();
     process.exit(0);
@@ -50,6 +50,6 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error("[attestor] Fatal:", err);
+  console.error("[composia] Fatal:", err);
   process.exit(1);
 });

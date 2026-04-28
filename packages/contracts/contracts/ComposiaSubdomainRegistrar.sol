@@ -21,7 +21,7 @@ interface IPublicResolver {
 }
 
 /**
- * @title AttestorSubdomainRegistrar
+ * @title ComposiaSubdomainRegistrar
  * @notice Creates {label}.composia.eth subdomains on Ethereum Sepolia for Gensyn agents.
  *
  * Callers:
@@ -33,7 +33,7 @@ interface IPublicResolver {
  *   2. deployer calls NameWrapper.setApprovalForAll(address(this), true)
  *   3. deployer calls setAuthorized(ENSNameManager, true)
  */
-contract AttestorSubdomainRegistrar is Ownable {
+contract ComposiaSubdomainRegistrar is Ownable {
     INameWrapper    public immutable nameWrapper;
     IPublicResolver public immutable resolver;
     bytes32         public immutable parentNode;
