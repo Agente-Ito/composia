@@ -112,22 +112,34 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
         </a>
       </div>
 
-      {/* Permission explanation */}
-      <div className="bg-composia-dark/60 border border-composia-border rounded-xl p-4 space-y-2 text-xs text-gray-400">
-        <div className="font-medium text-gray-300">After claiming you control:</div>
-        <ul className="space-y-1 list-disc list-inside">
-          <li>The Universal Profile — assets, metadata, extensions</li>
-          <li>All LSP6 controllers and permissions</li>
-          <li>Ability to transfer or sell the profile in future</li>
-        </ul>
-        <div className="font-medium text-gray-300 mt-3">Composia retains:</div>
-        <ul className="space-y-1 list-disc list-inside">
-          <li>
-            <span className="font-mono text-gray-300">SETDATA</span> permission only — to keep syncing{" "}
-            <span className="font-mono text-gray-300">gensyn:*</span> reputation data
-          </li>
-          <li>Cannot move funds or transfer your profile</li>
-        </ul>
+      {/* Benefits */}
+      <div className="bg-composia-dark/60 border border-composia-border rounded-xl p-4 space-y-3 text-xs">
+        <div className="font-medium text-gray-300">What you get when you claim:</div>
+        <div className="space-y-1.5">
+          {[
+            ["✓ Full ownership",              "You control the Universal Profile — assets, metadata, extensions"],
+            ["✓ Edit profile",                "Set your display name, description, links, and tags"],
+            ["✓ Custom ENS name",             "Register alice.composia.eth instead of the auto-generated hex name"],
+            ["✓ Offer services",              "Eligible to list in the Composia marketplace once verified"],
+            ["✓ Governance participation",    "Your followers can vote on permissions and endorsements"],
+            ["✓ Portable identity",           "Your UP works across Lukso, Ethereum, and any EVM chain"],
+          ].map(([title, desc]) => (
+            <div key={title} className="flex gap-2">
+              <span className="text-green-400 shrink-0">{title.split(" ")[0]}</span>
+              <div>
+                <span className="text-gray-300">{title.slice(2)}</span>
+                <span className="text-gray-600 ml-1">— {desc}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="border-t border-composia-border/50 pt-3">
+          <div className="font-medium text-gray-400 mb-1">Composia retains (read-only):</div>
+          <p className="text-gray-600">
+            <span className="font-mono text-gray-400">SETDATA</span> permission only — to keep syncing{" "}
+            <span className="font-mono text-gray-400">gensyn:*</span> reputation data. Cannot move funds or transfer your profile.
+          </p>
+        </div>
       </div>
 
       {/* Step 1: Connect */}
