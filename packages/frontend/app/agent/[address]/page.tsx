@@ -23,6 +23,11 @@ const VisitorActions = dynamic(() => import("@/components/VisitorActions"), {
   loading: () => null,
 });
 
+const GovernancePanel = dynamic(() => import("@/components/GovernancePanel"), {
+  ssr: false,
+  loading: () => null,
+});
+
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 // ── Data fetchers ────────────────────────────────────────────────────────────
@@ -159,6 +164,37 @@ async function fetchReactiveState(address: string): Promise<ReactiveState | null
   } catch { return null; }
 }
 
+// ── ENS Fuses (Ethereum Sepolia) ─────────────────────────────────────────────
+
+interface EnsFusesData {
+  cannotUnwrap: boolean;
+  cannotSetResolver: boolean;
+  expiry: number;
+}
+
+async function fetchEnsFuses(address: string): Promise<EnsFusesData | null> {
+  const rpc = process.env.ETHEREUM_SEPOLIA_RPC;
+  // Canonical ENS NameWrapper address on Sepolia
+  const NAME_WRAPPER = "0x0635513f179D50A207757E05759CbD106d7dFbe8";
+  if (!rpc) return null;
+  try {
+    const { ethers } = await import("ethers");
+    const provider = new ethers.JsonRpcProvider(rpc);
+    const nw = new ethers.Contract(NAME_WRAPPER, [
+      "function getData(bytes32 node) external view returns (address, uint32, uint64)",
+    ], provider);
+    const autoLabel = address.slice(2, 10).toLowerCase();
+    const node = ethers.namehash(`${autoLabel}.composia.eth`);
+    const [, fuses, expiry] = await nw.getData(node);
+    const f = Number(fuses);
+    return {
+      cannotUnwrap:      (f & 1)  !== 0,  // bit 0 = CANNOT_UNWRAP
+      cannotSetResolver: (f & 32) !== 0,  // bit 5 = CANNOT_SET_RESOLVER (0x20)
+      expiry: Number(expiry),
+    };
+  } catch { return null; }
+}
+
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const DOMAIN_LABELS: Record<string, string> = {
@@ -179,9 +215,10 @@ export default async function AgentProfilePage({
   const { address } = params;
   const devOwner    = searchParams?.devOwner === "1";
 
-  const [profile, reactive] = await Promise.all([
+  const [profile, reactive, ensFuses] = await Promise.all([
     buildProfile(address),
     fetchReactiveState(address),
+    fetchEnsFuses(address),
   ]);
 
   if (!profile) {
@@ -441,6 +478,35 @@ export default async function AgentProfilePage({
         <p className="text-[10px] text-gray-600">
           Auto-generated on UP creation. Custom names can be set from the Owner Panel.
         </p>
+
+        {/* ENS NameWrapper Fuses */}
+        {ensFuses && (
+          <div className="pt-2 border-t border-composia-border/40 space-y-2">
+            <div className="text-[10px] text-[#4a6670] uppercase tracking-wide">ENS Fuses (NameWrapper)</div>
+            <div className="flex flex-wrap gap-2">
+              <FuseChip
+                active={ensFuses.cannotUnwrap}
+                name="CANNOT_UNWRAP"
+                hint="subdomain permanently locked"
+                color="green"
+              />
+              <FuseChip
+                active={ensFuses.cannotSetResolver}
+                name="CANNOT_SET_RESOLVER"
+                hint="resolver frozen — protects reputation reads"
+                color="cyan"
+              />
+            </div>
+            {ensFuses.expiry > 0 && (
+              <p className="text-[9px] text-[#4a6670]">
+                Fuses expire:{" "}
+                {new Date(ensFuses.expiry * 1000).toLocaleDateString("en-US", {
+                  month: "short", day: "numeric", year: "numeric",
+                })}
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── 8. FOLLOWERS & QUORUM ───────────────────────────────────────── */}
@@ -497,8 +563,26 @@ export default async function AgentProfilePage({
         )}
       </div>
 
-      {/* ── 9. VISITOR ACTIONS ──────────────────────────────────────────── */}
-      <VisitorActions agentAddress={address} upAddress={profile.upAddress} />
+      {/* ── 9. GOVERNANCE ───────────────────────────────────────────────── */}
+      {reactive && (
+        <GovernancePanel
+          agentAddress={address}
+          followerCount={reactive.followerCount}
+          quorum={reactive.quorum}
+          isSlashed={reactive.slashed}
+          isVerified={reactive.verified}
+          sepoliaFollowers={reactive.sepoliaFollowers}
+        />
+      )}
+
+      {/* ── 10. VISITOR ACTIONS ─────────────────────────────────────────── */}
+      <VisitorActions
+        agentAddress={address}
+        upAddress={profile.upAddress}
+        isSlashed={reactive?.slashed ?? false}
+        slashExpired={(reactive?.slashed && reactive.slashTimeRemaining === 0) ?? false}
+        sepoliaFollowers={reactive?.sepoliaFollowers ?? []}
+      />
 
       {/* ── 10. ENS REACTIVE STATE (simplified) ─────────────────────────── */}
       {(() => {
@@ -709,6 +793,24 @@ export default async function AgentProfilePage({
 }
 
 // ── Helper component (inline, server-side) ───────────────────────────────────
+
+function FuseChip({
+  active, name, hint, color,
+}: {
+  active: boolean;
+  name: string;
+  hint: string;
+  color: "green" | "cyan";
+}) {
+  const dotColor = color === "green" ? "bg-[#00FF88]" : "bg-[#00D4FF]";
+  return (
+    <div className="flex items-center gap-1.5 text-[10px] bg-composia-dark/60 px-2 py-1 rounded border border-composia-border">
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? dotColor : "bg-gray-700"}`} />
+      <span className={`font-mono ${active ? "text-[#c8e6ea]" : "text-[#4a6670]"}`}>{name}</span>
+      <span className="text-[#4a6670]">— {hint}</span>
+    </div>
+  );
+}
 
 function CapabilityRow({ icon, text, color }: { icon: string; text: string; color: "green" | "yellow" | "red" | "blue" | "gray" }) {
   const styles: Record<typeof color, string> = {

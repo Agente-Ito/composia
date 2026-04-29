@@ -9,22 +9,61 @@ const LSP26_ABI = [
   "function isFollowing(address follower, address addr) external view returns (bool)",
 ];
 
+const REP_STATE_ABI = [
+  "function addFollower(bytes32 node, address follower) external",
+  "function removeFollower(bytes32 node) external",
+  "function settleSlash(bytes32 node) external",
+];
+
+const SEPOLIA_CHAIN_ID = 11155111;
+
 interface Props {
   agentAddress: string;
   upAddress: string | null;
+  isSlashed: boolean;
+  slashExpired: boolean;
+  sepoliaFollowers: string[];
 }
 
-export default function VisitorActions({ agentAddress, upAddress }: Props) {
-  const { address, connected, connect, getSigner } = useWallet();
-  const [following, setFollowing]   = useState<boolean | null>(null);
-  const [pending,   setPending]     = useState(false);
-  const [status,    setStatus]      = useState("");
+export default function VisitorActions({
+  agentAddress,
+  upAddress,
+  isSlashed,
+  slashExpired,
+  sepoliaFollowers,
+}: Props) {
+  const { address, connected, chainId, connect, getSigner } = useWallet();
 
-  const lsp26Addr   = process.env.NEXT_PUBLIC_LSP26_ADDRESS ?? "0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA";
-  const luksoRpc    = process.env.NEXT_PUBLIC_LUKSO_RPC ?? "https://rpc.testnet.lukso.network";
-  const isSelf      = connected && address?.toLowerCase() === agentAddress.toLowerCase();
+  // LSP26 / Lukso follow state
+  const [following, setFollowing]     = useState<boolean | null>(null);
+  const [pending, setPending]         = useState(false);
 
-  // Check current following state
+  // Sepolia native follow state
+  const [sepoliaPending, setSepoliaPending] = useState(false);
+
+  // Settle slash state
+  const [settlingSlash, setSettlingSlash] = useState(false);
+
+  const [status, setStatus] = useState("");
+
+  const lsp26Addr     = process.env.NEXT_PUBLIC_LSP26_ADDRESS ?? "0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA";
+  const luksoRpc      = process.env.NEXT_PUBLIC_LUKSO_RPC ?? "https://rpc.testnet.lukso.network";
+  const sepoliaRpc    = process.env.NEXT_PUBLIC_ETHEREUM_SEPOLIA_RPC ?? "https://ethereum-sepolia-rpc.publicnode.com";
+  const repStateAddr  = process.env.NEXT_PUBLIC_REPUTATION_STATE_ADDRESS;
+
+  const isSelf        = connected && address?.toLowerCase() === agentAddress.toLowerCase();
+  const isSepFollower = connected && address
+    ? sepoliaFollowers.map(a => a.toLowerCase()).includes(address.toLowerCase())
+    : false;
+
+  const agentNode = (() => {
+    try {
+      const label = agentAddress.slice(2, 10).toLowerCase();
+      return ethers.namehash(`${label}.composia.eth`);
+    } catch { return null; }
+  })();
+
+  // Check LSP26 following state
   useEffect(() => {
     if (!connected || !address || !upAddress || isSelf) return;
     const check = async () => {
@@ -37,6 +76,31 @@ export default function VisitorActions({ agentAddress, upAddress }: Props) {
     check();
   }, [address, connected, upAddress, lsp26Addr, luksoRpc, isSelf]);
 
+  // Switch wallet to Sepolia
+  const switchToSepolia = async () => {
+    if (!window.ethereum) return;
+    try {
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa36a7" }],
+      });
+    } catch (err: unknown) {
+      if ((err as { code?: number }).code === 4902) {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: "0xaa36a7",
+            chainName: "Sepolia",
+            nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+            rpcUrls: [sepoliaRpc],
+            blockExplorerUrls: ["https://sepolia.etherscan.io"],
+          }],
+        });
+      }
+    }
+  };
+
+  // LSP26 follow / unfollow on Lukso
   const toggleFollow = async () => {
     if (!upAddress) { setStatus("No UP address for this agent yet"); return; }
     const signer = await getSigner();
@@ -53,7 +117,7 @@ export default function VisitorActions({ agentAddress, upAddress }: Props) {
         ? await lsp26.unfollow(upAddress)
         : await lsp26.follow(upAddress);
       await tx.wait();
-      setStatus(optimistic ? "Following!" : "Unfollowed");
+      setStatus(optimistic ? "Following on Lukso!" : "Unfollowed on Lukso");
     } catch (err: unknown) {
       setFollowing(!optimistic);
       setStatus(err instanceof Error ? err.message.slice(0, 80) : "Transaction failed");
@@ -62,7 +126,56 @@ export default function VisitorActions({ agentAddress, upAddress }: Props) {
     }
   };
 
-  // Don't show to the agent themselves
+  // Sepolia native follow / unfollow via ReputationState
+  const toggleSepoliaFollow = async () => {
+    if (!repStateAddr || !agentNode) {
+      setStatus("Reputation contract not configured");
+      return;
+    }
+    const signer = await getSigner();
+    if (!signer) { await connect(); return; }
+    if (chainId !== SEPOLIA_CHAIN_ID) { await switchToSepolia(); return; }
+
+    setSepoliaPending(true);
+    setStatus("");
+    try {
+      const repState = new ethers.Contract(repStateAddr, REP_STATE_ABI, signer);
+      const tx = isSepFollower
+        ? await repState.removeFollower(agentNode)
+        : await repState.addFollower(agentNode, address);
+      await tx.wait();
+      setStatus(isSepFollower ? "Unfollowed on Sepolia" : "Following on Sepolia!");
+    } catch (err: unknown) {
+      setStatus(err instanceof Error ? err.message.slice(0, 80) : "Transaction failed");
+    } finally {
+      setSepoliaPending(false);
+    }
+  };
+
+  // Settle expired slash (permissionless)
+  const handleSettleSlash = async () => {
+    if (!repStateAddr || !agentNode) {
+      setStatus("Reputation contract not configured");
+      return;
+    }
+    const signer = await getSigner();
+    if (!signer) { await connect(); return; }
+    if (chainId !== SEPOLIA_CHAIN_ID) { await switchToSepolia(); return; }
+
+    setSettlingSlash(true);
+    setStatus("");
+    try {
+      const repState = new ethers.Contract(repStateAddr, REP_STATE_ABI, signer);
+      const tx = await repState.settleSlash(agentNode);
+      await tx.wait();
+      setStatus("Slash settled — agent status restored");
+    } catch (err: unknown) {
+      setStatus(err instanceof Error ? err.message.slice(0, 80) : "Failed to settle slash");
+    } finally {
+      setSettlingSlash(false);
+    }
+  };
+
   if (isSelf) return null;
 
   return (
@@ -70,7 +183,7 @@ export default function VisitorActions({ agentAddress, upAddress }: Props) {
       <h2 className="font-semibold">Actions</h2>
 
       <div className="flex flex-wrap gap-2">
-        {/* Follow / Unfollow */}
+        {/* Follow / Unfollow on Lukso (LSP26) */}
         {upAddress && (
           <button
             onClick={connected ? toggleFollow : connect}
@@ -87,8 +200,31 @@ export default function VisitorActions({ agentAddress, upAddress }: Props) {
               : !connected
               ? "Connect to follow"
               : following
-              ? "Following ✓"
+              ? "Following on Lukso ✓"
               : "Follow on Lukso"}
+          </button>
+        )}
+
+        {/* Follow / Unfollow on Sepolia (ReputationState) */}
+        {repStateAddr && (
+          <button
+            onClick={connected ? toggleSepoliaFollow : connect}
+            disabled={sepoliaPending}
+            className="text-sm px-4 py-2 rounded-lg border transition-colors disabled:opacity-50"
+            style={{
+              borderColor: isSepFollower ? "rgba(0,255,136,0.4)" : "rgba(0,255,136,0.15)",
+              color: isSepFollower ? "#00FF88" : "#9ca3af",
+              background: isSepFollower ? "rgba(0,255,136,0.06)" : "transparent",
+            }}
+            title="Sepolia-native follow — participates in governance quorum"
+          >
+            {sepoliaPending
+              ? isSepFollower ? "Unfollowing…" : "Following…"
+              : !connected
+              ? "Connect to follow on Sepolia"
+              : isSepFollower
+              ? "Following on Sepolia ✓"
+              : "Follow on Sepolia"}
           </button>
         )}
 
@@ -113,6 +249,29 @@ export default function VisitorActions({ agentAddress, upAddress }: Props) {
           Request Service
         </button>
       </div>
+
+      {/* Settle Slash — permissionless, visible to anyone when slash is expired */}
+      {isSlashed && slashExpired && repStateAddr && (
+        <div className="pt-1 border-t border-composia-border/40">
+          <button
+            onClick={connected ? handleSettleSlash : connect}
+            disabled={settlingSlash}
+            className="text-sm px-4 py-2 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/08 transition-colors disabled:opacity-50"
+          >
+            {settlingSlash ? "Settling…" : "Settle Slash (permissionless)"}
+          </button>
+          <p className="text-[10px] text-[#4a6670] mt-1.5">
+            This slash has expired. Anyone can call settleSlash to restore the agent&apos;s status.
+          </p>
+        </div>
+      )}
+
+      {/* Sepolia follow hint */}
+      {repStateAddr && !isSepFollower && connected && !isSelf && (
+        <p className="text-[10px] text-[#4a6670]">
+          Following on Sepolia adds you to governance quorum for this agent.
+        </p>
+      )}
 
       {status && (
         <p className="text-xs text-gray-500">{status}</p>
