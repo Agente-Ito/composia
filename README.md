@@ -10,6 +10,7 @@ Composia turns a Gensyn node's raw on-chain statistics into a fully-owned, cross
 2. Registers an **ENS subdomain** (`{agent}.composia.eth`) on Ethereum Sepolia with live reputation text records
 3. Persists reactive state in **ReputationState.sol** for DeFi composability (LTV, governance, marketplace)
 4. Exposes a **Composia Score** — a 5-component multidimensional reputation (accuracy, consistency, volume, activity, network) replacing a raw accuracy%
+5. Publishes an **ERC-8004 agent registration file** (`/api/agent/{address}/erc8004`) so any ERC-8004 compatible directory can discover and verify the agent's on-chain reputation
 
 No manual steps required from the agent. They just compute, and identity follows.
 
@@ -93,6 +94,7 @@ The UP stores custom Gensyn reputation keys (keccak256-hashed names):
 | `gensyn:joined` | `keccak256(...)` | Unix timestamp of first verification |
 | `gensyn:last_activity` | `keccak256(...)` | Unix timestamp of last update |
 | `LSP3Profile` | `keccak256("LSP3Profile")` | VerifiableURI → JSON with name, description, links, tags |
+| `erc8004:agentURI` | `keccak256("erc8004:agentURI")` | URL of the ERC-8004 `§registration-v1` JSON for this agent |
 
 Ownership transfer flow:
 1. Oracle deploys UP → oracle is initial owner
@@ -168,7 +170,10 @@ The PublicResolver on Sepolia stores key-value text records under each agent's E
 | `gensyn:verifications` | Verification count |
 | `gensyn:up_address` | LUKSO UP address |
 | `gensyn:followers` | LSP26 follower count |
-| `url` | `https://composia.xyz/agent/{eoa}` |
+| `url` | `https://composia.app/agent/{eoa}` |
+| `name` | `Composia Agent {label}` (ENSIP-5 global key) |
+| `description` | `Gensyn ML agent. Accuracy: X%, Verifications: N` (updated on every round) |
+| `erc8004:agentURI` | `https://composia.app/api/agent/{eoa}/erc8004` |
 
 These records are human-readable (any ENS-compatible app can display them) and machine-readable (Composia's `/api/agent/{address}` API reads them to hydrate the profile page).
 
@@ -184,7 +189,77 @@ The auto-generated name remains active. Both names resolve to the same agent. Th
 
 ---
 
-### KeeperHub — automated keeper execution
+### ERC-8004 — Trustless Agents identity layer
+
+[ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) ("Trustless Agents", draft, MetaMask / Coinbase / Google) defines a standard discovery and registration layer for autonomous AI agents. It specifies:
+
+1. **`§registration-v1` JSON file** — a canonical document describing the agent's identity, services, and trust model, served at a stable URL (`agentURI`)
+2. **Identity Registry** — an ERC-721 contract where agents self-register, minting a token whose `tokenURI` points to their registration file
+3. **ENS and ERC725Y integration** — agents store their `agentURI` in ENS text records and in Universal Profile ERC725Y key-value storage so any consumer can discover the file
+
+#### What Composia adds
+
+Every Composia agent automatically gets:
+
+| Artifact | Location | Value |
+|---|---|---|
+| `erc8004:agentURI` ENS text record | Sepolia ENS node | `https://composia.app/api/agent/{eoa}/erc8004` |
+| `erc8004:agentURI` ERC725Y key | LUKSO Universal Profile | same URL, stored on-chain as `bytes` |
+| Registration file endpoint | Next.js API route | ERC-8004 §registration-v1 compliant JSON |
+| Optional identity token | `ERC8004IdentityRegistry.sol` (Sepolia) | Agent self-mints via `/claim` Step 4 |
+
+#### Registration file (`GET /api/agent/{address}/erc8004`)
+
+The endpoint returns a JSON document conforming to ERC-8004 §registration-v1:
+
+```jsonc
+{
+  "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
+  "name": "Composia Agent a1b2c3d4",
+  "description": "Gensyn ML agent on Composia. Reputation: 87.3% · Verified. Followers: 12.",
+  "image": "https://composia.app/og-agent.png",
+  "active": true,
+  "services": [
+    { "name": "web",   "endpoint": "https://composia.app/agent/0x..." },
+    { "name": "ENS",   "endpoint": "a1b2c3d4.composia.eth", "version": "v1" }
+  ],
+  "supportedTrust": ["reputation"],
+  "registrations": [
+    // populated after agent calls register() in ERC8004IdentityRegistry.sol
+    { "agentId": 42, "agentRegistry": "eip155:11155111:0x..." }
+  ],
+  "com.composia.reputation": {
+    "reputationBps": 8730,     // 87.30%
+    "verified": true,
+    "slashed": false,
+    "followerCount": 12,
+    "source": "eip155:11155111:0x..."  // CAIP-10 reference to ReputationState.sol
+  }
+}
+```
+
+Cache-Control: `public, max-age=60` — short TTL because reputation changes frequently.
+
+#### ERC8004IdentityRegistry.sol
+
+A minimal ERC-721 + URIStorage contract deployed on Sepolia. Any agent can call `register(agentURI)` to mint their identity token. Composia does not custody agentIds — agents pay their own gas.
+
+```solidity
+function register(string calldata agentURI) external returns (uint256 agentId);
+function getAgentId(address agent) external view returns (uint256); // 0 = not registered
+function totalAgents() external view returns (uint256);
+```
+
+#### Claim flow (Step 4 — optional)
+
+After claiming UP ownership on LUKSO (Step 3), agents see an optional Step 4 on the `/claim/{upAddress}` page:
+- Wallet switches to **Sepolia**
+- Agent calls `ERC8004IdentityRegistry.register(agentURI)` — mints their ERC-8004 identity token (~150k gas)
+- `agentId` is parsed from the `Registered` event and displayed
+- The API route immediately starts returning `registrations: [{ agentId, agentRegistry }]`
+
+---
+
 
 [KeeperHub](https://keeperhub.dev/) is a decentralised automation protocol that triggers on-chain actions based on contract events or conditions. Composia uses it as the production trigger mechanism for UP creation.
 
@@ -246,6 +321,7 @@ The in-memory execution log (capped at 100 entries) is exposed at `GET /api/keep
 | `AttestorSubdomainRegistrar.sol` | Ethereum Sepolia | Creates `*.composia.eth` subdomains via ENS NameWrapper; writes text records to PublicResolver |
 | `ReputationState.sol` | Ethereum Sepolia | Reactive live state: verification status, slashing, quorum, bidirectional identity resolution |
 | `ENSNameManager.sol` | Ethereum Sepolia | Two-tier ENS name system; agents register custom names from their wallet |
+| `ERC8004IdentityRegistry.sol` | Ethereum Sepolia | ERC-8004 Identity Registry — agents self-mint an ERC-721 identity token pointing to their `agentURI` |
 
 ---
 
@@ -264,6 +340,7 @@ The in-memory execution log (capped at 100 entries) is exposed at `GET /api/keep
 │   │   │   ├── AttestorRegistry.sol
 │   │   │   ├── AttestorSubdomainRegistrar.sol
 │   │   │   ├── ENSNameManager.sol
+│   │   │   ├── ERC8004IdentityRegistry.sol
 │   │   │   ├── MockGensyn.sol
 │   │   │   └── ReputationState.sol
 │   │   └── scripts/
@@ -452,6 +529,13 @@ GET /api/keeper/history
 GET /api/keeperhub/auto-config
 ```
 
+```bash
+# Live ERC-8004 agent registration file (public, no auth)
+GET /api/agent/{agentEOA}/erc8004
+# Returns ERC-8004 §registration-v1 JSON with live reputation data.
+# Cached for 60 seconds. Populates registrations[] once agent has self-registered.
+```
+
 ---
 
 ## Reputation API
@@ -476,9 +560,10 @@ Response includes `reputation`, `reputationPct`, `verified`, `slashed`, `slashEx
 | Layer | Technology | Version |
 |---|---|---|
 | Smart contracts | Solidity + Hardhat | 0.8.24 / 2.22 |
-| OpenZeppelin | ERC725Y, AccessControl, IERC1155 | 5.x |
+| OpenZeppelin | ERC725Y, AccessControl, IERC1155, ERC721URIStorage | 5.x |
 | LUKSO identity | LSP0 UniversalProfile, LSP6 KeyManager, LSP3 Metadata, LSP26 Followers | `@lukso/lsp-smart-contracts` |
 | ENS | NameWrapper, PublicResolver (canonical Sepolia), NameHash | ENS v2 |
+| ERC-8004 | Trustless Agents (draft) — identity, ENS text records, registration file | [eip-8004](https://eips.ethereum.org/EIPS/eip-8004) |
 | Oracle / listener | Node.js, ethers.js | 18 / 6.13 |
 | Frontend | Next.js App Router, React, Tailwind CSS, Recharts | 14.2 / 18.3 / 3.4 |
 | Wallet | ethers.js BrowserProvider (no Wagmi) | 6.13 |

@@ -89,6 +89,7 @@ export async function registerENSSubdomain(
   const ensNode = ethers.namehash(ensName);
 
   // Layer 1: static text records (historical baseline)
+  const frontendUrl = process.env.COMPOSIA_FRONTEND_URL || "https://composia.app";
   const keys = [
     "gensyn:peerId",
     "gensyn:accuracy",
@@ -97,6 +98,10 @@ export async function registerENSSubdomain(
     "gensyn:followers",
     "gensyn:verified_since", // timestamp of first verification — historical anchor
     "url",
+    // ERC-8004 / ENSIP-5 standard records for discoverable agent identity
+    "name",
+    "description",
+    "erc8004:agentURI",
   ];
   const values = [
     params.peerId,
@@ -105,7 +110,11 @@ export async function registerENSSubdomain(
     params.upAddress,
     String(params.followers),
     String(Math.floor(Date.now() / 1000)),
-    `https://composia.app/agent/${params.agentEoa}`,
+    `${frontendUrl}/agent/${params.agentEoa}`,
+    // ERC-8004 values
+    `Composia Agent ${label}`,
+    `Gensyn ML agent. Accuracy: ${params.accuracy}%, Verifications: ${params.verifications}`,
+    `${frontendUrl}/api/agent/${params.agentEoa}/erc8004`,
   ];
 
   let subdomainHash: string | null = null;
@@ -155,8 +164,9 @@ export async function updateENSReputation(
       const registrar = new ethers.Contract(registrarAddr, REGISTRAR_ABI, signer);
       const receipt   = await (await registrar.updateTextRecords(
         ensNode,
-        ["gensyn:accuracy", "gensyn:verifications", "gensyn:followers"],
-        [String(accuracy), String(verifications), String(followers)]
+        ["gensyn:accuracy", "gensyn:verifications", "gensyn:followers", "description"],
+        [String(accuracy), String(verifications), String(followers),
+         `Gensyn ML agent. Accuracy: ${accuracy}%, Verifications: ${verifications}`]
       )).wait();
       result.l1 = receipt.hash;
     } catch (err) {

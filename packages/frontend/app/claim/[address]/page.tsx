@@ -10,6 +10,15 @@ const UP_ABI = [
   "function owner() external view returns (address)",
 ];
 
+const ERC8004_REGISTRY_ABI = [
+  "function register(string calldata agentURI) external returns (uint256 agentId)",
+  "function getAgentId(address agent) external view returns (uint256)",
+];
+
+// Sepolia Etherscan link for ERC-8004 registry tx
+const explorerSepoliaTx = (h: string) =>
+  `https://sepolia.etherscan.io/tx/${h}`;
+
 const REGISTRY_ABI = [
   "function upToAgent(address upAddress) view returns (address)",
   "function agentToKM(address agent) view returns (address)",
@@ -19,7 +28,7 @@ declare global {
   interface Window { ethereum?: any; }
 }
 
-type Phase = "idle" | "connecting" | "checking" | "claiming" | "done" | "error";
+type Phase = "idle" | "connecting" | "checking" | "claiming" | "done" | "registering8004" | "done8004" | "error";
 
 export default function ClaimPage({ params }: { params: { address: string } }) {
   const { address: upAddress } = params;
@@ -27,10 +36,14 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
   const [phase, setPhase]         = useState<Phase>("idle");
   const [walletAddr, setWalletAddr] = useState<string | null>(null);
   const [isPendingOwner, setIsPendingOwner] = useState<boolean | null>(null);
-  const [claimTx, setClaimTx]     = useState<string | null>(null);
-  const [error, setError]         = useState<string | null>(null);
+  const [claimTx, setClaimTx]       = useState<string | null>(null);
+  const [erc8004Tx, setErc8004Tx]   = useState<string | null>(null);
+  const [agentId, setAgentId]       = useState<string | null>(null);
+  const [error, setError]           = useState<string | null>(null);
 
-  const registryAddress = process.env.NEXT_PUBLIC_COMPOSIA_REGISTRY_ADDRESS;
+  const registryAddress    = process.env.NEXT_PUBLIC_COMPOSIA_REGISTRY_ADDRESS;
+  const erc8004Registry    = process.env.NEXT_PUBLIC_ERC8004_REGISTRY_ADDRESS;
+  const frontendUrl        = process.env.NEXT_PUBLIC_COMPOSIA_FRONTEND_URL || "https://composia.app";
 
   async function connect() {
     if (!window.ethereum) {
@@ -80,10 +93,42 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
     }
   }
 
+  async function registerERC8004() {
+    if (!window.ethereum || !walletAddr || !erc8004Registry) return;
+    try {
+      setPhase("registering8004");
+      setError(null);
+      // Switch to Sepolia for the ERC-8004 registration tx
+      await window.ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0xaa36a7" }], // Sepolia
+      });
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const registry = new ethers.Contract(erc8004Registry, ERC8004_REGISTRY_ABI, signer);
+      const agentURI = `${frontendUrl}/api/agent/${walletAddr}/erc8004`;
+      const tx = await registry.register(agentURI);
+      const receipt = await tx.wait();
+      setErc8004Tx(receipt.hash);
+      // Parse agentId from Registered event
+      const iface = new ethers.Interface(["event Registered(uint256 indexed agentId, string agentURI, address indexed owner)"]);
+      for (const log of receipt.logs) {
+        try {
+          const parsed = iface.parseLog(log);
+          if (parsed) { setAgentId(parsed.args.agentId.toString()); break; }
+        } catch { /* skip */ }
+      }
+      setPhase("done8004");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "ERC-8004 registration failed");
+      setPhase("done"); // revert to done so they can still navigate away
+    }
+  }
+
   const explorerTx  = (h: string) => `https://explorer.execution.testnet.lukso.network/tx/${h}`;
   const explorerUp  = `https://universalprofile.cloud/address/${upAddress}`;
   const isConnected = !!walletAddr;
-  const canClaim    = isConnected && isPendingOwner === true && phase !== "done";
+  const canClaim    = isConnected && isPendingOwner === true && phase !== "done" && phase !== "done8004";
 
   return (
     <div className="max-w-xl mx-auto px-6 py-12 space-y-6">
@@ -184,10 +229,10 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
       <ClaimStep
         number={3}
         title="Accept ownership of the Universal Profile"
-        done={phase === "done"}
+        done={phase === "done" || phase === "registering8004" || phase === "done8004"}
         active={isConnected}
       >
-        {phase === "done" && claimTx ? (
+        {(phase === "done" || phase === "done8004" || phase === "registering8004") && claimTx ? (
           <div className="space-y-2">
             <div className="text-green-400 font-medium text-sm">
               You now own your Universal Profile.
@@ -222,11 +267,74 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
         )}
       </ClaimStep>
 
+      {/* Step 4: Optional ERC-8004 registration */}
+      {erc8004Registry && (phase === "done" || phase === "registering8004" || phase === "done8004") && (
+        <ClaimStep
+          number={4}
+          title="Register in ERC-8004 Identity Registry (optional)"
+          done={phase === "done8004"}
+          active={phase === "done"}
+        >
+          {phase === "done8004" && erc8004Tx ? (
+            <div className="space-y-2">
+              <div className="text-green-400 font-medium text-sm">
+                Agent registered in ERC-8004 Identity Registry.
+              </div>
+              {agentId && (
+                <div className="text-xs text-gray-400">
+                  Agent ID: <span className="font-mono text-white">#{agentId}</span>
+                </div>
+              )}
+              <div className="text-xs space-y-0.5">
+                <div className="text-gray-500">
+                  TX: <span className="font-mono text-blue-400">{erc8004Tx.slice(0, 18)}...</span>
+                </div>
+                <a
+                  href={explorerSepoliaTx(erc8004Tx)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-composia-purple hover:underline"
+                >
+                  View on Sepolia Etherscan ↗
+                </a>
+              </div>
+            </div>
+          ) : (
+            <>
+              <p className="text-xs text-gray-500 mb-3">
+                Mint your agent as an ERC-8004 identity token (ERC-721) on Ethereum Sepolia.
+                This makes your agent discoverable in any ERC-8004 compatible directory.
+                Your wallet will be asked to switch to Sepolia (~150k gas).
+              </p>
+              <div className="text-xs bg-composia-dark/60 rounded-lg p-3 mb-3 space-y-1">
+                <div className="text-gray-400 font-medium">What this adds:</div>
+                <div className="text-gray-500">• Permanent <span className="font-mono text-gray-300">agentId</span> in a public on-chain registry</div>
+                <div className="text-gray-500">• Your profile becomes browsable via <span className="font-mono text-gray-300">tokenURI(agentId)</span></div>
+                <div className="text-gray-500">• Compatible with any ERC-8004 reputation aggregator</div>
+              </div>
+              <button
+                onClick={registerERC8004}
+                disabled={phase === "registering8004"}
+                className="w-full bg-blue-600/80 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+              >
+                {phase === "registering8004" ? "Registering on Sepolia..." : "Register in ERC-8004 (optional)"}
+              </button>
+              <button
+                onClick={() => setPhase("done8004")}
+                className="w-full text-xs text-gray-600 hover:text-gray-400 py-1 transition-colors"
+              >
+                Skip this step
+              </button>
+            </>
+          )}
+        </ClaimStep>
+      )}
+
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm">
           {error}
           <button
-            onClick={() => { setError(null); setPhase(isConnected ? "idle" : "idle"); }}
+            onClick={() => { setError(null); }}
             className="ml-3 text-xs underline"
           >
             Dismiss
