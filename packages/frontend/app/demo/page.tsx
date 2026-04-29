@@ -87,10 +87,41 @@ function MiniGauge({ accuracy }: { accuracy: number }) {
 
 // ── Journey steps ────────────────────────────────────────────────────────────
 const JOURNEY = [
-  { icon: "⚡", label: "Event fires", desc: "Gensyn emits VerificationCompleted on Lukso" },
-  { icon: "🏗", label: "UP + KM deployed", desc: "Listener creates Universal Profile + KeyManager" },
-  { icon: "🔑", label: "Ownership claimable", desc: "Agent accepts KeyManager — controls their UP" },
-  { icon: "🌐", label: "Use anywhere", desc: "DeFi, DAOs, marketplaces read composable reputation" },
+  {
+    icon: "⚡",
+    label: "Gensyn verification",
+    desc: "Agent completes ML tasks on Gensyn RL Swarm. MockGensyn emits VerificationCompleted(agent, accuracy, verifications) on LUKSO Testnet.",
+  },
+  {
+    icon: "👁",
+    label: "KeeperHub detects it",
+    desc: "KeeperHub listens for the event on-chain. If accuracy ≥ 80% and verifications ≥ 100, it triggers POST /api/keeper automatically.",
+  },
+  {
+    icon: "🏗",
+    label: "Universal Profile created",
+    desc: "A LUKSO UP (LSP0) + KeyManager (LSP6) are deployed. Reputation data is written to the UP via setDataBatch — gensyn:accuracy, verifications, LSP3 profile.",
+  },
+  {
+    icon: "🔏",
+    label: "ENS subdomain registered",
+    desc: "a1b2c3d4.composia.eth is minted on Ethereum Sepolia. Text records store live reputation. Fuses CANNOT_UNWRAP + CANNOT_SET_RESOLVER are burned to protect governance reads.",
+  },
+  {
+    icon: "📡",
+    label: "Reputation state seeded",
+    desc: "ReputationState.sol on Sepolia is populated: verification threshold, follower quorum for governance, and DeFi composability hooks (isCurrentlyVerified, getQuorum).",
+  },
+  {
+    icon: "🔑",
+    label: "Agent claims ownership",
+    desc: "Agent visits /claim/[address], connects wallet, and calls acceptOwnership(). After this, the agent fully controls their UP — Composia retains no access.",
+  },
+  {
+    icon: "🌐",
+    label: "Composability unlocked",
+    desc: "Followers on Sepolia form a governance quorum. Verified agents unlock DeFi collateral terms, DAO vote weights, and service marketplace access. ERC-8004 makes the agent discoverable cross-chain.",
+  },
 ];
 
 // ── Main component ────────────────────────────────────────────────────────────

@@ -105,6 +105,33 @@ interface ReactiveState {
   sepoliaFollowers: string[];
 }
 
+// Deterministic mock reactive state for preview when Sepolia contracts aren't deployed
+function mockReactiveState(address: string): ReactiveState {
+  // Simple deterministic hash of address for stable preview values
+  const seed = parseInt(address.slice(2, 10), 16);
+  const n    = (offset: number) => Math.abs((seed * 1103515245 + offset) | 0);
+
+  const autoLabel     = address.slice(2, 10).toLowerCase();
+  const reputation    = 6000 + (n(1) % 3500);          // 6000–9500 bps
+  const threshold     = 6000;
+  const followerCount = 2 + (n(2) % 8);                // 2–9 followers
+  const quorum        = Math.floor(followerCount / 2) + 1;
+  const verified      = reputation >= threshold;
+  const labels        = [autoLabel];
+  const mockFollowers = Array.from({ length: followerCount }, (_, i) =>
+    "0x" + n(i + 10).toString(16).padStart(40, "0").slice(0, 40)
+  );
+
+  return {
+    reputation, reputationPct: reputation / 100,
+    verified, slashed: false, slashExpiresAt: 0,
+    followerCount, quorum, threshold, thresholdPct: threshold / 100,
+    slashTimeRemaining: 0, meetsThreshold: verified,
+    agentLabels: labels, primaryLabel: autoLabel,
+    sepoliaFollowers: mockFollowers,
+  };
+}
+
 async function fetchReactiveState(address: string): Promise<ReactiveState | null> {
   const rpc             = process.env.ETHEREUM_SEPOLIA_RPC;
   const repStateAddr    = process.env.REPUTATION_STATE_ADDRESS;
@@ -215,11 +242,15 @@ export default async function AgentProfilePage({
   const { address } = params;
   const devOwner    = searchParams?.devOwner === "1";
 
-  const [profile, reactive, ensFuses] = await Promise.all([
+  const [profile, reactiveOnChain, ensFuses] = await Promise.all([
     buildProfile(address),
     fetchReactiveState(address),
     fetchEnsFuses(address),
   ]);
+
+  // Fall back to deterministic mock when Sepolia contracts aren't deployed yet
+  const reactive       = reactiveOnChain ?? mockReactiveState(address);
+  const isReactiveMock = reactiveOnChain === null;
 
   if (!profile) {
     return (
@@ -512,7 +543,10 @@ export default async function AgentProfilePage({
       {/* ── 8. FOLLOWERS & QUORUM ───────────────────────────────────────── */}
       <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-3">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="font-semibold">Followers</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold">Followers</h2>
+            {isReactiveMock && <PreviewBadge />}
+          </div>
           {reactive && reactive.followerCount > 0 && (
             <span className="text-xs text-gray-500">
               Governance quorum: <span className="text-white font-medium">{reactive.quorum}</span> of {reactive.followerCount}
@@ -572,6 +606,7 @@ export default async function AgentProfilePage({
           isSlashed={reactive.slashed}
           isVerified={reactive.verified}
           sepoliaFollowers={reactive.sepoliaFollowers}
+          isMock={isReactiveMock}
         />
       )}
 
@@ -592,7 +627,10 @@ export default async function AgentProfilePage({
           <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="font-semibold">Reputation State</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="font-semibold">Reputation State</h2>
+                  {isReactiveMock && <PreviewBadge />}
+                </div>
                 <div className="font-mono text-composia-cyan text-xs mt-0.5">{displayName}</div>
               </div>
               <div className="flex flex-col items-end gap-1">
@@ -793,6 +831,14 @@ export default async function AgentProfilePage({
 }
 
 // ── Helper component (inline, server-side) ───────────────────────────────────
+
+function PreviewBadge() {
+  return (
+    <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#4a6670]/30 text-[#4a6670] font-mono tracking-wide">
+      preview
+    </span>
+  );
+}
 
 function FuseChip({
   active, name, hint, color,

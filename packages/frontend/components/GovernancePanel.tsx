@@ -9,6 +9,7 @@ interface Props {
   isSlashed: boolean;
   isVerified: boolean;
   sepoliaFollowers: string[];
+  isMock?: boolean;
 }
 
 type ProposalResult = { ok: boolean; message: string } | null;
@@ -20,6 +21,7 @@ export default function GovernancePanel({
   isSlashed,
   isVerified,
   sepoliaFollowers,
+  isMock = false,
 }: Props) {
   const { address, connected } = useWallet();
   const [proposing, setProposing]     = useState(false);
@@ -63,7 +65,14 @@ export default function GovernancePanel({
     <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <h2 className="font-semibold text-[#c8e6ea]">Governance</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-[#c8e6ea]">Governance</h2>
+          {isMock && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#4a6670]/30 text-[#4a6670] font-mono tracking-wide">
+              preview
+            </span>
+          )}
+        </div>
         <span className="text-xs text-[#4a6670]">
           Quorum:{" "}
           <span className="text-white font-medium">{quorum}</span>
