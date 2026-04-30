@@ -101,8 +101,8 @@ export default function MothLogo({
   className = "",
 }: Props) {
   const color = glowColor ?? (score !== null ? scoreColor(score) : "#7B61FF");
-  const wingOpacity = 0.22;
-  const strokeWidth = 0.6;
+  const wingOpacity = 0.32;
+  const strokeWidth = 0.7;
 
   // Mirror helpers
   function mirrorX(pts: number[][]): number[][] {
@@ -139,17 +139,22 @@ export default function MothLogo({
     ));
   }
 
-  function renderNodes(nodes: number[][], r = 1.5) {
-    return nodes.map(([x, y], i) => (
-      <circle
-        key={i}
-        cx={x} cy={y} r={r}
-        fill={color}
-        fillOpacity={0.9}
-        className={animated ? "moth-node" : ""}
-        style={animated ? { animationDelay: `${parseFloat(animDelay) + i * 0.12}s` } : {}}
-      />
-    ));
+  function renderNodes(nodes: number[][], r = 1.5, outerStart = 2) {
+    const filterId = `nglow-${color.replace("#", "")}`;
+    return nodes.map(([x, y], i) => {
+      const isOuter = i >= outerStart;
+      return (
+        <circle
+          key={i}
+          cx={x} cy={y} r={isOuter ? r * 0.85 : r}
+          fill={color}
+          fillOpacity={isOuter ? 0.55 : 0.95}
+          filter={!isOuter ? `url(#${filterId})` : undefined}
+          className={animated ? "moth-node" : ""}
+          style={animated ? { animationDelay: `${parseFloat(animDelay) + i * 0.12}s` } : {}}
+        />
+      );
+    });
   }
 
   // ── Keeper variant: curved spine lines on wings ───────────────────────────
@@ -191,8 +196,17 @@ export default function MothLogo({
       aria-label="Composia moth logo"
     >
       <defs>
-        <filter id={`glow-${color.replace("#", "")}`} x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
+        {/* nucleus glow — strong */}
+        <filter id={`glow-${color.replace("#", "")}`} x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        {/* node glow — subtle */}
+        <filter id={`nglow-${color.replace("#", "")}`} x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="1.4" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -255,16 +269,29 @@ export default function MothLogo({
       />
 
       {/* ── Nucleus (thorax core) — brightest element ─────────────────── */}
+      {/* pulse ring — expands outward and fades */}
+      <circle cx={THORAX_CX} cy={THORAX_CY} r={10} fill="none"
+        stroke={color} strokeWidth={0.8} strokeOpacity={0}>
+        {animated && <>
+          <animate attributeName="r"            values="10;22;10"   dur="2.8s" repeatCount="indefinite" />
+          <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.8s" repeatCount="indefinite" />
+        </>}
+      </circle>
+      {/* outer ring — static glow halo */}
       <circle
         cx={THORAX_CX} cy={THORAX_CY} r={10}
-        fill={color} fillOpacity={0.12}
-        stroke={color} strokeWidth={1.2} strokeOpacity={1}
+        fill={color} fillOpacity={0.14}
+        stroke={color} strokeWidth={1.4} strokeOpacity={1}
         filter={`url(#glow-${color.replace("#", "")})`}
       />
-      <circle
-        cx={THORAX_CX} cy={THORAX_CY} r={5}
-        fill={color} fillOpacity={0.6}
-      />
+      {/* inner core dot — breathes */}
+      <circle cx={THORAX_CX} cy={THORAX_CY} r={5}
+        fill={color} fillOpacity={0.85}>
+        {animated && <>
+          <animate attributeName="r"            values="4;6;4"       dur="2.8s" repeatCount="indefinite" />
+          <animate attributeName="fill-opacity" values="0.75;1;0.75" dur="2.8s" repeatCount="indefinite" />
+        </>}
+      </circle>
 
       {/* ── Score overlay ─────────────────────────────────────────────── */}
       {score !== null && (
