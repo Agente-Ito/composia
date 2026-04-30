@@ -2,7 +2,7 @@ import { ComposiaLogo } from "@/components/ComposiaLogo";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import MothLogo from "@/components/MothLogo";
+import NetworkMoth from "@/components/NetworkMoth";
 
 // ── Static data ──────────────────────────────────────────────────────────────
 
@@ -78,9 +78,9 @@ export default function DesignPage() {
           >
             <div
               className="tile-float"
-              style={{ opacity: 0.44, animationDuration: "8s", transform: "translateY(-24px)" }}
+              style={{ animationDuration: "8s", transform: "translateY(-20px)" }}
             >
-              <MothLogo size={520} variant="core" animated glowColor="#7B61FF" />
+              <NetworkMoth size={540} color="#7B61FF" opacity={0.48} />
             </div>
           </div>
 
