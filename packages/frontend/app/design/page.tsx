@@ -122,7 +122,7 @@ export default function DesignPage() {
                   >layer</span>
                 </span>
               </span>
-              <span className="block text-white/75 font-medium tracking-tight">for agents.</span>
+              <span className="block text-white/85 font-medium tracking-tight">for agents.</span>
             </h1>
             <p className="max-w-[340px] text-[15px] leading-relaxed text-ds-muted/90">
               Composia turns verifiable behavior into portable identity —
