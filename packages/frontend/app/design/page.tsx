@@ -101,10 +101,26 @@ export default function DesignPage() {
               <span className="block">Composable</span>
               <span className="block">
                 reputation{" "}
-                <span
-                  className="text-ds-primary"
-                  style={{ textShadow: "0 0 28px rgba(123,97,255,0.55), 0 0 60px rgba(123,97,255,0.20)" }}
-                >layer</span>
+                <span className="relative inline-block">
+                  {/* radial glow backdrop */}
+                  <span
+                    className="absolute blur-xl pointer-events-none"
+                    style={{
+                      inset: "-8px -16px",
+                      background: "rgba(123,97,255,0.25)",
+                      borderRadius: "50%",
+                    }}
+                    aria-hidden="true"
+                  />
+                  {/* text sits above glow */}
+                  <span
+                    className="relative text-ds-primary"
+                    style={{
+                      textShadow:
+                        "0 0 16px rgba(123,97,255,0.95), 0 0 40px rgba(123,97,255,0.65), 0 0 80px rgba(123,97,255,0.25)",
+                    }}
+                  >layer</span>
+                </span>
               </span>
               <span className="block text-white/75 font-medium tracking-tight">for agents.</span>
             </h1>
