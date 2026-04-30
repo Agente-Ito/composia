@@ -106,7 +106,7 @@ export default function DesignPage() {
                   style={{ textShadow: "0 0 28px rgba(123,97,255,0.55), 0 0 60px rgba(123,97,255,0.20)" }}
                 >layer</span>
               </span>
-              <span className="block text-ds-text/70">for agents.</span>
+              <span className="block text-white/70 font-medium">for agents.</span>
             </h1>
             <p className="max-w-[340px] text-[15px] leading-relaxed text-ds-muted/90">
               Composia turns verifiable behavior into portable identity —
