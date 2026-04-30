@@ -1,97 +1,110 @@
-// NetworkMoth — visual system element.
-// Butterfly silhouette as a network graph.
-// Center = strongest. Mid = medium. Outer = faint.
+// NetworkMoth — butterfly silhouette as a minimal network graph.
+// Design principle: silhouette first, connections second.
+// viewBox 400×280, centre (200, 136).
 
 interface Props {
-  color?:   string
-  opacity?: number
-  size?:    number
+  color?:    string
+  opacity?:  number
+  size?:     number
   className?: string
 }
 
-// ── Nodes — viewBox 400×280, centre (200, 140) ───────────────────────────────
-// o = fillOpacity  |  pulse = SMIL breathing  |  glow = filter
+// ── Nodes ─────────────────────────────────────────────────────────────────────
+// r = radius  |  o = fillOpacity
+const C = { x: 200, y: 136 };   // nucleus
+
 const NODES = [
-  // ── Centre cluster ──────────────────────────────────────────────────────────
-  { x: 200, y: 140, r: 5.0, o: 1.00, pulse: true,  glow: true  }, // 0  nucleus
-  { x: 182, y: 126, r: 2.8, o: 0.88, pulse: true,  glow: false }, // 1  left inner
-  { x: 218, y: 126, r: 2.8, o: 0.88, pulse: true,  glow: false }, // 2  right inner
-  { x: 182, y: 156, r: 2.4, o: 0.78, pulse: false, glow: false }, // 3  left lower inner
-  { x: 218, y: 156, r: 2.4, o: 0.78, pulse: false, glow: false }, // 4  right lower inner
+  // Left upper wing — fan arc from inner-lower → inner-upper
+  { x: 172, y: 112, r: 2.6, o: 0.82 },  // 0  inner shoulder
+  { x: 144, y:  90, r: 2.2, o: 0.64 },  // 1  upper mid
+  { x: 112, y:  78, r: 2.0, o: 0.54 },  // 2  apex (highest point)
+  { x:  82, y:  88, r: 1.8, o: 0.44 },  // 3  outer upper
+  { x:  62, y: 116, r: 1.8, o: 0.38 },  // 4  outer mid — widest point
+  { x:  70, y: 148, r: 1.8, o: 0.40 },  // 5  outer lower
+  { x: 102, y: 164, r: 2.0, o: 0.54 },  // 6  lower mid
+  { x: 148, y: 158, r: 2.4, o: 0.72 },  // 7  inner lower
 
-  // ── Left upper wing ─────────────────────────────────────────────────────────
-  { x: 162, y: 114, r: 2.4, o: 0.78, pulse: false, glow: false }, // 5  shoulder
-  { x: 138, y: 102, r: 2.2, o: 0.64, pulse: false, glow: false }, // 6
-  { x: 112, y:  94, r: 2.0, o: 0.52, pulse: false, glow: false }, // 7  apex
-  { x:  88, y: 104, r: 1.8, o: 0.40, pulse: false, glow: false }, // 8  outer top
-  { x:  76, y: 124, r: 1.8, o: 0.34, pulse: false, glow: false }, // 9  outer tip
-  { x:  86, y: 148, r: 1.8, o: 0.38, pulse: false, glow: false }, // 10 outer lower
-  { x: 112, y: 158, r: 2.0, o: 0.52, pulse: false, glow: false }, // 11 lower mid
-  { x: 142, y: 150, r: 2.2, o: 0.66, pulse: false, glow: false }, // 12 inner lower
-  { x: 124, y: 114, r: 1.8, o: 0.52, pulse: false, glow: false }, // 13 interior
+  // Right upper wing — exact mirror (x → 400 − x)
+  { x: 228, y: 112, r: 2.6, o: 0.82 },  // 8  inner shoulder
+  { x: 256, y:  90, r: 2.2, o: 0.64 },  // 9
+  { x: 288, y:  78, r: 2.0, o: 0.54 },  // 10 apex
+  { x: 318, y:  88, r: 1.8, o: 0.44 },  // 11 outer upper
+  { x: 338, y: 116, r: 1.8, o: 0.38 },  // 12 outer mid
+  { x: 330, y: 148, r: 1.8, o: 0.40 },  // 13 outer lower
+  { x: 298, y: 164, r: 2.0, o: 0.54 },  // 14 lower mid
+  { x: 252, y: 158, r: 2.4, o: 0.72 },  // 15 inner lower
 
-  // ── Right upper wing (exact mirror x → 400−x) ───────────────────────────────
-  { x: 238, y: 114, r: 2.4, o: 0.78, pulse: false, glow: false }, // 14 shoulder
-  { x: 262, y: 102, r: 2.2, o: 0.64, pulse: false, glow: false }, // 15
-  { x: 288, y:  94, r: 2.0, o: 0.52, pulse: false, glow: false }, // 16 apex
-  { x: 312, y: 104, r: 1.8, o: 0.40, pulse: false, glow: false }, // 17 outer top
-  { x: 324, y: 124, r: 1.8, o: 0.34, pulse: false, glow: false }, // 18 outer tip
-  { x: 314, y: 148, r: 1.8, o: 0.38, pulse: false, glow: false }, // 19 outer lower
-  { x: 288, y: 158, r: 2.0, o: 0.52, pulse: false, glow: false }, // 20 lower mid
-  { x: 258, y: 150, r: 2.2, o: 0.66, pulse: false, glow: false }, // 21 inner lower
-  { x: 276, y: 114, r: 1.8, o: 0.52, pulse: false, glow: false }, // 22 interior
+  // Left lower wing
+  { x: 182, y: 162, r: 2.0, o: 0.62 },  // 16 root
+  { x: 162, y: 182, r: 1.8, o: 0.50 },  // 17
+  { x: 156, y: 204, r: 1.6, o: 0.38 },  // 18
+  { x: 170, y: 218, r: 1.5, o: 0.30 },  // 19 tip
+  { x: 186, y: 212, r: 1.7, o: 0.42 },  // 20
 
-  // ── Left lower wing ─────────────────────────────────────────────────────────
-  { x: 180, y: 164, r: 2.0, o: 0.62, pulse: false, glow: false }, // 23
-  { x: 164, y: 182, r: 1.8, o: 0.50, pulse: false, glow: false }, // 24
-  { x: 156, y: 200, r: 1.6, o: 0.38, pulse: false, glow: false }, // 25
-  { x: 168, y: 214, r: 1.6, o: 0.32, pulse: false, glow: false }, // 26
-  { x: 184, y: 208, r: 1.8, o: 0.44, pulse: false, glow: false }, // 27
-
-  // ── Right lower wing ────────────────────────────────────────────────────────
-  { x: 220, y: 164, r: 2.0, o: 0.62, pulse: false, glow: false }, // 28
-  { x: 236, y: 182, r: 1.8, o: 0.50, pulse: false, glow: false }, // 29
-  { x: 244, y: 200, r: 1.6, o: 0.38, pulse: false, glow: false }, // 30
-  { x: 232, y: 214, r: 1.6, o: 0.32, pulse: false, glow: false }, // 31
-  { x: 216, y: 208, r: 1.8, o: 0.44, pulse: false, glow: false }, // 32
-] as const;
-
-// ── Edges — [from, to, weight] ────────────────────────────────────────────────
-// weight 0 = centre-heavy (0.55)  |  1 = mid (0.28)  |  2 = outer-light (0.13)
-const EDGES: [number, number, number][] = [
-  // centre cluster — densest
-  [0,1,0],[0,2,0],[0,3,0],[0,4,0],
-  [1,2,0],[1,3,0],[2,4,0],[3,4,0],
-
-  // centre → shoulders
-  [0,5,0],[1,5,0],[0,14,0],[2,14,0],
-
-  // centre → lower wing roots
-  [3,23,0],[4,28,0],
-
-  // left upper — perimeter
-  [5,6,1],[6,7,1],[7,8,1],[8,9,2],[9,10,2],[10,11,2],[11,12,1],[12,1,1],
-  // left upper — interior
-  [5,13,1],[6,13,1],[7,13,1],[12,13,1],[13,1,1],
-
-  // right upper — perimeter
-  [14,15,1],[15,16,1],[16,17,1],[17,18,2],[18,19,2],[19,20,2],[20,21,1],[21,2,1],
-  // right upper — interior
-  [14,22,1],[15,22,1],[16,22,1],[21,22,1],[22,2,1],
-
-  // left lower
-  [23,24,1],[24,25,2],[25,26,2],[26,27,2],[27,23,1],
-
-  // right lower
-  [28,29,1],[29,30,2],[30,31,2],[31,32,2],[32,28,1],
+  // Right lower wing — exact mirror
+  { x: 218, y: 162, r: 2.0, o: 0.62 },  // 21 root
+  { x: 238, y: 182, r: 1.8, o: 0.50 },  // 22
+  { x: 244, y: 204, r: 1.6, o: 0.38 },  // 23
+  { x: 230, y: 218, r: 1.5, o: 0.30 },  // 24 tip
+  { x: 214, y: 212, r: 1.7, o: 0.42 },  // 25
 ];
 
-const STROKE_OPACITY = [0.55, 0.28, 0.13] as const;
+// ── Edges — [i, j, weight] ────────────────────────────────────────────────────
+// weight 0 = 0.55 (centre spokes)
+// weight 1 = 0.26 (inner perimeter + diagonals)
+// weight 2 = 0.11 (outer perimeter)
+// Cx/Cy = centre node references via negative index (-1)
+type Edge = [number | -1, number | -1, 0 | 1 | 2];
+
+const EDGES: Edge[] = [
+  // ── centre spokes — left (radiate from nucleus to key wing nodes) ──
+  [-1,  0, 0],   // → left shoulder
+  [-1,  2, 0],   // → left apex (long spoke, defines upper wing height)
+  [-1,  4, 0],   // → left outer mid (defines wingspan width)
+  [-1,  7, 0],   // → left inner lower
+
+  // ── centre spokes — right ──
+  [-1,  8, 0],
+  [-1, 10, 0],
+  [-1, 12, 0],
+  [-1, 15, 0],
+
+  // ── centre spokes — lower wings ──
+  [-1, 16, 1],
+  [-1, 21, 1],
+
+  // ── left upper wing perimeter ──
+  [0,  1, 1],  [1,  2, 1],  [2,  3, 1],
+  [3,  4, 2],  [4,  5, 2],  [5,  6, 2],
+  [6,  7, 1],  [7,  0, 1],
+
+  // ── left upper wing — 2 interior diagonals ──
+  [0,  6, 1],   // shoulder → lower mid (defines wing depth)
+  [1,  5, 2],   // cross-chord
+
+  // ── right upper wing perimeter ──
+  [8,  9, 1],  [9, 10, 1],  [10, 11, 1],
+  [11, 12, 2], [12, 13, 2], [13, 14, 2],
+  [14, 15, 1], [15,  8, 1],
+
+  // ── right upper wing — 2 interior diagonals ──
+  [8,  14, 1],
+  [9,  13, 2],
+
+  // ── lower wings ──
+  [16, 17, 1], [17, 18, 2], [18, 19, 2], [19, 20, 2], [20, 16, 1],
+  [21, 22, 1], [22, 23, 2], [23, 24, 2], [24, 25, 2], [25, 21, 1],
+];
+
+const SO = [0.55, 0.26, 0.11] as const;   // stroke-opacity by weight
+
+function nx(i: number | -1) { return i === -1 ? C.x : NODES[i].x; }
+function ny(i: number | -1) { return i === -1 ? C.y : NODES[i].y; }
 
 export default function NetworkMoth({
-  color   = "#7B61FF",
-  opacity = 1,
-  size    = 500,
+  color     = "#7B61FF",
+  opacity   = 1,
+  size      = 500,
   className = "",
 }: Props) {
   return (
@@ -104,8 +117,8 @@ export default function NetworkMoth({
       aria-hidden="true"
     >
       <defs>
-        <filter id="nm-glow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="4.5" result="blur" />
+        <filter id="nm-glow" x="-120%" y="-120%" width="340%" height="340%">
+          <feGaussianBlur stdDeviation="5" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -117,55 +130,37 @@ export default function NetworkMoth({
       {EDGES.map(([a, b, w], i) => (
         <line
           key={i}
-          x1={NODES[a].x} y1={NODES[a].y}
-          x2={NODES[b].x} y2={NODES[b].y}
+          x1={nx(a)} y1={ny(a)}
+          x2={nx(b)} y2={ny(b)}
           stroke={color}
           strokeWidth="0.7"
-          strokeOpacity={STROKE_OPACITY[w]}
+          strokeOpacity={SO[w]}
         />
       ))}
 
-      {/* ── Regular nodes ─────────────────────────────────────────────────── */}
-      {NODES.map((n, i) => {
-        if (n.pulse) return null; // handled separately
-        return (
-          <circle
-            key={i}
-            cx={n.x} cy={n.y} r={n.r}
-            fill={color}
-            fillOpacity={n.o}
-            className="moth-node"
-            style={{ animationDelay: `${((i * 0.22) % 2.4).toFixed(2)}s` }}
-          />
-        );
-      })}
+      {/* ── Wing nodes — staggered CSS pulse ──────────────────────────────── */}
+      {NODES.map((n, i) => (
+        <circle
+          key={i}
+          cx={n.x} cy={n.y} r={n.r}
+          fill={color}
+          fillOpacity={n.o}
+          className="moth-node"
+          style={{ animationDelay: `${((i * 0.25) % 2.5).toFixed(2)}s` }}
+        />
+      ))}
 
-      {/* ── Pulsing inner nodes (1–2) — subtle breathing ─────────────────── */}
-      {[1, 2].map((i) => {
-        const n = NODES[i];
-        return (
-          <circle key={`pulse-${i}`} cx={n.x} cy={n.y} r={n.r} fill={color}>
-            <animate attributeName="fill-opacity"
-              values={`${n.o};${Math.min(n.o + 0.12, 1)};${n.o}`}
-              dur="3.4s" begin={`${i * 0.6}s`} repeatCount="indefinite" />
-            <animate attributeName="r"
-              values={`${n.r};${n.r + 0.6};${n.r}`}
-              dur="3.4s" begin={`${i * 0.6}s`} repeatCount="indefinite" />
-          </circle>
-        );
-      })}
-
-      {/* ── Central nucleus — bloom + core ───────────────────────────────── */}
+      {/* ── Central nucleus ───────────────────────────────────────────────── */}
       <g filter="url(#nm-glow)">
-        {/* expanding bloom ring */}
-        <circle cx={NODES[0].x} cy={NODES[0].y} r="5" fill={color} fillOpacity="0.20">
-          <animate attributeName="r"            values="5;14;5"      dur="3s" repeatCount="indefinite" />
-          <animate attributeName="fill-opacity" values="0.20;0;0.20" dur="3s" repeatCount="indefinite" />
+        {/* bloom ring */}
+        <circle cx={C.x} cy={C.y} r="5" fill={color} fillOpacity="0.22">
+          <animate attributeName="r"            values="5;16;5"       dur="3s" repeatCount="indefinite" />
+          <animate attributeName="fill-opacity" values="0.22;0;0.22"  dur="3s" repeatCount="indefinite" />
         </circle>
         {/* solid core */}
-        <circle cx={NODES[0].x} cy={NODES[0].y} r="5" fill={color}>
-          <animate attributeName="r"            values="4;6;4"       dur="3s" repeatCount="indefinite" />
-          <animate attributeName="fill-opacity" values="0.82;1;0.82" dur="3s" repeatCount="indefinite" />
+        <circle cx={C.x} cy={C.y} r="5" fill={color}>
+          <animate attributeName="r"            values="4;6.5;4"      dur="3s" repeatCount="indefinite" />
+          <animate attributeName="fill-opacity" values="0.85;1;0.85"  dur="3s" repeatCount="indefinite" />
         </circle>
       </g>
     </svg>
