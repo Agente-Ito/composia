@@ -62,8 +62,8 @@ const config: Config = {
           "50%":       { opacity: "1" },
         },
         "node-glow": {
-          "0%, 100%": { filter: "drop-shadow(0 0 2px #7B61FF)" },
-          "50%":       { filter: "drop-shadow(0 0 6px #A78BFA)" },
+          "0%, 100%": { filter: "drop-shadow(0 0 2px #7B85E6)" },
+          "50%":       { filter: "drop-shadow(0 0 7px #7B85E6)" },
         },
         "float": {
           "0%, 100%": { transform: "translateY(0px)" },

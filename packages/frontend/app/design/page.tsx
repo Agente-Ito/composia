@@ -80,7 +80,7 @@ export default function DesignPage() {
               className="tile-float"
               style={{ animationDuration: "8s", transform: "translateY(-20px)" }}
             >
-              <NetworkMoth size={540} color="#7B61FF" opacity={0.48} />
+              <NetworkMoth size={920} opacity={0.72} />
             </div>
           </div>
 
