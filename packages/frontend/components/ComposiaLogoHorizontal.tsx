@@ -5,55 +5,61 @@ export default function ComposiaLogoHorizontal({
 }) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
+      {/*
+        Butterfly reconstructed from brand guide §1 horizontal version.
+        ViewBox 56×40, center (28, 20).
+        4 wing pairs — upper dominant, lower swept back.
+        Pure fills, no strokes, no nodes.
+      */}
       <svg
-        viewBox="0 0 48 32"
+        viewBox="0 0 56 40"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-9 h-6"
+        className="w-10 h-7"
         aria-hidden="true"
       >
-        {/* ── Left upper wing — large, rounded lobe ── */}
+        {/* ── Upper-left wing — primary fill ── */}
         <path
-          d="M 24,16 C 22,8 10,3 5,12 C 3,18 12,22 24,16 Z"
+          d="M 28,20 C 25,11 14,4 7,11 C 4,17 11,23 28,20 Z"
           fill="#EDEFF6"
-          fillOpacity="0.85"
+          fillOpacity="0.88"
         />
-        {/* inner highlight — softer depth layer */}
+        {/* depth layer — inner rounded lobe */}
         <path
-          d="M 24,16 C 22,10 13,8 10,14 C 9,18 15,20 24,16 Z"
+          d="M 28,20 C 25,13 17,9 13,15 C 11,19 16,22 28,20 Z"
           fill="#EDEFF6"
-          fillOpacity="0.35"
-        />
-
-        {/* ── Left lower wing — smaller, swept back ── */}
-        <path
-          d="M 24,16 C 19,21 11,25 13,29 C 15,31 22,28 24,16 Z"
-          fill="#EDEFF6"
-          fillOpacity="0.60"
+          fillOpacity="0.38"
         />
 
-        {/* ── Right upper wing — mirror ── */}
+        {/* ── Upper-right wing — primary fill ── */}
         <path
-          d="M 24,16 C 26,8 38,3 43,12 C 45,18 36,22 24,16 Z"
+          d="M 28,20 C 31,11 42,4 49,11 C 52,17 45,23 28,20 Z"
           fill="#EDEFF6"
-          fillOpacity="0.85"
+          fillOpacity="0.88"
         />
-        {/* inner highlight */}
+        {/* depth layer */}
         <path
-          d="M 24,16 C 26,10 35,8 38,14 C 39,18 33,20 24,16 Z"
+          d="M 28,20 C 31,13 39,9 43,15 C 45,19 40,22 28,20 Z"
           fill="#EDEFF6"
-          fillOpacity="0.35"
+          fillOpacity="0.38"
         />
 
-        {/* ── Right lower wing — mirror ── */}
+        {/* ── Lower-left wing — smaller, swept back ── */}
         <path
-          d="M 24,16 C 29,21 37,25 35,29 C 33,31 26,28 24,16 Z"
+          d="M 28,20 C 22,25 13,29 15,34 C 17,37 25,34 28,20 Z"
           fill="#EDEFF6"
-          fillOpacity="0.60"
+          fillOpacity="0.62"
+        />
+
+        {/* ── Lower-right wing — mirror ── */}
+        <path
+          d="M 28,20 C 34,25 43,29 41,34 C 39,37 31,34 28,20 Z"
+          fill="#EDEFF6"
+          fillOpacity="0.62"
         />
 
         {/* ── Nucleus ── */}
-        <circle cx="24" cy="16" r="4"   fill="#7B61FF" fillOpacity="0.18" />
-        <circle cx="24" cy="16" r="2.2" fill="#7B61FF" />
+        <circle cx="28" cy="20" r="4.5" fill="#7B61FF" fillOpacity="0.20" />
+        <circle cx="28" cy="20" r="2.4" fill="#7B61FF" />
       </svg>
 
       <span
@@ -62,7 +68,7 @@ export default function ComposiaLogoHorizontal({
           fontWeight: 500,
           fontSize: "0.9375rem",
           color: "#EDEFF6",
-          letterSpacing: "0.02em",
+          letterSpacing: "0.01em",
         }}
       >
         Composia
