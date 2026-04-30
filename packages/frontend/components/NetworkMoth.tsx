@@ -1,6 +1,6 @@
 // NetworkMoth — butterfly silhouette as a minimal network graph.
 // Design principle: silhouette first, connections second.
-// viewBox 400×280, centre (200, 136).
+// viewBox 400×280, centre (200, 136). Apex y=70, lower tips y=224.
 
 interface Props {
   color?:    string
@@ -15,38 +15,38 @@ const C = { x: 200, y: 136 };   // nucleus
 
 const NODES = [
   // Left upper wing — fan arc from inner-lower → inner-upper
-  { x: 172, y: 112, r: 2.6, o: 0.82 },  // 0  inner shoulder
-  { x: 144, y:  90, r: 2.2, o: 0.64 },  // 1  upper mid
-  { x: 112, y:  78, r: 2.0, o: 0.54 },  // 2  apex (highest point)
-  { x:  82, y:  88, r: 1.8, o: 0.44 },  // 3  outer upper
-  { x:  62, y: 116, r: 1.8, o: 0.38 },  // 4  outer mid — widest point
+  { x: 172, y: 110, r: 2.6, o: 0.82 },  // 0  inner shoulder
+  { x: 144, y:  85, r: 2.2, o: 0.64 },  // 1  upper mid
+  { x: 112, y:  70, r: 2.0, o: 0.54 },  // 2  apex (highest point)
+  { x:  82, y:  80, r: 1.8, o: 0.44 },  // 3  outer upper
+  { x:  62, y: 112, r: 1.8, o: 0.38 },  // 4  outer mid — widest point
   { x:  70, y: 148, r: 1.8, o: 0.40 },  // 5  outer lower
-  { x: 102, y: 164, r: 2.0, o: 0.54 },  // 6  lower mid
-  { x: 148, y: 158, r: 2.4, o: 0.72 },  // 7  inner lower
+  { x: 102, y: 166, r: 2.0, o: 0.54 },  // 6  lower mid
+  { x: 148, y: 160, r: 2.4, o: 0.72 },  // 7  inner lower
 
   // Right upper wing — exact mirror (x → 400 − x)
-  { x: 228, y: 112, r: 2.6, o: 0.82 },  // 8  inner shoulder
-  { x: 256, y:  90, r: 2.2, o: 0.64 },  // 9
-  { x: 288, y:  78, r: 2.0, o: 0.54 },  // 10 apex
-  { x: 318, y:  88, r: 1.8, o: 0.44 },  // 11 outer upper
-  { x: 338, y: 116, r: 1.8, o: 0.38 },  // 12 outer mid
+  { x: 228, y: 110, r: 2.6, o: 0.82 },  // 8  inner shoulder
+  { x: 256, y:  85, r: 2.2, o: 0.64 },  // 9
+  { x: 288, y:  70, r: 2.0, o: 0.54 },  // 10 apex
+  { x: 318, y:  80, r: 1.8, o: 0.44 },  // 11 outer upper
+  { x: 338, y: 112, r: 1.8, o: 0.38 },  // 12 outer mid
   { x: 330, y: 148, r: 1.8, o: 0.40 },  // 13 outer lower
-  { x: 298, y: 164, r: 2.0, o: 0.54 },  // 14 lower mid
-  { x: 252, y: 158, r: 2.4, o: 0.72 },  // 15 inner lower
+  { x: 298, y: 166, r: 2.0, o: 0.54 },  // 14 lower mid
+  { x: 252, y: 160, r: 2.4, o: 0.72 },  // 15 inner lower
 
   // Left lower wing
-  { x: 182, y: 162, r: 2.0, o: 0.62 },  // 16 root
-  { x: 162, y: 182, r: 1.8, o: 0.50 },  // 17
-  { x: 156, y: 204, r: 1.6, o: 0.38 },  // 18
-  { x: 170, y: 218, r: 1.5, o: 0.30 },  // 19 tip
-  { x: 186, y: 212, r: 1.7, o: 0.42 },  // 20
+  { x: 182, y: 164, r: 2.0, o: 0.62 },  // 16 root
+  { x: 162, y: 186, r: 1.8, o: 0.50 },  // 17
+  { x: 156, y: 208, r: 1.6, o: 0.38 },  // 18
+  { x: 170, y: 224, r: 1.5, o: 0.30 },  // 19 tip
+  { x: 186, y: 218, r: 1.7, o: 0.42 },  // 20
 
   // Right lower wing — exact mirror
-  { x: 218, y: 162, r: 2.0, o: 0.62 },  // 21 root
-  { x: 238, y: 182, r: 1.8, o: 0.50 },  // 22
-  { x: 244, y: 204, r: 1.6, o: 0.38 },  // 23
-  { x: 230, y: 218, r: 1.5, o: 0.30 },  // 24 tip
-  { x: 214, y: 212, r: 1.7, o: 0.42 },  // 25
+  { x: 218, y: 164, r: 2.0, o: 0.62 },  // 21 root
+  { x: 238, y: 186, r: 1.8, o: 0.50 },  // 22
+  { x: 244, y: 208, r: 1.6, o: 0.38 },  // 23
+  { x: 230, y: 224, r: 1.5, o: 0.30 },  // 24 tip
+  { x: 214, y: 218, r: 1.7, o: 0.42 },  // 25
 ];
 
 // ── Edges — [i, j, weight] ────────────────────────────────────────────────────
