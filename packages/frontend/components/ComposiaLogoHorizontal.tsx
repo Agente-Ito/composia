@@ -8,7 +8,7 @@ export default function ComposiaLogoHorizontal({
       <svg
         viewBox="0 0 48 32"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-8 h-6"
+        className="w-9 h-7"
       >
         <path
           d="M24 16 C20 6, 8 6, 6 14 C10 14, 14 18, 18 20 C14 20, 10 24, 8 28 C14 26, 20 22, 24 16 Z"
@@ -34,7 +34,7 @@ export default function ComposiaLogoHorizontal({
         <circle cx="24" cy="16" r="4" fill="#7B61FF" fillOpacity="0.15" />
       </svg>
 
-      <span className="font-sora text-sm font-medium tracking-wide text-white">
+      <span className="font-sora text-base font-medium tracking-wide text-white">
         Composia
       </span>
     </div>
