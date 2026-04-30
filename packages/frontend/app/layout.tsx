@@ -35,17 +35,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           {/* Brand */}
           <a href="/" className="flex items-center gap-2">
-            <svg width="40" height="24" viewBox="0 0 40 24" fill="none">
-              <g opacity="0.95">
-                <ellipse cx="12" cy="10" rx="6" ry="4" fill="#EDEFF6" opacity="0.9"/>
-                <ellipse cx="14" cy="6" rx="4" ry="3" fill="#EDEFF6" opacity="0.6"/>
-                <ellipse cx="13" cy="14" rx="3.5" ry="2.5" fill="#EDEFF6" opacity="0.5"/>
-
-                <ellipse cx="28" cy="10" rx="6" ry="4" fill="#EDEFF6" opacity="0.9"/>
-                <ellipse cx="26" cy="6" rx="4" ry="3" fill="#EDEFF6" opacity="0.6"/>
-                <ellipse cx="27" cy="14" rx="3.5" ry="2.5" fill="#EDEFF6" opacity="0.5"/>
-
-                <ellipse cx="20" cy="11" rx="1.5" ry="3" fill="#7B61FF" opacity="0.8"/>
+            <svg width="42" height="24" viewBox="0 0 42 24" fill="none">
+              <g>
+                <path d="M20 12C16 6 10 4 6 6C4 7 4 10 6 11C10 13 14 13 20 12Z" fill="#EDEFF6" fillOpacity="0.85"/>
+                <path d="M20 12C17 5 12 2.5 9 3.5C7 4.5 7.5 7 9.5 8C13 9.5 16 10 20 12Z" fill="#EDEFF6" fillOpacity="0.5"/>
+                <path d="M22 12C26 6 32 4 36 6C38 7 38 10 36 11C32 13 28 13 22 12Z" fill="#EDEFF6" fillOpacity="0.85"/>
+                <path d="M22 12C25 5 30 2.5 33 3.5C35 4.5 34.5 7 32.5 8C29 9.5 26 10 22 12Z" fill="#EDEFF6" fillOpacity="0.5"/>
+                <ellipse cx="21" cy="12" rx="1.2" ry="2.8" fill="#7B61FF" fillOpacity="0.9"/>
               </g>
             </svg>
             <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 500, fontSize: "0.9375rem", color: "#EDEFF6" }}>
