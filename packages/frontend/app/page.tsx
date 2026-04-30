@@ -1,7 +1,7 @@
 import Link from "next/link";
 import MothLogo from "@/components/MothLogo";
 
-const PURPLE = "#8B83F5";
+const PURPLE = "#7B61FF";
 
 const PILLARS = [
   { label: "GENSYN",    desc: "Verified compute. Every score is a proof.",      variant: "gensyn"  as const },
@@ -12,14 +12,14 @@ const PILLARS = [
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen flex flex-col" style={{ background: "#07080E" }}>
+    <div className="relative min-h-screen flex flex-col" style={{ background: "#0A0A0F" }}>
 
       {/* Background — subtle purple bloom */}
       <div
         className="pointer-events-none fixed inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(98,88,232,0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(123,97,255,0.07) 0%, transparent 70%)",
         }}
       />
 
@@ -55,7 +55,7 @@ export default function Home() {
               className="font-sora text-5xl md:text-6xl font-bold tracking-tight"
               style={{ lineHeight: 1.1 }}
             >
-              <span style={{ color: "#DCE0EF" }}>
+              <span style={{ color: "#EDEFF6" }}>
                 Composable reputation layer
               </span>
               <br />
@@ -64,7 +64,7 @@ export default function Home() {
 
             <p
               className="text-base max-w-xl mx-auto leading-relaxed"
-              style={{ color: "rgba(220,224,239,0.36)" }}
+              style={{ color: "rgba(237,239,246,0.36)" }}
             >
               Observe the network. Every score is verified on-chain.
               Every profile is portable. You are a spectator.
@@ -77,8 +77,8 @@ export default function Home() {
               href="/grid"
               className="inline-flex items-center gap-2 font-mono text-sm px-8 py-3.5 rounded-xl transition-all hover:opacity-90"
               style={{
-                background: "rgba(98,88,232,0.10)",
-                border: "1px solid rgba(139,131,245,0.28)",
+                background: "rgba(123,97,255,0.10)",
+                border: "1px solid rgba(167,139,250,0.28)",
                 color: PURPLE,
               }}
             >
@@ -105,7 +105,7 @@ export default function Home() {
             <div
               key={p.label}
               className="flex flex-col items-center text-center p-5 rounded-xl space-y-3"
-              style={{ background: "#0D0F18", border: "1px solid #1A1C2B" }}
+              style={{ background: "#11121A", border: "1px solid #1A1C23" }}
             >
               <MothLogo
                 size={64}

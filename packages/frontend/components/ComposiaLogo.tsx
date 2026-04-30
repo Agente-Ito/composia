@@ -4,22 +4,22 @@
 // the nucleus is the identity core; antennae are signal receivers.
 //
 // Color tiers:
-//   #DCE0EF white  — most nodes (light-catching surface)
-//   #B8AEF0 violet — active structural anchors
-//   #8AB0D8 blue   — depth nodes (trailing edges, shadow zones)
+//   #EDEFF6 white  — most nodes (light-catching surface)  [ds-text]
+//   #A78BFA violet — active structural anchors            [ds-secondary]
+//   #8AB0D8 blue   — depth nodes (trailing edges)
 //   #D48878 red    — signal nodes (rare — lower outer tips only)
-//   #6258E8 core   — nucleus (identity)
+//   #7B61FF core   — nucleus (identity)                   [ds-primary]
 //
 // Server Component — zero React hooks
 
 type Pt = readonly [number, number];
 
 const COL = {
-  white:  '#DCE0EF',
-  violet: '#B8AEF0',
-  blue:   '#8AB0D8',
-  red:    '#D48878',
-  core:   '#6258E8',
+  white:  '#EDEFF6',   // ds-text
+  violet: '#A78BFA',   // ds-secondary
+  blue:   '#8AB0D8',   // depth nodes — keep distinct
+  red:    '#D48878',   // signal nodes — keep distinct
+  core:   '#7B61FF',   // ds-primary
 } as const;
 type NodeColor = keyof typeof COL;
 
