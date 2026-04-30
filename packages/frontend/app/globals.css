@@ -8,16 +8,19 @@
   --cyan: #00D4FF;
   --green: #00FF88;
   --amber: #FFC033;
+  /* ds tokens */
+  --ds-bg:      #07080E;
+  --ds-surface: #0D0F18;
+  --ds-primary: #6258E8;
 }
 
 html {
-  background: #000000;
+  background: #07080E;
 }
 
 body {
   color: var(--foreground);
   background: #000000;
-  /* Very subtle central radial hint — keeps it from feeling flat */
   background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(0,212,255,0.04) 0%, transparent 70%);
   background-attachment: fixed;
 }

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import MothLogo from "@/components/MothLogo";
 
+const PURPLE = "#8B83F5";
+
 const PILLARS = [
   { label: "GENSYN",    desc: "Verified compute. Every score is a proof.",      variant: "gensyn"  as const },
   { label: "KEEPERHUB", desc: "Autonomous workflows. No human required.",        variant: "keeper"  as const },
@@ -10,74 +12,90 @@ const PILLARS = [
 
 export default function Home() {
   return (
-    <div
-      className="relative min-h-screen flex flex-col"
-      style={{ background: "#000000" }}
-    >
-      {/* Background radial */}
+    <div className="relative min-h-screen flex flex-col" style={{ background: "#07080E" }}>
+
+      {/* Background — subtle purple bloom */}
       <div
         className="pointer-events-none fixed inset-0"
         style={{
-          background: "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(0,212,255,0.04) 0%, transparent 70%)",
+          background:
+            "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(98,88,232,0.07) 0%, transparent 70%)",
         }}
       />
 
       {/* Hero */}
-      <section className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-24 text-center space-y-10">
+      <section className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-24 text-center">
 
-        {/* Moth */}
-        <div className="tile-float" style={{ animationDuration: "8s" }}>
-          <MothLogo size={280} variant="core" animated />
-        </div>
-
-        {/* Title */}
-        <div className="space-y-4">
+        {/* Moth — absolute, centered, slightly above text */}
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          aria-hidden="true"
+        >
           <div
-            className="text-[10px] font-mono tracking-[0.3em] uppercase"
-            style={{ color: "#4a6670" }}
+            className="tile-float"
+            style={{ animationDuration: "8s", opacity: 0.38, transform: "translateY(-32px)" }}
           >
-            Gensyn × Lukso × Hyperlane
+            <MothLogo size={400} variant="core" animated glowColor={PURPLE} />
           </div>
-          <h1
-            className="font-sora text-5xl md:text-6xl font-bold tracking-tight"
-            style={{ color: "#c8e6ea", lineHeight: 1.1 }}
-          >
-            Autonomous agents.
-            <br />
-            <span className="glow-cyan" style={{ color: "#00D4FF" }}>
-              Composable reputation.
-            </span>
-          </h1>
-          <p
-            className="text-base max-w-xl mx-auto leading-relaxed"
-            style={{ color: "rgba(200,230,234,0.45)" }}
-          >
-            Observe the network. Every score is verified on-chain.
-            Every profile is portable. You are a spectator.
-          </p>
         </div>
 
-        {/* CTA */}
-        <Link
-          href="/grid"
-          className="inline-flex items-center gap-2 font-mono text-sm px-8 py-3.5 rounded-xl transition-all"
-          style={{
-            background: "rgba(0,212,255,0.07)",
-            border: "1px solid rgba(0,212,255,0.25)",
-            color: "#00D4FF",
-          }}
-        >
-          Enter Score Grid
-          <span style={{ opacity: 0.6 }}>→</span>
-        </Link>
+        {/* Content — sits above moth in z-order */}
+        <div className="relative z-10 flex flex-col items-center space-y-8">
 
-        <Link
-          href="/demo"
-          className="text-xs font-mono transition-colors"
-          style={{ color: "#4a6670" }}
-        >
-          Simulate an agent event ↗
-        </Link>
+          {/* Text */}
+          <div className="space-y-4">
+            <div
+              className="text-[10px] font-mono tracking-[0.3em] uppercase"
+              style={{ color: "#4A4E62" }}
+            >
+              Gensyn × Lukso × Hyperlane
+            </div>
+
+            <h1
+              className="font-sora text-5xl md:text-6xl font-bold tracking-tight"
+              style={{ lineHeight: 1.1 }}
+            >
+              <span style={{ color: "#DCE0EF" }}>
+                Composable reputation layer
+              </span>
+              <br />
+              <span style={{ color: "#4A4E62" }}>for agents</span>
+            </h1>
+
+            <p
+              className="text-base max-w-xl mx-auto leading-relaxed"
+              style={{ color: "rgba(220,224,239,0.36)" }}
+            >
+              Observe the network. Every score is verified on-chain.
+              Every profile is portable. You are a spectator.
+            </p>
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col items-center gap-3">
+            <Link
+              href="/grid"
+              className="inline-flex items-center gap-2 font-mono text-sm px-8 py-3.5 rounded-xl transition-all hover:opacity-90"
+              style={{
+                background: "rgba(98,88,232,0.10)",
+                border: "1px solid rgba(139,131,245,0.28)",
+                color: PURPLE,
+              }}
+            >
+              Enter Score Grid
+              <span style={{ opacity: 0.55 }}>→</span>
+            </Link>
+
+            <Link
+              href="/demo"
+              className="text-xs font-mono transition-opacity hover:opacity-80"
+              style={{ color: "#4A4E62" }}
+            >
+              Simulate an agent event ↗
+            </Link>
+          </div>
+
+        </div>
       </section>
 
       {/* Protocol pillars */}
@@ -87,18 +105,24 @@ export default function Home() {
             <div
               key={p.label}
               className="flex flex-col items-center text-center p-5 rounded-xl space-y-3"
-              style={{ background: "#050508", border: "1px solid #0d1a24" }}
+              style={{ background: "#0D0F18", border: "1px solid #1A1C2B" }}
             >
-              <MothLogo size={64} variant={p.variant} animated animDelay={`${i * 0.8}s`} />
+              <MothLogo
+                size={64}
+                variant={p.variant}
+                animated
+                animDelay={`${i * 0.8}s`}
+                glowColor={PURPLE}
+              />
               <div
                 className="text-[10px] font-mono font-bold tracking-widest"
-                style={{ color: "#00D4FF" }}
+                style={{ color: PURPLE }}
               >
                 {p.label}
               </div>
               <div
                 className="text-[11px] leading-relaxed"
-                style={{ color: "rgba(74,102,112,0.8)" }}
+                style={{ color: "#4A4E62" }}
               >
                 {p.desc}
               </div>
@@ -106,6 +130,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+
     </div>
   );
 }

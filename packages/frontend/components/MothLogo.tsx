@@ -85,10 +85,10 @@ const LUKSO_ANCHOR_NODES = [
 
 // ── Colour per score ──────────────────────────────────────────────────────────
 export function scoreColor(score: number): string {
-  if (score >= 90) return "#00FF88";
-  if (score >= 75) return "#00D4FF";
-  if (score >= 60) return "#FFC033";
-  return "#FF4060";
+  if (score >= 90) return "#9B8FF5";   // violet — top tier
+  if (score >= 75) return "#7B6EE8";   // purple — strong
+  if (score >= 60) return "#FFC033";   // amber — caution
+  return "#FF4060";                    // red — low
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ export default function MothLogo({
   animated = true,
   className = "",
 }: Props) {
-  const color = glowColor ?? (score !== null ? scoreColor(score) : "#00D4FF");
+  const color = glowColor ?? (score !== null ? scoreColor(score) : "#8B83F5");
   const wingOpacity = 0.22;
   const strokeWidth = 0.6;
 

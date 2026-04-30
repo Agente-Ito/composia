@@ -8,6 +8,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        ds: {
+          bg:        "#07080E",   // deep dark, cool-tinted
+          surface:   "#0D0F18",   // card backgrounds
+          elev:      "#121421",   // elevated / nested surfaces
+          line:      "#1A1C2B",   // borders
+          text:      "#DCE0EF",   // primary text
+          muted:     "#656880",   // secondary text
+          primary:   "#6258E8",   // accent — interactions & state only
+          secondary: "#8B83F5",   // lighter accent
+        },
         composia: {
           cyan:     "#00D4FF",   // glow principal
           electric: "#0099CC",   // secondary / links
