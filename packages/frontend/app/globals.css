@@ -21,10 +21,15 @@ html {
 }
 
 body {
+  font-family: 'Sora', sans-serif;
   color: var(--ds-text);
   background: var(--ds-bg);
   background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(123,97,255,0.05) 0%, transparent 70%);
   background-attachment: fixed;
+}
+
+h1, h2, h3 {
+  font-family: 'Space Grotesk', sans-serif;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */

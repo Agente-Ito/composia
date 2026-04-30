@@ -41,7 +41,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sora: ["var(--font-sora)", "sans-serif"],
+        sora:    ["Space Grotesk", "sans-serif"],
+        grotesk: ["Space Grotesk", "sans-serif"],
+        body:    ["Sora", "sans-serif"],
       },
       animation: {
         "moth-pulse":  "moth-pulse 3s ease-in-out infinite",
