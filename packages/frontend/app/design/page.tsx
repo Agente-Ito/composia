@@ -140,10 +140,18 @@ export default function DesignPage() {
           <div className="flex items-center gap-10 border-t border-ds-line pt-8">
             {STATS.map((s) => (
               <div key={s.label}>
-                <p className="font-sora text-2xl font-semibold text-ds-text tabular-nums">
+                <p
+                  className="font-sora text-3xl font-bold tabular-nums"
+                  style={{
+                    background: "linear-gradient(135deg, #EDEFF6 40%, #A78BFA 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    filter: "drop-shadow(0 0 8px rgba(123,97,255,0.30))",
+                  }}
+                >
                   {s.value}
                 </p>
-                <p className="text-[11px] text-ds-muted mt-0.5">{s.label}</p>
+                <p className="text-[11px] text-white/65 mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
