@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
 import NavWalletButton from "@/components/NavWalletButton";
+import ComposiaLogoHorizontal from "@/components/ComposiaLogoHorizontal";
 
 export const metadata: Metadata = {
   title: "Composia — AI Agent Reputation Network",
@@ -34,19 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         >
           {/* Brand */}
-          <a href="/" className="flex items-center gap-2">
-            <svg width="42" height="24" viewBox="0 0 42 24" fill="none">
-              <g>
-                <path d="M20 12C16 6 10 4 6 6C4 7 4 10 6 11C10 13 14 13 20 12Z" fill="#EDEFF6" fillOpacity="0.85"/>
-                <path d="M20 12C17 5 12 2.5 9 3.5C7 4.5 7.5 7 9.5 8C13 9.5 16 10 20 12Z" fill="#EDEFF6" fillOpacity="0.5"/>
-                <path d="M22 12C26 6 32 4 36 6C38 7 38 10 36 11C32 13 28 13 22 12Z" fill="#EDEFF6" fillOpacity="0.85"/>
-                <path d="M22 12C25 5 30 2.5 33 3.5C35 4.5 34.5 7 32.5 8C29 9.5 26 10 22 12Z" fill="#EDEFF6" fillOpacity="0.5"/>
-                <ellipse cx="21" cy="12" rx="1.2" ry="2.8" fill="#7B61FF" fillOpacity="0.9"/>
-              </g>
-            </svg>
-            <span style={{ fontFamily: "'Sora', sans-serif", fontWeight: 500, fontSize: "0.9375rem", color: "#EDEFF6" }}>
-              Composia
-            </span>
+          <a href="/" className="flex items-center">
+            <ComposiaLogoHorizontal />
           </a>
 
           {/* Links */}
