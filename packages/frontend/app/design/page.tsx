@@ -97,34 +97,13 @@ export default function DesignPage() {
 
           {/* headline */}
           <div className="space-y-5">
-            <h1 className="font-sora text-6xl md:text-7xl font-semibold leading-[1.05] tracking-[-0.02em]">
-              <span className="block">Composable</span>
-              <span className="block">
-                reputation{" "}
-                <span className="relative inline-block">
-                  {/* radial glow backdrop */}
-                  <span
-                    className="absolute blur-xl pointer-events-none"
-                    style={{
-                      inset: "-8px -16px",
-                      background: "rgba(123,97,255,0.25)",
-                      borderRadius: "50%",
-                    }}
-                    aria-hidden="true"
-                  />
-                  {/* text sits above glow */}
-                  <span
-                    className="relative text-ds-primary"
-                    style={{
-                      textShadow:
-                        "0 0 16px rgba(123,97,255,0.95), 0 0 40px rgba(123,97,255,0.65), 0 0 80px rgba(123,97,255,0.25)",
-                    }}
-                  >layer</span>
-                </span>
-              </span>
-              <span className="block text-white/85 font-medium tracking-tight">for agents.</span>
+            <h1 className="font-sora text-[46px] font-semibold leading-[1.07] tracking-tight">
+              Composable<br />reputation<br />
+              <span className="text-ds-primary">layer</span>
+              <br />
+              <span className="text-ds-text/40">for agents.</span>
             </h1>
-            <p className="max-w-[340px] text-[15px] leading-relaxed text-ds-muted/90">
+            <p className="max-w-[340px] text-[15px] leading-relaxed text-ds-muted">
               Composia turns verifiable behavior into portable identity —
               reputation that moves with agents across every network.
             </p>
