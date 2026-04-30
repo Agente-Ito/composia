@@ -8,33 +8,63 @@ export default function ComposiaLogoHorizontal({
       <svg
         viewBox="0 0 48 32"
         xmlns="http://www.w3.org/2000/svg"
-        className="w-9 h-7"
+        className="w-9 h-6"
+        aria-hidden="true"
       >
+        {/* ── Left upper wing — large, rounded lobe ── */}
         <path
-          d="M24 16 C20 6, 8 6, 6 14 C10 14, 14 18, 18 20 C14 20, 10 24, 8 28 C14 26, 20 22, 24 16 Z"
+          d="M 24,16 C 22,8 10,3 5,12 C 3,18 12,22 24,16 Z"
           fill="#EDEFF6"
           fillOpacity="0.85"
         />
+        {/* inner highlight — softer depth layer */}
         <path
-          d="M24 16 C20 10, 10 10, 8 16 C12 16, 16 18, 20 19"
+          d="M 24,16 C 22,10 13,8 10,14 C 9,18 15,20 24,16 Z"
           fill="#EDEFF6"
-          fillOpacity="0.4"
+          fillOpacity="0.35"
         />
+
+        {/* ── Left lower wing — smaller, swept back ── */}
         <path
-          d="M24 16 C28 6, 40 6, 42 14 C38 14, 34 18, 30 20 C34 20, 38 24, 40 28 C34 26, 28 22, 24 16 Z"
+          d="M 24,16 C 19,21 11,25 13,29 C 15,31 22,28 24,16 Z"
+          fill="#EDEFF6"
+          fillOpacity="0.60"
+        />
+
+        {/* ── Right upper wing — mirror ── */}
+        <path
+          d="M 24,16 C 26,8 38,3 43,12 C 45,18 36,22 24,16 Z"
           fill="#EDEFF6"
           fillOpacity="0.85"
         />
+        {/* inner highlight */}
         <path
-          d="M24 16 C28 10, 38 10, 40 16 C36 16, 32 18, 28 19"
+          d="M 24,16 C 26,10 35,8 38,14 C 39,18 33,20 24,16 Z"
           fill="#EDEFF6"
-          fillOpacity="0.4"
+          fillOpacity="0.35"
         />
+
+        {/* ── Right lower wing — mirror ── */}
+        <path
+          d="M 24,16 C 29,21 37,25 35,29 C 33,31 26,28 24,16 Z"
+          fill="#EDEFF6"
+          fillOpacity="0.60"
+        />
+
+        {/* ── Nucleus ── */}
+        <circle cx="24" cy="16" r="4"   fill="#7B61FF" fillOpacity="0.18" />
         <circle cx="24" cy="16" r="2.2" fill="#7B61FF" />
-        <circle cx="24" cy="16" r="4" fill="#7B61FF" fillOpacity="0.15" />
       </svg>
 
-      <span className="font-sora text-base font-medium tracking-wide text-white">
+      <span
+        style={{
+          fontFamily: "'Sora', sans-serif",
+          fontWeight: 500,
+          fontSize: "0.9375rem",
+          color: "#EDEFF6",
+          letterSpacing: "0.02em",
+        }}
+      >
         Composia
       </span>
     </div>
