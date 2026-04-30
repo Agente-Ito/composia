@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
 import NavWalletButton from "@/components/NavWalletButton";
+import ComposiaLogoHorizontal from "@/components/ComposiaLogoHorizontal";
 
 export const metadata: Metadata = {
   title: "Composia — AI Agent Reputation Network",
@@ -22,8 +23,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body
         className="min-h-screen antialiased"
-        style={{ background: "#0A0A0F", color: "#EDEFF6" }}
-      >
+        
+    >
         <WalletProvider>
         <nav
           className="flex items-center justify-between px-6 py-3.5 sticky top-0 z-50"
@@ -34,37 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         >
           {/* Brand */}
-          <a href="/" className="flex items-center gap-2.5">
-            {/* Composia horizontal mark — geometric butterfly, brand Reference B */}
-            <svg viewBox="0 0 38 24" width="38" height="24" aria-hidden="true">
-              <defs>
-                <filter id="nav-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="1.2" result="b" />
-                  <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-                </filter>
-              </defs>
-              {/* Upper-left wing — angular, two-panel */}
-              <polygon points="19,12 15,5 4,8 10,14"  fill="#EDEFF6" fillOpacity="0.82" />
-              <polygon points="19,12 13,3 4,6 15,5"   fill="#EDEFF6" fillOpacity="0.40" />
-              {/* Upper-right wing — mirrored */}
-              <polygon points="19,12 23,5 34,8 28,14"  fill="#EDEFF6" fillOpacity="0.82" />
-              <polygon points="19,12 25,3 34,6 23,5"   fill="#EDEFF6" fillOpacity="0.40" />
-              {/* Lower-left wing */}
-              <polygon points="19,12 12,16 7,22 16,17" fill="#EDEFF6" fillOpacity="0.52" />
-              {/* Lower-right wing */}
-              <polygon points="19,12 26,16 31,22 22,17" fill="#EDEFF6" fillOpacity="0.52" />
-              {/* Wing-edge accent lines */}
-              <line x1="19" y1="12" x2="4"  y2="8"  stroke="#B8AEF0" strokeWidth="0.5" strokeOpacity="0.5" />
-              <line x1="19" y1="12" x2="34" y2="8"  stroke="#B8AEF0" strokeWidth="0.5" strokeOpacity="0.5" />
-              <line x1="19" y1="12" x2="7"  y2="22" stroke="#B8AEF0" strokeWidth="0.4" strokeOpacity="0.35" />
-              <line x1="19" y1="12" x2="31" y2="22" stroke="#B8AEF0" strokeWidth="0.4" strokeOpacity="0.35" />
-              {/* Nucleus */}
-              <circle cx="19" cy="12" r="3.2" fill="#7B61FF" fillOpacity="0.18" filter="url(#nav-glow)" />
-              <circle cx="19" cy="12" r="2"   fill="#7B61FF" />
-            </svg>
-            <span className="font-sora text-sm font-semibold tracking-wide" style={{ color: "#EDEFF6" }}>
-              Composia
-            </span>
+          <a href="/" className="flex items-center">
+            <ComposiaLogoHorizontal />
           </a>
 
           {/* Links */}
