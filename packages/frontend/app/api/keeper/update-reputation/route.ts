@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ethers } from "ethers";
 import { keeperLog } from "@/lib/keeper-log";
+import { nsUpdateTexts } from "@/lib/namespace";
 
 // ── ABIs ──────────────────────────────────────────────────────────────────────
 const REPUTATION_STATE_ABI = [
@@ -68,7 +69,10 @@ export async function POST(req: NextRequest) {
       followerCount = Number(status.followerCount);
     } catch { /* agent not yet registered — syncFollowerCount(0) is safe */ }
 
-    // Parallel: updateVerificationStatus + syncFollowerCount
+    // L1: gasless text record update via Namespace (fire-and-forget)
+    nsUpdateTexts(agent, accuracy, verifications).catch(() => {});
+
+    // L2: on-chain ReputationState update (parallel)
     const repTxs = await Promise.all([
       repState.updateVerificationStatus(ensNode, repBps, verified),
       repState.syncFollowerCount(ensNode, followerCount),

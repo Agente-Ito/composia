@@ -1,11 +1,12 @@
 import { ethers } from "ethers";
+import {
+  autoLabel,
+  ensNameFor,
+  createAgentSubname,
+  updateAgentMetadata,
+} from "./namespace-client";
 
-// ─── ABIs ──────────────────────────────────────────────────────────────────────
-
-const REGISTRAR_ABI = [
-  "function registerSubdomain(string calldata label, address agentEoa, string[] calldata keys, string[] calldata values) external returns (bytes32)",
-  "function updateTextRecords(bytes32 node, string[] calldata keys, string[] calldata values) external",
-];
+// ─── ABI ───────────────────────────────────────────────────────────────────────
 
 const REPUTATION_STATE_ABI = [
   "function registerAgent(address agent, address upAddress, bytes32 ensNode, string calldata label) external",
@@ -40,20 +41,12 @@ export interface ENSRegistrationResult {
   ensName: string;
   ensNode: string;
   label: string;
-  subdomain: string | null;
+  /** Namespace subname label if creation succeeded, null otherwise */
+  namespace: string | null;
   repState: string | null;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
-
-/** Label = first 8 hex chars of EOA (without 0x), matches ENSNameManager._autoLabel() */
-function autoLabel(agentEoa: string): string {
-  return agentEoa.slice(2, 10).toLowerCase();
-}
-
-function ensNameFor(label: string): string {
-  return `${label}.composia.eth`;
-}
 
 /** accuracy (0-100) → basis points (0-10000) */
 function toBasisPoints(accuracy: number): number {
@@ -67,115 +60,57 @@ function getSignerOrNull(): ethers.Wallet | null {
   return new ethers.Wallet(pk, new ethers.JsonRpcProvider(rpc));
 }
 
-// ─── Layer 1: ENS subdomain creation ──────────────────────────────────────────
+// ─── Layer 1: Namespace subname creation (gasless) ────────────────────────────
 
 /**
- * Registers {hex8}.composia.eth on Sepolia with static text records (Layer 1)
- * and then seeds ReputationState with the agent + reactive state (Layer 2).
+ * Registers {hex8}.composia.eth via Namespace SDK (Layer 1, gasless)
+ * and seeds ReputationState on-chain (Layer 2, one-time gas).
  * Returns null silently if env vars are missing — never blocks Lukso UP creation.
  */
 export async function registerENSSubdomain(
   params: ENSRegistrationParams
 ): Promise<ENSRegistrationResult | null> {
-  const signer        = getSignerOrNull();
-  const registrarAddr = process.env.ENS_REGISTRAR_ADDRESS;
-  if (!signer || !registrarAddr) {
-    console.log("[ens-registrar] Not configured — skipping (need ETHEREUM_SEPOLIA_RPC, DEPLOYER_PRIVATE_KEY, ENS_REGISTRAR_ADDRESS)");
-    return null;
-  }
-
   const label   = autoLabel(params.agentEoa);
   const ensName = ensNameFor(label);
   const ensNode = ethers.namehash(ensName);
 
-  // Layer 1: static text records (historical baseline)
-  const frontendUrl = process.env.COMPOSIA_FRONTEND_URL || "https://composia.app";
-  const keys = [
-    "gensyn:peerId",
-    "gensyn:accuracy",
-    "gensyn:verifications",
-    "gensyn:up_address",
-    "gensyn:followers",
-    "gensyn:verified_since", // timestamp of first verification — historical anchor
-    "url",
-    // ERC-8004 / ENSIP-5 standard records for discoverable agent identity
-    "name",
-    "description",
-    "erc8004:agentURI",
-  ];
-  const values = [
-    params.peerId,
-    String(params.accuracy),
-    String(params.verifications),
-    params.upAddress,
-    String(params.followers),
-    String(Math.floor(Date.now() / 1000)),
-    `${frontendUrl}/agent/${params.agentEoa}`,
-    // ERC-8004 values
-    `Composia Agent ${label}`,
-    `Gensyn ML agent. Accuracy: ${params.accuracy}%, Verifications: ${params.verifications}`,
-    `${frontendUrl}/api/agent/${params.agentEoa}/erc8004`,
-  ];
+  // Layer 1: create offchain subname via Namespace SDK (gasless)
+  const namespaceLabel = await createAgentSubname(params);
 
-  let subdomainHash: string | null = null;
-  let repStateHash:  string | null = null;
+  // Layer 2: seed ReputationState on-chain (once per agent, gas required)
+  const signer = getSignerOrNull();
+  const repStateHash = signer
+    ? await _seedReputationState(signer, params, ensNode, label)
+    : null;
 
-  // Layer 1: register subdomain
-  try {
-    const registrar = new ethers.Contract(registrarAddr, REGISTRAR_ABI, signer);
-    const receipt   = await (await registrar.registerSubdomain(label, params.agentEoa, keys, values)).wait();
-    subdomainHash   = receipt.hash;
-    console.log(`[ens-registrar] L1: ${ensName} → ${receipt.hash}`);
-  } catch (err) {
-    console.error(`[ens-registrar] L1 subdomain failed for ${ensName}:`, err);
-  }
-
-  // Layer 2: seed ReputationState (registerAgent + updateVerificationStatus + syncFollowers)
-  repStateHash = await _seedReputationState(signer, params, ensNode, label);
-
-  if (!subdomainHash && !repStateHash) return null;
-  return { ensName, ensNode, label, subdomain: subdomainHash, repState: repStateHash };
+  if (!namespaceLabel && !repStateHash) return null;
+  return { ensName, ensNode, label, namespace: namespaceLabel, repState: repStateHash };
 }
 
-// ─── Layer 2: ReputationState updates ─────────────────────────────────────────
+// ─── Layer 1 + 2: Reputation update ──────────────────────────────────────────
 
 /**
- * Syncs reputation update to both L1 text records and L2 ReputationState.
- * Called by keeper when an existing agent's reputation changes.
+ * Updates reputation metadata:
+ *   L1 → gasless text record update via Namespace SDK (every event)
+ *   L2 → on-chain ReputationState update via KeeperHub batch (periodic)
  */
 export async function updateENSReputation(
   agentEoa: string,
   accuracy: number,
   verifications: number,
   followers: number
-): Promise<{ l1: string | null; l2: string | null }> {
-  const signer        = getSignerOrNull();
-  const registrarAddr = process.env.ENS_REGISTRAR_ADDRESS;
-  const repStateAddr  = process.env.REPUTATION_STATE_ADDRESS;
-  const result        = { l1: null as string | null, l2: null as string | null };
-  if (!signer) return result;
+): Promise<{ l1: boolean; l2: string | null }> {
+  const result = { l1: false, l2: null as string | null };
 
-  const label   = autoLabel(agentEoa);
-  const ensNode = ethers.namehash(ensNameFor(label));
+  // L1: gasless update via Namespace SDK
+  result.l1 = await updateAgentMetadata(agentEoa, accuracy, verifications, followers);
 
-  // L1 text records
-  if (registrarAddr) {
-    try {
-      const registrar = new ethers.Contract(registrarAddr, REGISTRAR_ABI, signer);
-      const receipt   = await (await registrar.updateTextRecords(
-        ensNode,
-        ["gensyn:accuracy", "gensyn:verifications", "gensyn:followers", "description"],
-        [String(accuracy), String(verifications), String(followers),
-         `Gensyn ML agent. Accuracy: ${accuracy}%, Verifications: ${verifications}`]
-      )).wait();
-      result.l1 = receipt.hash;
-    } catch (err) {
-      console.error("[ens-registrar] L1 text update failed:", err);
-    }
-  }
-
-  // L2 ReputationState
-  if (repStateAddr) {
+  // L2: on-chain ReputationState (batched by KeeperHub — direct call as fallback)
+  const signer       = getSignerOrNull();
+  const repStateAddr = process.env.REPUTATION_STATE_ADDRESS;
+  if (signer && repStateAddr) {
+    const label   = autoLabel(agentEoa);
+    const ensNode = ethers.namehash(ensNameFor(label));
     try {
       const repState = new ethers.Contract(repStateAddr, REPUTATION_STATE_ABI, signer);
       const repBps   = toBasisPoints(accuracy);
@@ -212,7 +147,6 @@ async function _seedReputationState(
   try {
     const repState = new ethers.Contract(repStateAddr, REPUTATION_STATE_ABI, signer);
 
-    // registerAgent + updateVerificationStatus + syncFollowerCount in parallel
     const [regTx, repTx, followerTx] = await Promise.all([
       repState.registerAgent(params.agentEoa, params.upAddress, ensNode, label),
       repState.updateVerificationStatus(ensNode, repBps, verified),
@@ -222,7 +156,7 @@ async function _seedReputationState(
     const [regReceipt] = await Promise.all([regTx.wait(), repTx.wait(), followerTx.wait()]);
 
     console.log(
-      `[ens-registrar] L2 seeded: ${label}.composia.eth node=${ensNode.slice(0,10)}… rep=${repBps}bps verified=${verified}`
+      `[ens-registrar] L2 seeded: ${label}.composia.eth node=${ensNode.slice(0, 10)}… rep=${repBps}bps verified=${verified}`
     );
     return regReceipt.hash;
   } catch (err) {
