@@ -2,7 +2,7 @@ import { ComposiaLogo } from "@/components/ComposiaLogo";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import MothLogo from "@/components/MothLogo";
+import NetworkMoth from "@/components/NetworkMoth";
 
 // ── Static data ──────────────────────────────────────────────────────────────
 
@@ -50,12 +50,12 @@ function AgentSparkline() {
     <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ height: 28 }} preserveAspectRatio="none">
       <defs>
         <linearGradient id="ag-spark" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%"   stopColor="#6258E8" stopOpacity="0.16" />
-          <stop offset="100%" stopColor="#6258E8" stopOpacity="0"    />
+          <stop offset="0%"   stopColor="#7B61FF" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="#7B61FF" stopOpacity="0"    />
         </linearGradient>
       </defs>
       <polygon points={area} fill="url(#ag-spark)" />
-      <polyline points={pts} fill="none" stroke="#6258E8" strokeWidth="1.3"
+      <polyline points={pts} fill="none" stroke="#7B61FF" strokeWidth="1.3"
         strokeLinejoin="round" strokeLinecap="round" />
     </svg>
   );
@@ -78,9 +78,9 @@ export default function DesignPage() {
           >
             <div
               className="tile-float"
-              style={{ opacity: 0.44, animationDuration: "8s", transform: "translateY(-24px)" }}
+              style={{ animationDuration: "8s", transform: "translateY(-20px)" }}
             >
-              <MothLogo size={520} variant="core" animated glowColor="#8B83F5" />
+              <NetworkMoth size={920} opacity={0.72} />
             </div>
           </div>
 
@@ -99,9 +99,9 @@ export default function DesignPage() {
           <div className="space-y-5">
             <h1 className="font-sora text-[46px] font-semibold leading-[1.07] tracking-tight">
               Composable<br />reputation<br />
-              <span style={{ color: "#8B83F5" }}>layer</span>
+              <span className="text-ds-primary">layer</span>
               <br />
-              <span className="text-ds-text/35">for agents.</span>
+              <span className="text-ds-text/40">for agents.</span>
             </h1>
             <p className="max-w-[340px] text-[15px] leading-relaxed text-ds-muted">
               Composia turns verifiable behavior into portable identity —
@@ -119,10 +119,18 @@ export default function DesignPage() {
           <div className="flex items-center gap-10 border-t border-ds-line pt-8">
             {STATS.map((s) => (
               <div key={s.label}>
-                <p className="font-sora text-2xl font-semibold text-ds-text tabular-nums">
+                <p
+                  className="font-sora text-3xl font-bold tabular-nums"
+                  style={{
+                    background: "linear-gradient(135deg, #EDEFF6 40%, #A78BFA 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    filter: "drop-shadow(0 0 8px rgba(123,97,255,0.30))",
+                  }}
+                >
                   {s.value}
                 </p>
-                <p className="text-[11px] text-ds-muted mt-0.5">{s.label}</p>
+                <p className="text-[11px] text-white/65 mt-0.5">{s.label}</p>
               </div>
             ))}
           </div>
@@ -154,7 +162,7 @@ export default function DesignPage() {
                   <span className="font-sora text-[52px] font-bold leading-none text-ds-text tabular-nums">
                     94.2
                   </span>
-                  <span className="text-sm font-medium" style={{ color: "#9B8FF5" }}>↑ 8.3%</span>
+                  <span className="text-sm font-medium text-ds-secondary">↑ 8.3%</span>
                 </div>
               </div>
               <span className="text-xs text-ds-muted mb-1">30d</span>
@@ -172,11 +180,11 @@ export default function DesignPage() {
               {ATTESTATIONS.map((a, i) => (
                 <div key={i} className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ background: "#8B83F5", opacity: 0.7 }} />
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-ds-primary/60" />
                     <span className="text-sm text-ds-text truncate">{a.label}</span>
                   </div>
                   <div className="flex items-center gap-2.5 shrink-0 ml-3">
-                    <span className="text-sm font-mono font-medium" style={{ color: "#9B8FF5" }}>{a.delta}</span>
+                    <span className="text-sm font-mono font-medium text-ds-secondary">{a.delta}</span>
                     <span className="text-[10px] font-mono text-ds-muted bg-ds-elev px-1.5 py-0.5 rounded">
                       {a.chain}
                     </span>

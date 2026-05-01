@@ -4,19 +4,22 @@ const config: Config = {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
       colors: {
+        // Canonical tokens — mirrors lib/tokens.ts. Brand Guideline v1.0.
         ds: {
-          bg:        "#07080E",   // deep dark, cool-tinted
-          surface:   "#0D0F18",   // card backgrounds
-          elev:      "#121421",   // elevated / nested surfaces
-          line:      "#1A1C2B",   // borders
-          text:      "#DCE0EF",   // primary text
-          muted:     "#656880",   // secondary text
-          primary:   "#6258E8",   // accent — interactions & state only
-          secondary: "#8B83F5",   // lighter accent
+          bg:        "#0A0A0F",   // Background   — brand §3
+          surface:   "#11121A",   // Surface      — brand §3
+          elev:      "#161720",   // elevated / nested (one step above surface)
+          line:      "#1A1C23",   // Line         — brand §3
+          text:      "#EDEFF6",   // Text/Note    — brand §3
+          muted:     "#4A4E62",   // secondary labels
+          primary:   "#7B61FF",   // Primary      — brand §3 (purple = state/activity)
+          secondary: "#A78BFA",   // Secondary    — brand §3
         },
         composia: {
           cyan:     "#00D4FF",   // glow principal
@@ -40,7 +43,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sora: ["var(--font-sora)", "sans-serif"],
+        sora:    ["Space Grotesk", "sans-serif"],
+        grotesk: ["Space Grotesk", "sans-serif"],
+        body:    ["Sora", "sans-serif"],
       },
       animation: {
         "moth-pulse":  "moth-pulse 3s ease-in-out infinite",
@@ -57,8 +62,8 @@ const config: Config = {
           "50%":       { opacity: "1" },
         },
         "node-glow": {
-          "0%, 100%": { filter: "drop-shadow(0 0 2px #00D4FF)" },
-          "50%":       { filter: "drop-shadow(0 0 6px #00D4FF)" },
+          "0%, 100%": { filter: "drop-shadow(0 0 2px #7B85E6)" },
+          "50%":       { filter: "drop-shadow(0 0 7px #7B85E6)" },
         },
         "float": {
           "0%, 100%": { transform: "translateY(0px)" },

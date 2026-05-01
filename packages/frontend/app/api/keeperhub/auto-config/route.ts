@@ -40,9 +40,8 @@ export async function GET(req: NextRequest) {
         mockGensyn:       process.env.MOCK_GENSYN_ADDRESS ?? "",
       },
       "ethereum-sepolia": {
-        syncerContract:    process.env.SYNCER_ETHEREUM_ADDRESS ?? "",
-        ensRegistrar:      process.env.ENS_REGISTRAR_ADDRESS ?? "",
-        reputationState:   process.env.REPUTATION_STATE_ADDRESS ?? "",
+        syncerContract:  process.env.SYNCER_ETHEREUM_ADDRESS ?? "",
+        reputationState: process.env.REPUTATION_STATE_ADDRESS ?? "",
       },
     },
 
