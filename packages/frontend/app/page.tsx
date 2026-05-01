@@ -1,5 +1,8 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import MothLogo from "@/components/MothLogo";
+
+const NetworkScene = dynamic(() => import("@/components/NetworkScene"), { ssr: false });
 
 const PURPLE = "#7B61FF";
 
@@ -24,79 +27,86 @@ export default function Home() {
       />
 
       {/* Hero */}
-      <section className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-24 text-center">
-
-        {/* Moth — absolute, centered, slightly above text */}
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          aria-hidden="true"
-        >
-          <div
-            className="tile-float"
-            style={{ animationDuration: "8s", opacity: 0.38, transform: "translateY(-32px)" }}
-          >
-            <MothLogo size={400} variant="core" animated glowColor={PURPLE} />
-          </div>
+      <div className="relative">
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <NetworkScene />
         </div>
 
-        {/* Content — sits above moth in z-order */}
-        <div className="relative z-10 flex flex-col items-center space-y-8">
+        <div className="relative z-10">
+          <section className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-24 text-center">
 
-          {/* Text */}
-          <div className="space-y-4">
+            {/* Moth — absolute, centered, slightly above text */}
             <div
-              className="text-[10px] font-mono tracking-[0.3em] uppercase"
-              style={{ color: "#4A4E62" }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+              aria-hidden="true"
             >
-              Gensyn × Lukso × Hyperlane
+              <div
+                className="tile-float"
+                style={{ animationDuration: "8s", opacity: 0.38, transform: "translateY(-32px)" }}
+              >
+                <MothLogo size={400} variant="core" animated glowColor={PURPLE} />
+              </div>
             </div>
 
-            <h1
-              className="font-sora text-5xl md:text-6xl font-bold tracking-tight"
-              style={{ lineHeight: 1.1 }}
-            >
-              <span style={{ color: "#EDEFF6" }}>
-                Composable reputation layer
-              </span>
-              <br />
-              <span style={{ color: "#4A4E62" }}>for agents</span>
-            </h1>
+            {/* Content — sits above moth in z-order */}
+            <div className="relative z-10 flex flex-col items-center space-y-8">
 
-            <p
-              className="text-base max-w-xl mx-auto leading-relaxed"
-              style={{ color: "rgba(237,239,246,0.36)" }}
-            >
-              Observe the network. Every score is verified on-chain.
-              Every profile is portable. You are a spectator.
-            </p>
-          </div>
+              {/* Text */}
+              <div className="space-y-4">
+                <div
+                  className="text-[10px] font-mono tracking-[0.3em] uppercase"
+                  style={{ color: "#4A4E62" }}
+                >
+                  Gensyn × Lukso × Hyperlane
+                </div>
 
-          {/* CTAs */}
-          <div className="flex flex-col items-center gap-3">
-            <Link
-              href="/grid"
-              className="inline-flex items-center gap-2 font-mono text-sm px-8 py-3.5 rounded-xl transition-all hover:opacity-90"
-              style={{
-                background: "rgba(123,97,255,0.10)",
-                border: "1px solid rgba(167,139,250,0.28)",
-                color: PURPLE,
-              }}
-            >
-              Enter Score Grid
-              <span style={{ opacity: 0.55 }}>→</span>
-            </Link>
+                <h1
+                  className="font-sora text-5xl md:text-6xl font-bold tracking-tight"
+                  style={{ lineHeight: 1.1 }}
+                >
+                  <span style={{ color: "#EDEFF6" }}>
+                    Composable reputation layer
+                  </span>
+                  <br />
+                  <span style={{ color: "#4A4E62" }}>for agents</span>
+                </h1>
 
-            <Link
-              href="/demo"
-              className="text-xs font-mono transition-opacity hover:opacity-80"
-              style={{ color: "#4A4E62" }}
-            >
-              Simulate an agent event ↗
-            </Link>
-          </div>
+                <p
+                  className="text-base max-w-xl mx-auto leading-relaxed"
+                  style={{ color: "rgba(237,239,246,0.36)" }}
+                >
+                  Observe the network. Every score is verified on-chain.
+                  Every profile is portable. You are a spectator.
+                </p>
+              </div>
 
+              {/* CTAs */}
+              <div className="flex flex-col items-center gap-3">
+                <Link
+                  href="/grid"
+                  className="inline-flex items-center gap-2 font-mono text-sm px-8 py-3.5 rounded-xl transition-all hover:opacity-90"
+                  style={{
+                    background: "rgba(123,97,255,0.10)",
+                    border: "1px solid rgba(167,139,250,0.28)",
+                    color: PURPLE,
+                  }}
+                >
+                  Enter Score Grid
+                  <span style={{ opacity: 0.55 }}>→</span>
+                </Link>
+
+                <Link
+                  href="/demo"
+                  className="text-xs font-mono transition-opacity hover:opacity-80"
+                  style={{ color: "#4A4E62" }}
+                >
+                  Simulate an agent event ↗
+                </Link>
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
 
       {/* Protocol pillars */}
       <section className="relative z-10 px-6 pb-20">
