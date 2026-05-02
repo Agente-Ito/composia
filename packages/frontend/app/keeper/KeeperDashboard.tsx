@@ -84,7 +84,7 @@ function truncateAddr(addr: string): string {
 }
 
 function statusColor(s: KeeperLogEntry["status"]) {
-  if (s === "created") return "text-[#00FF88]";
+  if (s === "created") return "text-[#00C896]";
   if (s === "updated") return "text-[#00C896]";
   return "text-[#FF4060]";
 }
@@ -219,7 +219,7 @@ export default function KeeperDashboard() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           { label: "Total runs", value: stats?.total   ?? "—", color: "text-[#c8e6ea]" },
-          { label: "Created",    value: stats?.created ?? "—", color: "text-[#00FF88]" },
+          { label: "Created",    value: stats?.created ?? "—", color: "text-[#00C896]" },
           { label: "Updated",    value: stats?.updated ?? "—", color: "text-[#00C896]" },
           { label: "Failed",     value: stats?.failed  ?? "—", color: "text-[#FF4060]" },
         ].map(({ label, value, color }) => (
@@ -248,7 +248,7 @@ export default function KeeperDashboard() {
         </button>
 
         {runMsg && (
-          <span className={`text-sm ${runMsg.startsWith("Run complete") ? "text-[#00FF88]" : "text-[#FF4060]"}`}>
+          <span className={`text-sm ${runMsg.startsWith("Run complete") ? "text-[#00C896]" : "text-[#FF4060]"}`}>
             {runMsg}
           </span>
         )}
@@ -297,7 +297,7 @@ export default function KeeperDashboard() {
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00FF88]/10 text-[#00FF88] font-mono">
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00C896]/10 text-[#00C896] font-mono">
                       ACTIVE
                     </span>
                     <span className="text-[#4a6670] text-xs">{isExp ? "▲" : "▼"}</span>
@@ -335,7 +335,7 @@ export default function KeeperDashboard() {
                         )}
 
                         <PipelineBox label="Action" color="green">
-                          <div className="text-[#00FF88] font-medium">HTTP {wf.action.method ?? "POST"}</div>
+                          <div className="text-[#00C896] font-medium">HTTP {wf.action.method ?? "POST"}</div>
                           <div className="font-mono text-[#4a6670]">{actionPath}</div>
                           {wf.action.body && (
                             <div className="font-mono text-[#4a6670] break-all">
@@ -500,7 +500,7 @@ function PipelineBox({
     color === "cyan"   ? "text-[#00C896]" :
     color === "yellow" ? "text-[#A78BFA]" :
     color === "purple" ? "text-[#605CFF]" :
-    "text-[#00FF88]";
+    "text-[#00C896]";
   return (
     <div className="shrink-0 min-w-[130px] max-w-[180px]">
       <div className={`text-[9px] uppercase tracking-wide text-center mb-1 ${labelColor}`}>{label}</div>
@@ -658,7 +658,7 @@ function SimulateModal({
         {result && (
           <div className={`text-xs rounded-lg px-3 py-2 ${
             result.ok
-              ? "bg-[#00FF88]/5 border border-[#00FF88]/20 text-[#00FF88]"
+              ? "bg-[#00C896]/5 border border-[#00C896]/20 text-[#00C896]"
               : "bg-[#FF4060]/5 border border-[#FF4060]/20 text-[#FF4060]"
           }`}>
             {result.ok ? (

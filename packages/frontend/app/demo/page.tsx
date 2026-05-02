@@ -53,7 +53,7 @@ function tierLabel(a: number) {
   return "Low";
 }
 function consistencyLabel(a: number) {
-  if (a >= 90) return { text: "↑ Rising", cls: "text-green-400" };
+  if (a >= 90) return { text: "↑ Rising", cls: "text-[#00C896]" };
   if (a >= 75) return { text: "→ Stable", cls: "text-gray-400" };
   return { text: "↓ Declining", cls: "text-red-400" };
 }
@@ -439,9 +439,9 @@ export default function DemoPage() {
                   <div
                     key={i}
                     className={`flex gap-3 ${
-                      log.type === "success" ? "text-green-400" :
+                      log.type === "success" ? "text-[#00C896]" :
                       log.type === "error"   ? "text-red-400"   :
-                      log.type === "tx"      ? "text-blue-400"  :
+                      log.type === "tx"      ? "text-[#7B61FF]"  :
                       "text-gray-400"
                     }`}
                   >
@@ -519,12 +519,12 @@ export default function DemoPage() {
             {lastSimulatedAgent && (
               <div className={`rounded-lg p-4 space-y-2 transition-all ${
                 profileCreated
-                  ? "bg-green-500/10 border border-green-500/25"
+                  ? "bg-[#00C896]/10 border border-[#00C896]/25"
                   : "bg-composia-dark/60 border border-composia-border"
               }`}>
                 {profileCreated ? (
                   <>
-                    <div className="text-green-400 font-medium text-sm">
+                    <div className="text-[#00C896] font-medium text-sm">
                       ✓ Universal Profile created on Lukso
                     </div>
                     <p className="text-xs text-gray-400">
@@ -587,7 +587,7 @@ export default function DemoPage() {
       <div className="bg-composia-card border border-composia-border rounded-xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-composia-border">
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
             <span className="font-semibold text-sm">Real Gensyn Data</span>
             <span className="text-[10px] text-gray-500 border border-composia-border rounded-full px-2 py-0.5">
               SwarmCoordinator · chain 685685
@@ -647,7 +647,7 @@ export default function DemoPage() {
           )}
 
           {seedResult && (
-            <div className="text-xs text-green-400 bg-green-500/10 border border-green-500/20 rounded p-3 space-y-1">
+            <div className="text-xs text-[#00C896] bg-[#00C896]/10 border border-[#00C896]/20 rounded p-3 space-y-1">
               <div className="font-medium">✓ {seedResult.count} real Gensyn agent(s) bridged to Lukso testnet</div>
               <div className="font-mono text-gray-400">TX: {seedResult.txHash.slice(0, 20)}…</div>
               <div className="text-gray-500">Run the KeeperHub panel below to create their Universal Profiles.</div>
@@ -702,7 +702,7 @@ export default function DemoPage() {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-composia-border">
           <div className="flex items-center gap-3">
-            <div className={`w-2 h-2 rounded-full ${keeperAuto ? "bg-green-400 animate-pulse" : "bg-gray-600"}`} />
+            <div className={`w-2 h-2 rounded-full ${keeperAuto ? "bg-[#00C896] animate-pulse" : "bg-gray-600"}`} />
             <span className="font-semibold text-sm">KeeperHub Automation</span>
             <span className="text-[10px] text-gray-500 border border-composia-border rounded-full px-2 py-0.5">
               decentralized keeper
@@ -715,7 +715,7 @@ export default function DemoPage() {
             <button
               onClick={() => setKeeperAuto((v) => !v)}
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                keeperAuto ? "bg-green-500" : "bg-gray-700"
+                keeperAuto ? "bg-[#00C896]" : "bg-gray-700"
               }`}
             >
               <span className={`inline-block h-3 w-3 rounded-full bg-white transition-transform ${
@@ -774,7 +774,7 @@ export default function DemoPage() {
                         {ev.agent.slice(0, 10)}…{ev.agent.slice(-4)}
                       </span>
                       <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
-                        ev.hasUP ? "bg-green-500/10 text-green-400" : "bg-[#A78BFA]/10 text-[#A78BFA]"
+                        ev.hasUP ? "bg-[#00C896]/10 text-[#00C896]" : "bg-[#A78BFA]/10 text-[#A78BFA]"
                       }`}>
                         {ev.hasUP ? "✓ UP ready" : "pending"}
                       </span>
@@ -795,7 +795,7 @@ export default function DemoPage() {
               {[
                 { label: "Events detected", value: keeperEvents.length, color: "text-white" },
                 { label: "Pending (no UP)",  value: keeperEvents.filter(e => !e.hasUP).length, color: "text-[#A78BFA]" },
-                { label: "Already processed", value: keeperEvents.filter(e => e.hasUP).length, color: "text-green-400" },
+                { label: "Already processed", value: keeperEvents.filter(e => e.hasUP).length, color: "text-[#00C896]" },
                 { label: "UPs created", value: keeperResults.filter(r => r.action === "created").length, color: "text-composia-violet" },
               ].map((s) => (
                 <div key={s.label} className="bg-composia-dark/60 rounded-lg p-3">
@@ -813,7 +813,7 @@ export default function DemoPage() {
                 "Updates LSP3 reputation via KeyManager",
               ].map((step) => (
                 <div key={step} className="flex items-start gap-1.5 text-[10px] text-gray-400">
-                  <span className="text-green-400 shrink-0">›</span>
+                  <span className="text-[#00C896] shrink-0">›</span>
                   {step}
                 </div>
               ))}
@@ -838,8 +838,8 @@ export default function DemoPage() {
                   <div
                     key={i}
                     className={`rounded-lg p-2.5 border text-[10px] space-y-1 ${
-                      r.action === "created" ? "border-green-500/25 bg-green-500/5" :
-                      r.action === "updated" ? "border-blue-500/25 bg-blue-500/5" :
+                      r.action === "created" ? "border-[#00C896]/25 bg-[#00C896]/5" :
+                      r.action === "updated" ? "border-[#7B61FF]/25 bg-[#7B61FF]/5" :
                       r.action === "error"   ? "border-red-500/25 bg-red-500/5" :
                       "border-gray-700 bg-composia-dark/40"
                     }`}
@@ -849,8 +849,8 @@ export default function DemoPage() {
                         {r.agent.slice(0, 10)}…{r.agent.slice(-4)}
                       </span>
                       <span className={`font-medium ${
-                        r.action === "created" ? "text-green-400" :
-                        r.action === "updated" ? "text-blue-400" :
+                        r.action === "created" ? "text-[#00C896]" :
+                        r.action === "updated" ? "text-[#7B61FF]" :
                         r.action === "error"   ? "text-red-400" : "text-gray-500"
                       }`}>
                         {r.action === "created" ? "✓ UP created" :

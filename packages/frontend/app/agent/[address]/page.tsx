@@ -637,12 +637,12 @@ export default async function AgentProfilePage({
                   reactive!.slashed ? (
                     <span className="text-[10px] px-2 py-0.5 rounded-full border bg-red-500/10 text-red-400 border-red-500/20">Slashed</span>
                   ) : reactive!.verified ? (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full border bg-green-500/10 text-green-400 border-green-500/20">✓ Verified (live)</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full border bg-[#00C896]/10 text-[#00C896] border-[#00C896]/20">✓ Verified (live)</span>
                   ) : (
                     <span className="text-[10px] px-2 py-0.5 rounded-full border bg-[#1A1C23] text-[#A78BFA] border-[#1A1C23]">Below threshold</span>
                   )
                 ) : layer1Active ? (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full border bg-blue-500/10 text-blue-400 border-blue-700/30">Layer 1 only</span>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full border bg-[#7B61FF]/10 text-[#A78BFA] border-[#7B61FF]/20">Layer 1 only</span>
                 ) : (
                   <span className="text-[10px] px-2 py-0.5 rounded-full border bg-gray-700/40 text-gray-500 border-gray-700">Pending</span>
                 )}
@@ -657,14 +657,14 @@ export default async function AgentProfilePage({
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
                     <span className="text-gray-400">Reputation</span>
-                    <span className={reactive.meetsThreshold ? "text-green-400" : "text-[#A78BFA]"}>
+                    <span className={reactive.meetsThreshold ? "text-[#00C896]" : "text-[#A78BFA]"}>
                       {reactive.reputationPct.toFixed(1)}%
                       <span className="text-gray-600 ml-1">(threshold {reactive.thresholdPct.toFixed(0)}%)</span>
                     </span>
                   </div>
                   <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${reactive.meetsThreshold ? "bg-green-400" : "bg-[#A78BFA]"}`}
+                      className={`h-full rounded-full transition-all ${reactive.meetsThreshold ? "bg-[#00C896]" : "bg-[#A78BFA]"}`}
                       style={{ width: `${Math.min(reactive.reputationPct, 100)}%` }}
                     />
                   </div>
@@ -682,12 +682,12 @@ export default async function AgentProfilePage({
                   </div>
                   <div className={`rounded px-2 py-2 text-center ${
                     reactive.slashed ? "bg-red-500/10 border border-red-500/20"
-                    : reactive.verified ? "bg-green-500/10 border border-green-500/20"
+                    : reactive.verified ? "bg-[#00C896]/10 border border-[#00C896]/20"
                     : "bg-composia-dark/60"
                   }`}>
                     <div className="text-gray-500 text-[9px]">Status</div>
                     <div className={`font-bold mt-0.5 text-[10px] ${
-                      reactive.slashed ? "text-red-400" : reactive.verified ? "text-green-400" : "text-[#A78BFA]"
+                      reactive.slashed ? "text-red-400" : reactive.verified ? "text-[#00C896]" : "text-[#A78BFA]"
                     }`}>
                       {reactive.slashed ? "SLASHED" : reactive.verified ? "ACTIVE" : "PENDING"}
                     </div>
@@ -712,7 +712,7 @@ export default async function AgentProfilePage({
                   <div className="text-gray-500 font-medium">DeFi composability hooks</div>
                   <div className="font-mono">
                     isCurrentlyVerified({primaryLabel.slice(0, 6)}…) →{" "}
-                    <span className={reactive.verified && !reactive.slashed ? "text-green-400" : "text-red-400"}>
+                    <span className={reactive.verified && !reactive.slashed ? "text-[#00C896]" : "text-red-400"}>
                       {String(reactive.verified && !reactive.slashed)}
                     </span>
                   </div>
@@ -847,7 +847,7 @@ function FuseChip({
   hint: string;
   color: "green" | "cyan";
 }) {
-  const dotColor = color === "green" ? "bg-[#00FF88]" : "bg-[#00D4FF]";
+  const dotColor = color === "green" ? "bg-[#00C896]" : "bg-[#7B61FF]";
   return (
     <div className="flex items-center gap-1.5 text-[10px] bg-composia-dark/60 px-2 py-1 rounded border border-composia-border">
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${active ? dotColor : "bg-gray-700"}`} />
@@ -859,11 +859,11 @@ function FuseChip({
 
 function CapabilityRow({ icon, text, color }: { icon: string; text: string; color: "green" | "yellow" | "red" | "blue" | "gray" }) {
   const styles: Record<typeof color, string> = {
-    green:  "bg-green-500/5  border-green-500/15  text-green-300",
-    yellow: "bg-[#A78BFA]/5 border-[#A78BFA]/15 text-[#A78BFA]",
-    red:    "bg-red-500/5    border-red-500/15    text-red-300",
-    blue:   "bg-blue-500/5   border-blue-500/15   text-blue-300",
-    gray:   "bg-gray-800/40  border-gray-700/40   text-gray-400",
+    green:  "bg-[#00C896]/5  border-[#00C896]/15  text-[#00C896]",
+    yellow: "bg-[#A78BFA]/5  border-[#A78BFA]/15  text-[#A78BFA]",
+    red:    "bg-red-500/5    border-red-500/15     text-red-300",
+    blue:   "bg-[#7B61FF]/5  border-[#7B61FF]/15  text-[#A78BFA]",
+    gray:   "bg-gray-800/40  border-gray-700/40    text-gray-400",
   };
   return (
     <div className={`flex items-start gap-2 rounded-lg border px-3 py-2 text-xs ${styles[color]}`}>

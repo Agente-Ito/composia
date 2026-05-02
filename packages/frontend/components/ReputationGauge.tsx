@@ -82,7 +82,7 @@ export default function ReputationGauge({ accuracy, trend, consistency }: Props)
         <span
           className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
             consistency === "rising"
-              ? "bg-green-500/10 border-green-500/30 text-green-400"
+              ? "bg-[#00C896]/10 border-[#00C896]/30 text-[#00C896]"
               : consistency === "declining"
               ? "bg-red-500/10 border-red-500/30 text-red-400"
               : "bg-composia-void border-composia-border text-composia-muted"
