@@ -36,17 +36,13 @@ function statusLabel(score: number): string {
 
 export default function AgentTile({ data, index = 0 }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const color    = scoreColor(data.score);
-  const delay    = data.floatDelay ?? `${(index % 5) * 1.1}s`;
-  const ringCls  =
-    data.score >= 90 ? "ring-glow-green" :
-    data.score >= 75 ? "ring-glow-cyan"  :
-    "ring-glow-amber";
+  const color = scoreColor(data.score);
+  const delay = data.floatDelay ?? `${(index % 5) * 1.1}s`;
 
   return (
     <Link
       href={`/agent/${data.agentAddress}`}
-      className={`relative agent-tile select-none ${ringCls} block`}
+      className="relative agent-tile select-none block"
       style={{
         background: "linear-gradient(135deg, #050508 0%, #080b12 100%)",
         border: `1px solid ${color}22`,
@@ -54,6 +50,7 @@ export default function AgentTile({ data, index = 0 }: Props) {
         padding: "24px 20px 20px",
         animationDelay: delay,
         textDecoration: "none",
+        boxShadow: `0 0 0 1px ${color}11, 0 0 24px ${color}08`,
       }}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
@@ -64,13 +61,13 @@ export default function AgentTile({ data, index = 0 }: Props) {
           <span
             className="text-[9px] font-mono font-bold tracking-widest px-2 py-0.5 rounded-full"
             style={{
-              color: "#00FF88",
-              background: "rgba(0,255,136,0.08)",
-              border: "1px solid rgba(0,255,136,0.2)",
+              color: "#FF4F8B",
+              background: "rgba(255,79,139,0.08)",
+              border: "1px solid rgba(255,79,139,0.22)",
               animation: "live-pulse 2.5s ease-in-out infinite",
             }}
           >
-            ● GENSYN VERIFIED
+            ● GENSYN
           </span>
         ) : (
           <span className="text-[9px] font-mono text-composia-muted">—</span>
@@ -79,9 +76,9 @@ export default function AgentTile({ data, index = 0 }: Props) {
           <span
             className="text-[9px] font-mono px-2 py-0.5 rounded-full"
             style={{
-              color: "#00D4FF",
-              background: "rgba(0,212,255,0.07)",
-              border: "1px solid rgba(0,212,255,0.18)",
+              color: "#A78BFA",
+              background: "rgba(167,139,250,0.07)",
+              border: "1px solid rgba(167,139,250,0.18)",
             }}
           >
             ⬡ ETH
@@ -136,13 +133,13 @@ export default function AgentTile({ data, index = 0 }: Props) {
       {/* ── Bottom badges ─────────────────────────────────────────────── */}
       <div className="flex flex-wrap justify-center gap-1.5 mt-3">
         {data.isKeeperActive && (
-          <Badge color="#00D4FF" label="KeeperHub" />
+          <Badge color="#00C896" label="KeeperHub" />
         )}
         {data.lastDeposit && (
-          <Badge color="#FFC033" label={`Deposit ${data.lastDeposit}`} />
+          <Badge color="#FF8C5A" label={`Deposit ${data.lastDeposit}`} />
         )}
         {data.claimed ? (
-          <Badge color="#00FF88" label="Claimed" />
+          <Badge color="#00C896" label="Claimed" />
         ) : (
           <Badge color="#4a6670" label="Unclaimed" />
         )}
