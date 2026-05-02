@@ -44,7 +44,7 @@ function tierBgClass(tier: ComposiaScore["tier"]): string {
   switch (tier) {
     case "elite":       return "bg-[#A78BFA]/10 text-[#A78BFA] border-[#A78BFA]/30";
     case "trustworthy": return "bg-[#7B61FF]/10 text-[#7B61FF] border-[#7B61FF]/30";
-    case "developing":  return "bg-[#FF8C5A]/10 text-[#FF8C5A] border-[#FF8C5A]/30";
+    case "developing":  return "bg-[#A78BFA]/10 text-[#A78BFA] border-[#A78BFA]/30";
     default:            return "bg-[#FF4060]/10 text-[#FF4060] border-[#FF4060]/30";
   }
 }
@@ -52,7 +52,7 @@ function tierBgClass(tier: ComposiaScore["tier"]): string {
 function scoreToBarColor(score: number): string {
   if (score >= 75) return "#A78BFA";
   if (score >= 60) return "#7B61FF";
-  if (score >= 40) return "#FF8C5A";
+  if (score >= 40) return "#A78BFA";
   return "#FF4060";
 }
 

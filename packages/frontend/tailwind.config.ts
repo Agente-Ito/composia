@@ -40,6 +40,7 @@ const config: Config = {
           pink:  "#FF4F8B",
           warn:  "#FF8C5A",
           red:   "#FF4060",
+          cyan:  "#7B61FF",
           dark:  "#000000",
           void:  "#050508",
           surface: "#080b12",
@@ -61,12 +62,14 @@ const config: Config = {
       fontFamily: {
         grotesk: ["Space Grotesk", "sans-serif"],
         body: ["Sora", "sans-serif"],
+        sora: ["Sora", "sans-serif"],
       },
 
       animation: {
         "moth-pulse": "moth-pulse 3s ease-in-out infinite",
         "node-glow": "node-glow 2s ease-in-out infinite",
         "float": "float 6s ease-in-out infinite",
+        "live-pulse": "live-pulse 2s ease-in-out infinite",
       },
 
       keyframes: {
@@ -81,6 +84,10 @@ const config: Config = {
         float: {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-8px)" },
+        },
+        "live-pulse": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.3" },
         },
       },
     },

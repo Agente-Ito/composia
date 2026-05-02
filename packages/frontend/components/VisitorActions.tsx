@@ -34,22 +34,16 @@ export default function VisitorActions({
 }: Props) {
   const { address, connected, chainId, connect, getSigner } = useWallet();
 
-  // LSP26 / Lukso follow state
-  const [following, setFollowing]     = useState<boolean | null>(null);
-  const [pending, setPending]         = useState(false);
-
-  // Sepolia native follow state
+  const [following, setFollowing]           = useState<boolean | null>(null);
+  const [pending, setPending]               = useState(false);
   const [sepoliaPending, setSepoliaPending] = useState(false);
+  const [settlingSlash, setSettlingSlash]   = useState(false);
+  const [status, setStatus]                 = useState("");
 
-  // Settle slash state
-  const [settlingSlash, setSettlingSlash] = useState(false);
-
-  const [status, setStatus] = useState("");
-
-  const lsp26Addr     = process.env.NEXT_PUBLIC_LSP26_ADDRESS ?? "0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA";
-  const luksoRpc      = process.env.NEXT_PUBLIC_LUKSO_RPC ?? "https://rpc.testnet.lukso.network";
-  const sepoliaRpc    = process.env.NEXT_PUBLIC_ETHEREUM_SEPOLIA_RPC ?? "https://ethereum-sepolia-rpc.publicnode.com";
-  const repStateAddr  = process.env.NEXT_PUBLIC_REPUTATION_STATE_ADDRESS;
+  const lsp26Addr    = process.env.NEXT_PUBLIC_LSP26_ADDRESS ?? "0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA";
+  const luksoRpc     = process.env.NEXT_PUBLIC_LUKSO_RPC ?? "https://rpc.testnet.lukso.network";
+  const sepoliaRpc   = process.env.NEXT_PUBLIC_ETHEREUM_SEPOLIA_RPC ?? "https://ethereum-sepolia-rpc.publicnode.com";
+  const repStateAddr = process.env.NEXT_PUBLIC_REPUTATION_STATE_ADDRESS;
 
   const isSelf        = connected && address?.toLowerCase() === agentAddress.toLowerCase();
   const isSepFollower = connected && address
@@ -63,7 +57,6 @@ export default function VisitorActions({
     } catch { return null; }
   })();
 
-  // Check LSP26 following state
   useEffect(() => {
     if (!connected || !address || !upAddress || isSelf) return;
     const check = async () => {
@@ -76,7 +69,6 @@ export default function VisitorActions({
     check();
   }, [address, connected, upAddress, lsp26Addr, luksoRpc, isSelf]);
 
-  // Switch wallet to Sepolia
   const switchToSepolia = async () => {
     if (!window.ethereum) return;
     try {
@@ -100,7 +92,6 @@ export default function VisitorActions({
     }
   };
 
-  // LSP26 follow / unfollow on Lukso
   const toggleFollow = async () => {
     if (!upAddress) { setStatus("No UP address for this agent yet"); return; }
     const signer = await getSigner();
@@ -126,12 +117,8 @@ export default function VisitorActions({
     }
   };
 
-  // Sepolia native follow / unfollow via ReputationState
   const toggleSepoliaFollow = async () => {
-    if (!repStateAddr || !agentNode) {
-      setStatus("Reputation contract not configured");
-      return;
-    }
+    if (!repStateAddr || !agentNode) { setStatus("Reputation contract not configured"); return; }
     const signer = await getSigner();
     if (!signer) { await connect(); return; }
     if (chainId !== SEPOLIA_CHAIN_ID) { await switchToSepolia(); return; }
@@ -152,12 +139,8 @@ export default function VisitorActions({
     }
   };
 
-  // Settle expired slash (permissionless)
   const handleSettleSlash = async () => {
-    if (!repStateAddr || !agentNode) {
-      setStatus("Reputation contract not configured");
-      return;
-    }
+    if (!repStateAddr || !agentNode) { setStatus("Reputation contract not configured"); return; }
     const signer = await getSigner();
     if (!signer) { await connect(); return; }
     if (chainId !== SEPOLIA_CHAIN_ID) { await switchToSepolia(); return; }
@@ -183,16 +166,15 @@ export default function VisitorActions({
       <h2 className="font-semibold">Actions</h2>
 
       <div className="flex flex-wrap gap-2">
-        {/* Follow / Unfollow on Lukso (LSP26) */}
         {upAddress && (
           <button
             onClick={connected ? toggleFollow : connect}
             disabled={pending}
             className="text-sm px-4 py-2 rounded-lg border transition-colors disabled:opacity-50"
             style={{
-              borderColor: following ? "rgba(0,212,255,0.4)" : "rgba(0,212,255,0.2)",
-              color: following ? "#00D4FF" : "#9ca3af",
-              background: following ? "rgba(0,212,255,0.08)" : "transparent",
+              borderColor: following ? "rgba(123,97,255,0.4)" : "rgba(123,97,255,0.2)",
+              color: following ? "#7B61FF" : "#9ca3af",
+              background: following ? "rgba(123,97,255,0.08)" : "transparent",
             }}
           >
             {pending
@@ -205,16 +187,15 @@ export default function VisitorActions({
           </button>
         )}
 
-        {/* Follow / Unfollow on Sepolia (ReputationState) */}
         {repStateAddr && (
           <button
             onClick={connected ? toggleSepoliaFollow : connect}
             disabled={sepoliaPending}
             className="text-sm px-4 py-2 rounded-lg border transition-colors disabled:opacity-50"
             style={{
-              borderColor: isSepFollower ? "rgba(0,255,136,0.4)" : "rgba(0,255,136,0.15)",
-              color: isSepFollower ? "#00FF88" : "#9ca3af",
-              background: isSepFollower ? "rgba(0,255,136,0.06)" : "transparent",
+              borderColor: isSepFollower ? "rgba(167,139,250,0.4)" : "rgba(167,139,250,0.15)",
+              color: isSepFollower ? "#A78BFA" : "#9ca3af",
+              background: isSepFollower ? "rgba(167,139,250,0.06)" : "transparent",
             }}
             title="Sepolia-native follow — participates in governance quorum"
           >
@@ -228,7 +209,6 @@ export default function VisitorActions({
           </button>
         )}
 
-        {/* View on UP Cloud */}
         {upAddress && (
           <a
             href={`https://universalprofile.cloud/address/${upAddress}`}
@@ -240,7 +220,6 @@ export default function VisitorActions({
           </a>
         )}
 
-        {/* Request Service — placeholder */}
         <button
           disabled
           className="text-sm px-4 py-2 rounded-lg border border-composia-border text-gray-600 opacity-50 cursor-not-allowed"
@@ -250,7 +229,6 @@ export default function VisitorActions({
         </button>
       </div>
 
-      {/* Settle Slash — permissionless, visible to anyone when slash is expired */}
       {isSlashed && slashExpired && repStateAddr && (
         <div className="pt-1 border-t border-composia-border/40">
           <button
@@ -266,7 +244,6 @@ export default function VisitorActions({
         </div>
       )}
 
-      {/* Sepolia follow hint */}
       {repStateAddr && !isSepFollower && connected && !isSelf && (
         <p className="text-[10px] text-[#4a6670]">
           Following on Sepolia adds you to governance quorum for this agent.

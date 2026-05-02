@@ -244,7 +244,7 @@ export default function KeeperDashboard() {
           onClick={() => setShowSimulate(true)}
           className="px-6 py-2.5 rounded-xl bg-[#605CFF]/10 border border-[#605CFF]/40 text-[#605CFF] font-semibold text-sm hover:bg-[#605CFF]/20 transition"
         >
-          ⚡ Simulate Event
+          Simulate Event
         </button>
 
         {runMsg && (
@@ -326,7 +326,7 @@ export default function KeeperDashboard() {
                         {wf.condition && (
                           <>
                             <PipelineBox label="Condition" color="yellow">
-                              <div className="text-[#FF8C5A] font-medium">Health Check</div>
+                              <div className="text-[#A78BFA] font-medium">Health Check</div>
                               <div className="font-mono text-[#4a6670]">{wf.condition.method ?? "GET"} {condPath}</div>
                               <div className="text-[#4a6670]">{wf.condition.passWhen}</div>
                             </PipelineBox>
@@ -498,7 +498,7 @@ function PipelineBox({
 }) {
   const labelColor =
     color === "cyan"   ? "text-[#00C896]" :
-    color === "yellow" ? "text-[#FF8C5A]" :
+    color === "yellow" ? "text-[#A78BFA]" :
     color === "purple" ? "text-[#605CFF]" :
     "text-[#00FF88]";
   return (
@@ -673,7 +673,7 @@ function SimulateModal({
         <div className="flex gap-3 pt-1">
           <button onClick={handleSimulate} disabled={pending}
             className="flex-1 px-4 py-2.5 rounded-xl bg-[#605CFF]/10 border border-[#605CFF]/40 text-[#605CFF] font-semibold text-sm hover:bg-[#605CFF]/20 disabled:opacity-50 transition">
-            {pending ? "Sending…" : "⚡ Simulate"}
+            {pending ? "Sending…" : "Simulate"}
           </button>
           <button onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-[#0d1a24] text-[#4a6670] text-sm hover:text-[#c8e6ea] transition">

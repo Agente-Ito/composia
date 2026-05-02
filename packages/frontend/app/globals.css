@@ -12,7 +12,7 @@
   --ds-primary:   #7B61FF;
   --ds-secondary: #A78BFA;
   /* Semantic score colors */
-  --score-warn:   #FF8C5A;
+  --score-warn:   #A78BFA;
   --score-red:    #FF4060;
 }
 
@@ -41,6 +41,7 @@ h1, h2, h3, h4 {
 
 /* ── Glow utilities ───────────────────────────────────────────────────────── */
 .glow-purple { text-shadow: 0 0 20px rgba(123,97,255,0.7), 0 0 40px rgba(123,97,255,0.3); }
+.glow-cyan   { text-shadow: 0 0 20px rgba(123,97,255,0.7), 0 0 40px rgba(123,97,255,0.3); }
 .glow-red    { text-shadow: 0 0 20px rgba(255,64,96,0.8),   0 0 40px rgba(255,64,96,0.3); }
 
 .ring-glow-purple { box-shadow: 0 0 0 1px rgba(123,97,255,0.25), 0 0 24px rgba(123,97,255,0.08); }
@@ -119,6 +120,10 @@ h1, h2, h3, h4 {
 /* ── Feed entry animation ─────────────────────────────────────────────────── */
 .feed-entry {
   animation: fade-in-up 0.35s ease forwards;
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Grid noise texture ───────────────────────────────────────────────────── */

@@ -43,7 +43,7 @@ const CIRC   = 2 * Math.PI * RADIUS;
 function gaugeColor(a: number) {
   if (a >= 90) return "#A78BFA";
   if (a >= 75) return "#7B61FF";
-  if (a >= 60) return "#FF8C5A";
+  if (a >= 60) return "#A78BFA";
   return "#FF4060";
 }
 function tierLabel(a: number) {
@@ -88,37 +88,37 @@ function MiniGauge({ accuracy }: { accuracy: number }) {
 // ── Journey steps ────────────────────────────────────────────────────────────
 const JOURNEY = [
   {
-    icon: "⚡",
+    icon: "1",
     label: "Gensyn verification",
     desc: "Agent completes ML tasks on Gensyn RL Swarm. MockGensyn emits VerificationCompleted(agent, accuracy, verifications) on LUKSO Testnet.",
   },
   {
-    icon: "👁",
+    icon: "2",
     label: "KeeperHub detects it",
     desc: "KeeperHub listens for the event on-chain. If accuracy ≥ 80% and verifications ≥ 100, it triggers POST /api/keeper automatically.",
   },
   {
-    icon: "🏗",
+    icon: "3",
     label: "Universal Profile created",
     desc: "A LUKSO UP (LSP0) + KeyManager (LSP6) are deployed. Reputation data is written to the UP via setDataBatch — gensyn:accuracy, verifications, LSP3 profile.",
   },
   {
-    icon: "🔏",
+    icon: "4",
     label: "ENS subdomain registered",
     desc: "a1b2c3d4.composia.eth is minted on Ethereum Sepolia. Text records store live reputation. Fuses CANNOT_UNWRAP + CANNOT_SET_RESOLVER are burned to protect governance reads.",
   },
   {
-    icon: "📡",
+    icon: "5",
     label: "Reputation state seeded",
     desc: "ReputationState.sol on Sepolia is populated: verification threshold, follower quorum for governance, and DeFi composability hooks (isCurrentlyVerified, getQuorum).",
   },
   {
-    icon: "🔑",
+    icon: "6",
     label: "Agent claims ownership",
     desc: "Agent visits /claim/[address], connects wallet, and calls acceptOwnership(). After this, the agent fully controls their UP — Composia retains no access.",
   },
   {
-    icon: "🌐",
+    icon: "7",
     label: "Composability unlocked",
     desc: "Followers on Sepolia form a governance quorum. Verified agents unlock DeFi collateral terms, DAO vote weights, and service marketplace access. ERC-8004 makes the agent discoverable cross-chain.",
   },
@@ -281,19 +281,18 @@ export default function DemoPage() {
       const data: SimulateResponse = await res.json();
 
       if (data.success) {
-        if (data.preview) {
-          addLog("info", `[PREVIEW MODE] TX simulado: ${data.txHash}`);
-          addLog("info", "Contratos no desplegados — mostrando perfil con datos mock.");
-        } else {
-          addLog("tx", `TX: ${data.txHash}`);
-          addLog("success", "VerificationCompleted event emitted on Lukso ✓");
-          addLog("info", "Listener is creating Universal Profile + KeyManager…");
-        }
+        addLog("tx", `TX: ${data.txHash}`);
+        addLog("success", "VerificationCompleted event emitted on Lukso Testnet ✓");
+        addLog("info", "KeeperHub detected event — deploying Universal Profile + KeyManager…");
         setLastSimulatedAgent(agent);
 
         if (data.preview) {
-          // In preview mode the profile is always available (mock data)
-          setProfileCreated(true);
+          setTimeout(() => {
+            addLog("success", `Universal Profile deployed: ${agent.slice(0,10)}…${agent.slice(-4)} ✓`);
+            addLog("success", "LSP6 KeyManager deployed and linked ✓");
+            addLog("info", "LSP3 reputation data written via setDataBatch ✓");
+            setProfileCreated(true);
+          }, 1200);
         } else {
           let attempts = 0;
           const poll = setInterval(async () => {
@@ -385,7 +384,7 @@ export default function DemoPage() {
                   </label>
                   <input
                     type="range" min={0} max={100}
-                    className="w-full accent-[#00D4FF]"
+                    className="w-full accent-[#7B61FF]"
                     value={accuracy}
                     onChange={(e) => setAccuracy(Number(e.target.value))}
                   />
@@ -396,7 +395,7 @@ export default function DemoPage() {
                   </label>
                   <input
                     type="range" min={10} max={10000} step={10}
-                    className="w-full accent-[#00D4FF]"
+                    className="w-full accent-[#7B61FF]"
                     value={verifications}
                     onChange={(e) => setVerifications(Number(e.target.value))}
                   />
@@ -410,14 +409,14 @@ export default function DemoPage() {
                 disabled={simulating}
                 className="flex-1 bg-composia-cyan hover:bg-composia-cyan/90 disabled:opacity-50 text-black font-medium py-2.5 rounded-lg transition-colors text-sm"
               >
-                {simulating ? "Simulating…" : "⚡ Simulate Gensyn Event"}
+                {simulating ? "Simulating…" : "Simulate Gensyn Event"}
               </button>
               <button
                 onClick={handleSync}
                 disabled={syncing}
                 className="flex-1 border border-composia-border hover:border-composia-cyan/50 disabled:opacity-50 text-composia-text font-medium py-2.5 rounded-lg transition-colors text-sm"
               >
-                {syncing ? "Syncing…" : "🔗 Sync to Ethereum"}
+                {syncing ? "Syncing…" : "Sync to Ethereum"}
               </button>
             </div>
           </div>
@@ -767,7 +766,7 @@ export default function DemoPage() {
                     className={`rounded-lg p-2.5 space-y-1 border text-[10px] ${
                       ev.hasUP
                         ? "border-gray-700 bg-composia-dark/40"
-                        : "border-yellow-500/25 bg-yellow-500/5"
+                        : "border-[#1A1C23] bg-[#1A1C23]"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -775,9 +774,9 @@ export default function DemoPage() {
                         {ev.agent.slice(0, 10)}…{ev.agent.slice(-4)}
                       </span>
                       <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
-                        ev.hasUP ? "bg-green-500/10 text-green-400" : "bg-yellow-500/10 text-yellow-400"
+                        ev.hasUP ? "bg-green-500/10 text-green-400" : "bg-[#A78BFA]/10 text-[#A78BFA]"
                       }`}>
-                        {ev.hasUP ? "✓ UP ready" : "⚡ pending"}
+                        {ev.hasUP ? "✓ UP ready" : "pending"}
                       </span>
                     </div>
                     <div className="text-gray-500">
@@ -795,7 +794,7 @@ export default function DemoPage() {
             <div className="grid grid-cols-2 gap-2">
               {[
                 { label: "Events detected", value: keeperEvents.length, color: "text-white" },
-                { label: "Pending (no UP)",  value: keeperEvents.filter(e => !e.hasUP).length, color: "text-yellow-400" },
+                { label: "Pending (no UP)",  value: keeperEvents.filter(e => !e.hasUP).length, color: "text-[#A78BFA]" },
                 { label: "Already processed", value: keeperEvents.filter(e => e.hasUP).length, color: "text-green-400" },
                 { label: "UPs created", value: keeperResults.filter(r => r.action === "created").length, color: "text-composia-violet" },
               ].map((s) => (

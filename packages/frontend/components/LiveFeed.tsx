@@ -36,9 +36,9 @@ function pickRandom<T>(arr: T[]): T {
 }
 
 function scoreColor(s: number): string {
-  if (s >= 90) return "#00FF88";
-  if (s >= 75) return "#00D4FF";
-  if (s >= 60) return "#FFC033";
+  if (s >= 90) return "#A78BFA";
+  if (s >= 75) return "#7B61FF";
+  if (s >= 60) return "#A78BFA";
   return "#FF4060";
 }
 
@@ -108,7 +108,7 @@ export default function LiveFeed({
         </span>
         <span
           className="text-[10px] font-mono flex items-center gap-1.5"
-          style={{ color: "#00FF88" }}
+          style={{ color: "#A78BFA" }}
         >
           <span className="animate-live-pulse">●</span>
           <span style={{ color: "rgba(74,102,112,0.8)" }}>LIVE</span>

@@ -185,9 +185,9 @@ export default function FollowAgents({ upAddress }: Props) {
             onClick={() => setFilter(f.id)}
             className="text-[10px] font-mono px-3 py-1 rounded-lg transition-colors"
             style={{
-              background: filter === f.id ? "rgba(0,212,255,0.1)" : "transparent",
-              color: filter === f.id ? "#00D4FF" : "#4a6670",
-              border: `1px solid ${filter === f.id ? "rgba(0,212,255,0.3)" : "#0d1a24"}`,
+              background: filter === f.id ? " "rgba(123,97,255,$($args[0].Groups[1].Value))" " : "transparent",
+              color: filter === f.id ? "#7B61FF" : "#4a6670",
+              border: `1px solid ${filter === f.id ? " "rgba(123,97,255,$($args[0].Groups[1].Value))" " : "#0d1a24"}`,
             }}
           >
             {f.label}
@@ -221,11 +221,11 @@ export default function FollowAgents({ upAddress }: Props) {
                     style={{
                       color:
                         agent.score >= 90
-                          ? "#00FF88"
+                          ? "#A78BFA"
                           : agent.score >= 75
-                          ? "#00D4FF"
+                          ? "#7B61FF"
                           : agent.score >= 60
-                          ? "#FFC033"
+                          ? "#A78BFA"
                           : "#FF4060",
                     }}
                   >
@@ -239,11 +239,11 @@ export default function FollowAgents({ upAddress }: Props) {
                 className="shrink-0 text-[10px] font-mono px-3 py-1 rounded-lg border transition-colors disabled:opacity-50"
                 style={{
                   borderColor: agent.following
-                    ? "rgba(0,255,136,0.3)"
+                    ? " "rgba(167,139,250,$($args[0].Groups[1].Value))" "
                     : "#0d1a24",
-                  color: agent.following ? "#00FF88" : "#4a6670",
+                  color: agent.following ? "#A78BFA" : "#4a6670",
                   background: agent.following
-                    ? "rgba(0,255,136,0.05)"
+                    ? " "rgba(167,139,250,$($args[0].Groups[1].Value))" "
                     : "transparent",
                 }}
               >

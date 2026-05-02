@@ -12,7 +12,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 function getColor(accuracy: number): string {
   if (accuracy >= 90) return "#A78BFA"; // secondary — Excellent
   if (accuracy >= 75) return "#7B61FF"; // primary   — Good
-  if (accuracy >= 60) return "#FF8C5A"; // warm      — Average
+  if (accuracy >= 60) return "#A78BFA"; // secondary — Average
   return "#FF4060";                     // red       — Low
 }
 

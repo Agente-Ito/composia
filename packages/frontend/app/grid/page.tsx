@@ -169,7 +169,7 @@ export default function GridPage() {
             </h1>
             <span
               className="text-[9px] font-mono px-2 py-0.5 rounded-full flex items-center gap-1"
-              style={{ color: "#00C896", background: "rgba(0,200,150,0.06)", border: "1px solid rgba(0,200,150,0.18)" }}
+              style={{ color: "#A78BFA", background: "rgba(167,139,250,0.06)", border: "1px solid rgba(167,139,250,0.18)" }}
             >
               <span className="animate-live-pulse">●</span> LIVE
             </span>

@@ -134,11 +134,11 @@ export default function EnsNameManager({ agentAddress }: Props) {
 
       {/* Wrong-chain warning */}
       {onWrongChain && (
-        <div className="text-xs text-yellow-400 bg-yellow-500/5 border border-yellow-500/20 rounded px-3 py-2 flex items-center justify-between gap-3">
+        <div className="text-xs text-[#A78BFA] bg-[#1A1C23] border border-[#1A1C23] rounded px-3 py-2 flex items-center justify-between gap-3">
           <span>Switch to Ethereum Sepolia to register a custom name</span>
           <button
             onClick={switchToSepolia}
-            className="text-[10px] border border-yellow-500/30 px-2 py-1 rounded hover:bg-yellow-500/10 transition-colors whitespace-nowrap"
+            className="text-[10px] border border-[#A78BFA]/30 px-2 py-1 rounded hover:bg-[#A78BFA]/10 transition-colors whitespace-nowrap"
           >
             Switch →
           </button>
@@ -168,16 +168,16 @@ export default function EnsNameManager({ agentAddress }: Props) {
         {label && (
           <div className={`text-xs px-2 py-1 rounded ${
             checkState === "checking"  ? "text-gray-400" :
-            checkState === "available" ? "text-green-400" :
+            checkState === "available" ? "text-[#A78BFA]" :
             checkState === "taken"     ? "text-red-400" :
-            checkState === "invalid"   ? "text-yellow-400" :
+            checkState === "invalid"   ? "text-[#A78BFA]" :
             "text-gray-500"
           }`}>
             {checkState === "checking"  && "Checking availability…"}
             {checkState === "available" && `✓ ${label}.composia.eth is available`}
             {checkState === "taken"     && `✗ ${label}.composia.eth is taken`}
             {checkState === "invalid"   && `✗ ${checkReason}`}
-            {checkState === "error"     && `⚠ ${checkReason}`}
+            {checkState === "error"     && checkReason}
           </div>
         )}
 
@@ -187,9 +187,9 @@ export default function EnsNameManager({ agentAddress }: Props) {
           disabled={txState === "pending" || (checkState !== "available" && !onWrongChain)}
           className="w-full py-2 rounded-lg text-xs font-mono transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
-            background: checkState === "available" && !onWrongChain ? "rgba(0,212,255,0.15)" : "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(0,212,255,0.25)",
-            color: "#00D4FF",
+            background: checkState === "available" && !onWrongChain ? " "rgba(123,97,255,$($args[0].Groups[1].Value))" " : "rgba(255,255,255,0.05)",
+            border: "1px solid  "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+            color: "#7B61FF",
           }}
         >
           {txState === "pending"

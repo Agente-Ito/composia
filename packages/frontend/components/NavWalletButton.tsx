@@ -11,9 +11,9 @@ export default function NavWalletButton() {
         title="Click to disconnect"
         className="text-xs font-mono px-3 py-1.5 rounded-lg border transition-colors hover:border-composia-cyan/50"
         style={{
-          color: "#00D4FF",
-          borderColor: "rgba(0,212,255,0.25)",
-          background: "rgba(0,212,255,0.05)",
+          color: "#7B61FF",
+          borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+          background: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
         }}
       >
         {address.slice(0, 6)}…{address.slice(-4)}

@@ -28,12 +28,6 @@ const BODY = { cx: THORAX_CX, cy: THORAX_CY + 10, rx: 6, ry: 16 };
 // Head
 const HEAD = { cx: THORAX_CX, cy: THORAX_CY - 14, r: 5 };
 
-// Antennae
-const ANTENNAE = [
-  { x1: 97, y1: 46, x2: 82, y2: 20 },
-  { x1: 103, y1: 46, x2: 118, y2: 20 },
-];
-
 // ── Wing polygons ─────────────────────────────────────────────────────────────
 // Each wing is defined as a set of triangles (network mesh).
 // Left wing: mirrored via scaleX(-1) from center.
@@ -86,7 +80,7 @@ const LUKSO_ANCHOR_NODES = [
 export function scoreColor(score: number): string {
   if (score >= 90) return "#A78BFA";   // ds-secondary — top tier
   if (score >= 75) return "#7B61FF";   // ds-primary — strong
-  if (score >= 60) return "#FF8C5A";   // warm orange — caution
+  if (score >= 60) return "#A78BFA";   // secondary — developing
   return "#FF4060";                    // red — low
 }
 
@@ -265,17 +259,6 @@ export default function MothLogo({
       {/* ── Lukso: anchor structure below body ───────────────────────── */}
       {variant === "lukso" && luksoAnchors()}
 
-      {/* ── Antennae ─────────────────────────────────────────────────── */}
-      {ANTENNAE.map((a, i) => (
-        <line
-          key={i}
-          x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2}
-          stroke={color} strokeWidth={0.7} strokeOpacity={0.7}
-        />
-      ))}
-      {/* Antenna tip nodes */}
-      <circle cx={82} cy={20} r={1.5} fill={color} fillOpacity={0.9} />
-      <circle cx={118} cy={20} r={1.5} fill={color} fillOpacity={0.9} />
 
       {/* ── Body ─────────────────────────────────────────────────────── */}
       <ellipse

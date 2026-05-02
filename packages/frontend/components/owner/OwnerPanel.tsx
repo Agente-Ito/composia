@@ -56,7 +56,7 @@ export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwne
         <button
           onClick={connect}
           className="shrink-0 text-xs font-mono px-4 py-2 rounded-lg border transition-colors hover:bg-composia-cyan/10"
-          style={{ borderColor: "rgba(0,212,255,0.3)", color: "#00D4FF" }}
+          style={{ borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ", color: "#7B61FF" }}
         >
           Connect Wallet
         </button>
@@ -68,19 +68,19 @@ export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwne
   return (
     <div
       className="rounded-xl border overflow-hidden"
-      style={{ borderColor: "rgba(0,212,255,0.25)" }}
+      style={{ borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" " }}
     >
       {/* Header */}
       <div
         className="px-5 py-3 flex items-center justify-between"
-        style={{ borderBottom: "1px solid #0d1a24", background: "rgba(0,212,255,0.04)" }}
+        style={{ borderBottom: "1px solid #0d1a24", background: " "rgba(123,97,255,$($args[0].Groups[1].Value))" " }}
       >
         <div className="flex items-center gap-2">
           <span
             className="w-2 h-2 rounded-full animate-live-pulse"
-            style={{ background: "#00FF88" }}
+            style={{ background: "#A78BFA" }}
           />
-          <span className="text-xs font-semibold" style={{ color: "#00D4FF" }}>
+          <span className="text-xs font-semibold" style={{ color: "#7B61FF" }}>
             {devOwner ? "Owner Panel — dev preview" : "You own this profile"}
           </span>
         </div>
@@ -100,7 +100,7 @@ export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwne
             onClick={() => setActiveTab(tab.id)}
             className="px-4 py-2.5 text-xs font-mono transition-colors relative"
             style={{
-              color: activeTab === tab.id ? "#00D4FF" : "#4a6670",
+              color: activeTab === tab.id ? "#7B61FF" : "#4a6670",
               background: "transparent",
             }}
           >
@@ -108,7 +108,7 @@ export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwne
             {activeTab === tab.id && (
               <span
                 className="absolute bottom-0 left-0 right-0 h-0.5"
-                style={{ background: "#00D4FF" }}
+                style={{ background: "#7B61FF" }}
               />
             )}
           </button>

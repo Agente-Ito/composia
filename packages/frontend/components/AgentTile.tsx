@@ -136,10 +136,10 @@ export default function AgentTile({ data, index = 0 }: Props) {
           <Badge color="#00C896" label="KeeperHub" />
         )}
         {data.lastDeposit && (
-          <Badge color="#FF8C5A" label={`Deposit ${data.lastDeposit}`} />
+          <Badge color="#A78BFA" label={`Deposit ${data.lastDeposit}`} />
         )}
         {data.claimed ? (
-          <Badge color="#00C896" label="Claimed" />
+          <Badge color="#A78BFA" label="Claimed" />
         ) : (
           <Badge color="#4a6670" label="Unclaimed" />
         )}
