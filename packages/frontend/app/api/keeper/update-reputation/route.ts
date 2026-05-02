@@ -72,13 +72,11 @@ export async function POST(req: NextRequest) {
     // L1: gasless text record update via Namespace (fire-and-forget)
     nsUpdateTexts(agent, accuracy, verifications).catch(() => {});
 
-    // L2: on-chain ReputationState update (parallel)
-    const repTxs = await Promise.all([
-      repState.updateVerificationStatus(ensNode, repBps, verified),
-      repState.syncFollowerCount(ensNode, followerCount),
-    ]);
-    const receipts = await Promise.all(repTxs.map((tx: { wait: () => Promise<{ hash: string }> }) => tx.wait()));
-    const txHash   = receipts[0].hash;
+    // L2: on-chain ReputationState update (sequential to avoid nonce collisions)
+    const updateTx      = await repState.updateVerificationStatus(ensNode, repBps, verified);
+    const updateReceipt = await updateTx.wait();
+    const txHash        = updateReceipt.hash;
+    await (await repState.syncFollowerCount(ensNode, followerCount)).wait();
 
     // Optional: sync to SyncerContract (cross-chain bridge record)
     let syncTxHash: string | undefined;
