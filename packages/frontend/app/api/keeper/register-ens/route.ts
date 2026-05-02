@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     if (!nsOk) console.warn(`[register-ens] Namespace subname creation failed for ${label} — continuing with L2`);
 
     // L2: seed ReputationState on-chain (sequential, explicit gas to avoid OOG on cold slots)
-    const GAS = 300_000n;
+    const GAS = 300000;
     await (await repState.registerAgent(agent, upAddress, ensNode, label, { gasLimit: GAS })).wait();
     await (await repState.updateVerificationStatus(ensNode, 0, false, { gasLimit: GAS })).wait();
     await (await repState.syncFollowerCount(ensNode, 0, { gasLimit: GAS })).wait();

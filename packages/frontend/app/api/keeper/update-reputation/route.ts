@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     nsUpdateTexts(agent, accuracy, verifications).catch(() => {});
 
     // L2: on-chain ReputationState update (sequential, explicit gas to avoid OOG on cold slots)
-    const GAS           = 300_000n;
+    const GAS           = 300000;
     const updateTx      = await repState.updateVerificationStatus(ensNode, repBps, verified, { gasLimit: GAS });
     const updateReceipt = await updateTx.wait();
     const txHash        = updateReceipt.hash;
