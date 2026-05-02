@@ -148,7 +148,7 @@ export default function SocialRecovery({ upAddress }: Props) {
       {/* Explainer */}
       <div
         className="rounded-lg p-4 space-y-2"
-        style={{ background: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ", border: "1px solid  "rgba(123,97,255,$($args[0].Groups[1].Value))" " }}
+        style={{ background: "rgba(123,97,255,0.05)", border: "1px solid rgba(123,97,255,0.2)" }}
       >
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold" style={{ color: "#7B61FF" }}>

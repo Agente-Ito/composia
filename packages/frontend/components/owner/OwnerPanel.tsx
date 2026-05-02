@@ -56,7 +56,7 @@ export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwne
         <button
           onClick={connect}
           className="shrink-0 text-xs font-mono px-4 py-2 rounded-lg border transition-colors hover:bg-composia-cyan/10"
-          style={{ borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ", color: "#7B61FF" }}
+          style={{ borderColor: "rgba(123,97,255,0.3)", color: "#7B61FF" }}
         >
           Connect Wallet
         </button>
@@ -68,12 +68,12 @@ export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwne
   return (
     <div
       className="rounded-xl border overflow-hidden"
-      style={{ borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" " }}
+      style={{ borderColor: "rgba(123,97,255,0.3)" }}
     >
       {/* Header */}
       <div
         className="px-5 py-3 flex items-center justify-between"
-        style={{ borderBottom: "1px solid #0d1a24", background: " "rgba(123,97,255,$($args[0].Groups[1].Value))" " }}
+        style={{ borderBottom: "1px solid #0d1a24", background: "rgba(123,97,255,0.05)" }}
       >
         <div className="flex items-center gap-2">
           <span

@@ -12,8 +12,8 @@ export default function NavWalletButton() {
         className="text-xs font-mono px-3 py-1.5 rounded-lg border transition-colors hover:border-composia-cyan/50"
         style={{
           color: "#7B61FF",
-          borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
-          background: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+          borderColor: "rgba(123,97,255,0.3)",
+          background: "rgba(123,97,255,0.1)",
         }}
       >
         {address.slice(0, 6)}…{address.slice(-4)}

@@ -295,9 +295,9 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded border"
                         style={{
-                          borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+                          borderColor: "rgba(123,97,255,0.3)",
                           color: "#7B61FF",
-                          background: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+                          background: "rgba(123,97,255,0.1)",
                         }}
                       >
                         Composia

@@ -304,9 +304,9 @@ export default function ProfileEditor({ agentAddress, upAddress, kmAddress }: Pr
                   key={t}
                   className="text-[10px] font-mono px-2 py-0.5 rounded-full border"
                   style={{
-                    borderColor: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+                    borderColor: "rgba(123,97,255,0.3)",
                     color: "#7B61FF",
-                    background: " "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+                    background: "rgba(123,97,255,0.1)",
                   }}
                 >
                   {t}
