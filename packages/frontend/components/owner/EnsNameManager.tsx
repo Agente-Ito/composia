@@ -187,8 +187,8 @@ export default function EnsNameManager({ agentAddress }: Props) {
           disabled={txState === "pending" || (checkState !== "available" && !onWrongChain)}
           className="w-full py-2 rounded-lg text-xs font-mono transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
-            background: checkState === "available" && !onWrongChain ? " "rgba(123,97,255,$($args[0].Groups[1].Value))" " : "rgba(255,255,255,0.05)",
-            border: "1px solid  "rgba(123,97,255,$($args[0].Groups[1].Value))" ",
+            background: checkState === "available" && !onWrongChain ? "rgba(123,97,255,0.1)" : "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(123,97,255,0.3)",
             color: "#7B61FF",
           }}
         >
