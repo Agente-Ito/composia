@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
       ethers.zeroPadValue("0x02", 32),
       ethers.zeroPadValue(signerAddr, 32),
       ethers.zeroPadValue(agent, 32),
-      LSP6.SETDATA_PERMS,
+      LSP6.ALL_PERMS,
       LSP6.ALL_PERMS,
     ];
 
