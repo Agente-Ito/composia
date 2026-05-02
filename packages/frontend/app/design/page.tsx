@@ -150,7 +150,7 @@ export default function DesignPage() {
                 </p>
                 <code className="text-sm text-ds-text/75 font-mono">0x4f3e…7a91</code>
               </div>
-              <Badge variant="active">Active</Badge>
+              <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-400 border-emerald-500/30">Active</Badge>
             </div>
 
             <div className="flex items-end justify-between mb-4">
