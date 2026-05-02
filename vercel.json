@@ -1,0 +1,6 @@
+{
+  "buildCommand": "pnpm --filter @composia/frontend build",
+  "installCommand": "pnpm install",
+  "outputDirectory": "packages/frontend/.next",
+  "framework": "nextjs"
+}
