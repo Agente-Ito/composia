@@ -4,10 +4,12 @@ import { keeperLog } from "@/lib/keeper-log";
 import { nsCreateSubname, nsLabel } from "@/lib/namespace";
 
 const REPUTATION_STATE_ABI = [
-  "function registerAgent(address agent, address upAddress, bytes32 ensNode, string calldata label) external",
+  "function registerAgent(address agent, address upAddress, bytes32 ensNode, string label) external",
   "function updateVerificationStatus(bytes32 node, uint256 newReputation, bool shouldBeVerified) external",
   "function syncFollowerCount(bytes32 node, uint256 count) external",
   "function agentToNode(address agent) external view returns (bytes32)",
+  "function reputationOracle() external view returns (address)",
+  "function owner() external view returns (address)",
 ];
 
 function isAuthorized(req: NextRequest): boolean {
@@ -59,6 +61,21 @@ export async function POST(req: NextRequest) {
     // L1: create offchain ENS subname via Namespace SDK (gasless)
     const nsOk = await nsCreateSubname({ agentEoa: agent, upAddress, accuracy: 0, verifications: 0 });
     if (!nsOk) console.warn(`[register-ens] Namespace subname creation failed for ${label} — continuing with L2`);
+
+    // Debug: verify auth before sending tx
+    const signerAddr = await signer.getAddress();
+    const oracle     = await repState.reputationOracle().catch(() => "unknown");
+    const owner      = await repState.owner().catch(() => "unknown");
+    console.log(`[register-ens] signer=${signerAddr} oracle=${oracle} owner=${owner}`);
+
+    // Dry-run to surface exact revert reason
+    try {
+      await repState.registerAgent.staticCall(agent, upAddress, ensNode, label);
+    } catch (simErr: unknown) {
+      const simMsg = simErr instanceof Error ? simErr.message : String(simErr);
+      console.error(`[register-ens] staticCall failed: ${simMsg}`);
+      throw new Error(`registerAgent simulation failed: ${simMsg}`);
+    }
 
     // L2: seed ReputationState on-chain (sequential to avoid nonce collisions)
     await (await repState.registerAgent(agent, upAddress, ensNode, label)).wait();
