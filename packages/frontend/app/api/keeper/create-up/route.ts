@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ethers } from "ethers";
-import path from "path";
-import fs from "fs";
 import { keeperLog } from "@/lib/keeper-log";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const UniversalProfileArtifact = require("@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const LSP6KeyManagerArtifact   = require("@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json");
 
 // ── LSP3 / LSP6 constants (copied from /api/keeper/route.ts) ─────────────────
 function lsp3Key(name: string) {
@@ -45,19 +47,8 @@ const KM_ABI = [
 ];
 
 // ── Bytecode loader ───────────────────────────────────────────────────────────
-let _upBytecode: string | null = null;
-let _kmBytecode: string | null = null;
-
-function readArtifact(name: string): string {
-  const p = path.join(
-    process.cwd(),
-    "../../packages/contracts/node_modules/@lukso/lsp-smart-contracts/artifacts",
-    `${name}.json`
-  );
-  return JSON.parse(fs.readFileSync(p, "utf8")).bytecode as string;
-}
-function getUPBytecode(): string { if (!_upBytecode) _upBytecode = readArtifact("UniversalProfile"); return _upBytecode; }
-function getKMBytecode(): string { if (!_kmBytecode) _kmBytecode = readArtifact("LSP6KeyManager");  return _kmBytecode; }
+function getUPBytecode(): string { return UniversalProfileArtifact.bytecode as string; }
+function getKMBytecode(): string { return LSP6KeyManagerArtifact.bytecode as string; }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 function isAuthorized(req: NextRequest): boolean {
