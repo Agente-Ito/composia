@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ethers } from "ethers";
 import { keeperLog } from "@/lib/keeper-log";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const UniversalProfileArtifact = require("@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json");
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const LSP6KeyManagerArtifact   = require("@lukso/lsp-smart-contracts/artifacts/LSP6KeyManager.json");
+import UniversalProfileArtifact from "@/lib/artifacts/UniversalProfile.json";
+import LSP6KeyManagerArtifact   from "@/lib/artifacts/LSP6KeyManager.json";
 
 // ── LSP3 / LSP6 constants (copied from /api/keeper/route.ts) ─────────────────
 function lsp3Key(name: string) {
