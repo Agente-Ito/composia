@@ -285,7 +285,7 @@ export default async function AgentProfilePage({
       <div className="bg-composia-card border border-composia-border rounded-xl p-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="min-w-0">
-            <h1 className="font-sora text-2xl font-bold glow-cyan truncate">{displayName}</h1>
+            <h1 className="text-2xl font-bold glow-cyan truncate">{displayName}</h1>
             <p className="font-mono text-sm text-gray-400 break-all mt-0.5">{address}</p>
             {reactive && allLabels.length > 1 && (
               <p className="text-[11px] text-gray-600 mt-1">

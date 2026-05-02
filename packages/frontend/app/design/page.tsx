@@ -97,7 +97,7 @@ export default function DesignPage() {
 
           {/* headline */}
           <div className="space-y-5">
-            <h1 className="font-sora text-[46px] font-semibold leading-[1.07] tracking-tight">
+            <h1 className="text-[46px] font-semibold leading-[1.07] tracking-tight">
               Composable<br />reputation<br />
               <span className="text-ds-primary">layer</span>
               <br />
@@ -111,7 +111,7 @@ export default function DesignPage() {
 
           {/* CTAs */}
           <div className="flex items-center gap-3">
-            <Button variant="primary">Get Early Access</Button>
+            <Button variant="default">Get Early Access</Button>
             <Button variant="secondary">Read the Docs</Button>
           </div>
 
@@ -120,7 +120,7 @@ export default function DesignPage() {
             {STATS.map((s) => (
               <div key={s.label}>
                 <p
-                  className="font-sora text-3xl font-bold tabular-nums"
+                  className="text-3xl font-bold tabular-nums"
                   style={{
                     background: "linear-gradient(135deg, #EDEFF6 40%, #A78BFA 100%)",
                     WebkitBackgroundClip: "text",
@@ -159,7 +159,7 @@ export default function DesignPage() {
                   Reputation Score
                 </p>
                 <div className="flex items-baseline gap-2.5">
-                  <span className="font-sora text-[52px] font-bold leading-none text-ds-text tabular-nums">
+                  <span className="text-[52px] font-bold leading-none text-ds-text tabular-nums">
                     94.2
                   </span>
                   <span className="text-sm font-medium text-ds-secondary">↑ 8.3%</span>

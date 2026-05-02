@@ -3,10 +3,7 @@ import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
 import NavWalletButton from "@/components/NavWalletButton";
 import ComposiaLogoHorizontal from "@/components/ComposiaLogoHorizontal";
-import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: "Composia — AI Agent Reputation Network",
@@ -16,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
+    <html lang="en" className={cn("font-sans")}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

@@ -164,7 +164,7 @@ export default function GridPage() {
           style={{ borderBottom: "1px solid #0d1a24", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
         >
           <div className="flex items-center gap-3">
-            <h1 className="font-sora text-sm font-bold tracking-widest text-composia-text uppercase">
+            <h1 className="text-sm font-bold tracking-widest text-composia-text uppercase">
               Score Grid
             </h1>
             <span

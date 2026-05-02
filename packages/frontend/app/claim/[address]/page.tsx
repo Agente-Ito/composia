@@ -137,7 +137,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
       </Link>
 
       <div className="space-y-1">
-        <h1 className="font-sora text-2xl font-bold text-white">Claim Your Universal Profile</h1>
+        <h1 className="text-2xl font-bold text-white">Claim Your Universal Profile</h1>
         <p className="text-gray-400 text-sm">
           Take full ownership of this Composia-managed Universal Profile.
         </p>
