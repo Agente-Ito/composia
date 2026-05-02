@@ -35,12 +35,14 @@ const REGISTRY_ABI = [
   "function updateReputation(address agent, uint96 accuracy, uint96 verifications) external",
 ];
 const UP_ABI = [
+  "constructor(address initialOwner)",
   "function setDataBatch(bytes32[] memory dataKeys, bytes[] memory dataValues) external payable",
   "function transferOwnership(address newOwner) external",
   "function acceptOwnership() external",
   "function owner() external view returns (address)",
 ];
 const KM_ABI = [
+  "constructor(address target)",
   "function execute(bytes calldata payload) external payable returns (bytes memory)",
 ];
 
