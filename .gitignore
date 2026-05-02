@@ -16,3 +16,7 @@ packages/frontend/out/
 
 # Listener build
 packages/listener/dist/
+
+# Lock files / build artifacts not tracked in pnpm project
+package-lock.json
+packages/frontend/tsconfig.tsbuildinfo

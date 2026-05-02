@@ -41,9 +41,9 @@ const RADIUS = 34;
 const CIRC   = 2 * Math.PI * RADIUS;
 
 function gaugeColor(a: number) {
-  if (a >= 90) return "#00FF88";
-  if (a >= 75) return "#00D4FF";
-  if (a >= 60) return "#FFC033";
+  if (a >= 90) return "#A78BFA";
+  if (a >= 75) return "#7B61FF";
+  if (a >= 60) return "#FF8C5A";
   return "#FF4060";
 }
 function tierLabel(a: number) {
@@ -351,7 +351,7 @@ export default function DemoPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
       <div>
-        <h1 className="font-sora text-3xl font-bold glow-cyan">Demo Simulator</h1>
+        <h1 className="text-3xl font-bold glow-cyan">Demo Simulator</h1>
         <p className="text-composia-muted mt-2 text-sm">
           Simulate a Gensyn verification event and watch Composia build an on-chain identity in real time.
         </p>

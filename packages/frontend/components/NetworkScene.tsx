@@ -1,216 +1,256 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { AdditiveBlending, Color, InstancedMesh, LineSegments, Mesh, Object3D } from "three";
+import { AdditiveBlending, Group, InstancedMesh, LineSegments, Mesh, Object3D } from "three";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// ─── Easing ───────────────────────────────────────────────────────────────────
 
-type BNode = {
-  id: number;
-  anchor: readonly [number, number, number];
-  pos: [number, number, number];
-  phase: number;       // deterministic float offset (index × 0.72)
-  importance: number;  // 0–1, drives colour intensity
-};
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - Math.min(t, 1), 3);
+const easeOutBack  = (t: number) =>
+  1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
 
-type BEdge = { a: number; b: number; strength: number };
+// Smooth travel (70%) → slight organic overshoot (30%)
+function expandEase(t: number) {
+  const c = Math.min(t, 1);
+  return c <= 0.70
+    ? easeOutCubic(c / 0.70) * 0.90
+    : 0.90 + easeOutBack((c - 0.70) / 0.30) * 0.10;
+}
+
+function lerp(a: number, b: number, t: number) { return a + (b - a) * t; }
 
 // ─── Butterfly geometry ───────────────────────────────────────────────────────
-//
-// Coordinate space: centre (0,0,0).  One unit ≈ 28 % of viewport half-height.
-// Left side defined explicitly; right side is an exact X-mirror.
-//
-// Index map
-//   0        = centre body
-//   1–5      = left upper forewing  (lu_root · lu_inner · lu_tip · lu_outer · lu_base)
-//   6–9      = left lower hindwing  (ll_root · ll_inner · ll_outer · ll_tip)
-//   10–14    = right upper forewing (mirror of 1–5)
-//   15–18    = right lower hindwing (mirror of 6–9)
 
-const L_UPPER: ReadonlyArray<readonly [number, number, number]> = [
-  [-0.12,  0.10, 0.01],  // 1  lu_root   — inner attachment near body
-  [-0.20,  0.54, 0.05],  // 2  lu_inner  — interior vein junction
-  [-0.56,  1.04, 0.10],  // 3  lu_tip    — forewing apex (highest point)
-  [-1.10,  0.56, 0.08],  // 4  lu_outer  — outer corner (widest span)
-  [-1.04,  0.10, 0.04],  // 5  lu_base   — outer trailing edge at body level
-];
+// Navbar logo world-space position (top-left corner, camera z=4.2 fov=42)
+const NAV_X = -2.35;
+const NAV_Y =  1.52;
 
-const L_LOWER: ReadonlyArray<readonly [number, number, number]> = [
-  [-0.12, -0.10, 0.01],  // 6  ll_root
-  [-0.36, -0.40, 0.05],  // 7  ll_inner
-  [-0.86, -0.34, 0.06],  // 8  ll_outer
-  [-0.48, -0.84, 0.08],  // 9  ll_tip  — hindwing lower apex
-];
+const L_UPPER = [
+  [-0.07,  0.20, 0.01],  // shoulder
+  [-0.44,  0.66, 0.06],  // inner arc
+  [-0.88,  0.86, 0.10],  // apex
+  [-1.42,  0.44, 0.08],  // outer-mid (high enough for moth silhouette)
+  [-0.96, -0.14, 0.04],  // outer-base
+] as const;
 
-// Importance per node — drives brightness; tips are highlighted
-const IMPORTANCE: readonly number[] = [
-  1.00,                             // 0  centre
-  0.68, 0.62, 0.94, 0.76, 0.66,   // 1–5  left upper  (tip=0.94, outer=0.76)
-  0.64, 0.58, 0.56, 0.88,          // 6–9  left lower  (tip=0.88)
-  0.68, 0.62, 0.94, 0.76, 0.66,   // 10–14 right upper (mirror)
-  0.64, 0.58, 0.56, 0.88,          // 15–18 right lower (mirror)
-];
+const L_LOWER = [
+  [-0.07, -0.18, 0.01],  // root
+  [-0.38, -0.40, 0.05],  // lower-mid
+  [-0.80, -0.52, 0.06],  // lower-outer
+  [-0.50, -0.88, 0.08],  // tip
+] as const;
 
-// ─── Build node list ──────────────────────────────────────────────────────────
+const IMPORTANCE = [
+  1.00,
+  0.68, 0.62, 0.94, 0.76, 0.66,
+  0.64, 0.58, 0.56, 0.88,
+  0.68, 0.62, 0.94, 0.76, 0.66,
+  0.64, 0.58, 0.56, 0.88,
+] as const;
+
+const EDGES = [
+  { a: 0, b: 1,  s: 0.90 }, { a: 0, b: 5,  s: 0.80 },
+  { a: 1, b: 3,  s: 0.86 }, { a: 3, b: 4,  s: 0.78 },
+  { a: 4, b: 5,  s: 0.72 }, { a: 5, b: 0,  s: 0.65 },
+  { a: 1, b: 2,  s: 0.70 }, { a: 2, b: 3,  s: 0.74 },
+  { a: 2, b: 4,  s: 0.68 }, { a: 1, b: 4,  s: 0.58 },
+  { a: 0, b: 6,  s: 0.88 }, { a: 6, b: 7,  s: 0.72 },
+  { a: 7, b: 8,  s: 0.68 }, { a: 7, b: 9,  s: 0.76 },
+  { a: 8, b: 9,  s: 0.65 }, { a: 6, b: 8,  s: 0.58 },
+  { a: 0, b: 10, s: 0.90 }, { a: 0, b: 14, s: 0.80 },
+  { a: 10, b: 12, s: 0.86 }, { a: 12, b: 13, s: 0.78 },
+  { a: 13, b: 14, s: 0.72 }, { a: 14, b: 0,  s: 0.65 },
+  { a: 10, b: 11, s: 0.70 }, { a: 11, b: 12, s: 0.74 },
+  { a: 11, b: 13, s: 0.68 }, { a: 10, b: 13, s: 0.58 },
+  { a: 0,  b: 15, s: 0.88 }, { a: 15, b: 16, s: 0.72 },
+  { a: 16, b: 17, s: 0.68 }, { a: 16, b: 18, s: 0.76 },
+  { a: 17, b: 18, s: 0.65 }, { a: 15, b: 17, s: 0.58 },
+] as const;
+
+// ─── Node builder ─────────────────────────────────────────────────────────────
+
+type BNode = {
+  start:      [number, number, number]; // navbar cluster position
+  end:        [number, number, number]; // final butterfly position
+  phase:      number;                   // idle breathing offset
+  delay:      number;                   // expand stagger 0–0.42
+  importance: number;
+};
+
+// Golden-angle spiral for natural cluster scatter around NAV point
+function clusterAt(i: number): [number, number, number] {
+  const θ = (i * 137.508 * Math.PI) / 180;
+  const r = 0.028 + (i % 5) * 0.016;
+  return [NAV_X + Math.cos(θ) * r, NAV_Y + Math.sin(θ) * r, 0];
+}
 
 function buildNodes(): BNode[] {
-  const left = [...L_UPPER, ...L_LOWER];
-  const nodes: BNode[] = [
-    { id: 0, anchor: [0, 0, 0], pos: [0, 0, 0], phase: 0, importance: 1 },
-  ];
+  const wings = [...L_UPPER, ...L_LOWER];
+  const total = wings.length; // 9
 
-  // Left side: ids 1–9
-  left.forEach((a, i) => {
+  // Centre (id 0) — flies first, no delay
+  const nodes: BNode[] = [{
+    start:      [NAV_X, NAV_Y, 0],
+    end:        [0, 0, 0],
+    phase:      0,
+    delay:      0,
+    importance: 1,
+  }];
+
+  // Left wing nodes (ids 1–9)
+  wings.forEach((a, i) => {
     nodes.push({
-      id: i + 1,
-      anchor: a,
-      pos: [a[0], a[1], a[2]],
-      phase: (i + 1) * 0.72,
+      start:      clusterAt(i + 1),
+      end:        [a[0], a[1], a[2]],
+      phase:      (i + 1) * 0.72,
+      delay:      0.05 + (i / (total - 1)) * 0.37,
       importance: IMPORTANCE[i + 1],
     });
   });
 
-  // Right side: ids 10–18  — X axis mirror
-  left.forEach((a, i) => {
+  // Right wing nodes (ids 10–18) — X-mirror, interleaved stagger
+  wings.forEach((a, i) => {
     nodes.push({
-      id: i + 10,
-      anchor: [-a[0], a[1], a[2]],
-      pos: [-a[0], a[1], a[2]],
-      phase: (i + 1) * 0.72,   // identical phase → perfectly synchronised mirror
+      start:      clusterAt(i + 10),
+      end:        [-a[0], a[1], a[2]],
+      phase:      (i + 1) * 0.72,
+      delay:      0.08 + (i / (total - 1)) * 0.37,
       importance: IMPORTANCE[i + 10],
     });
   });
 
-  return nodes; // order: 0, 1…9, 10…18
+  return nodes;
 }
 
-// ─── Edge list ────────────────────────────────────────────────────────────────
-//
-// Left upper forewing forms a closed triangular outline with interior veins.
-// Left lower hindwing forms a smaller angular diamond.
-// Right side mirrors left (node indices shifted +9 for non-centre).
+// ─── Visualization ────────────────────────────────────────────────────────────
 
-const EDGES: readonly BEdge[] = [
-  // ── left upper forewing ─────────────────────────────────────────────────
-  { a: 0, b: 1, strength: 0.90 },  // centre  → lu_root
-  { a: 0, b: 5, strength: 0.80 },  // centre  → lu_base   (trailing edge root)
-  { a: 1, b: 3, strength: 0.86 },  // lu_root → lu_tip    (leading costal vein)
-  { a: 3, b: 4, strength: 0.78 },  // lu_tip  → lu_outer
-  { a: 4, b: 5, strength: 0.72 },  // lu_outer→ lu_base   (outer trailing edge)
-  { a: 5, b: 0, strength: 0.65 },  // lu_base → centre    (trailing edge closes)
-  { a: 1, b: 2, strength: 0.70 },  // lu_root → lu_inner  (inner vein)
-  { a: 2, b: 3, strength: 0.74 },  // lu_inner→ lu_tip
-  { a: 2, b: 4, strength: 0.68 },  // lu_inner→ lu_outer  (cross vein)
-  { a: 1, b: 4, strength: 0.58 },  // diagonal strengthener
-
-  // ── left lower hindwing ─────────────────────────────────────────────────
-  { a: 0, b: 6, strength: 0.88 },  // centre  → ll_root
-  { a: 6, b: 7, strength: 0.72 },  // ll_root → ll_inner
-  { a: 7, b: 8, strength: 0.68 },  // ll_inner→ ll_outer
-  { a: 7, b: 9, strength: 0.76 },  // ll_inner→ ll_tip    (main vein)
-  { a: 8, b: 9, strength: 0.65 },  // ll_outer→ ll_tip
-  { a: 6, b: 8, strength: 0.58 },  // ll_root → ll_outer  (base edge)
-
-  // ── right upper forewing  (mirror: non-centre indices + 9) ──────────────
-  { a:  0, b: 10, strength: 0.90 },
-  { a:  0, b: 14, strength: 0.80 },
-  { a: 10, b: 12, strength: 0.86 },
-  { a: 12, b: 13, strength: 0.78 },
-  { a: 13, b: 14, strength: 0.72 },
-  { a: 14, b:  0, strength: 0.65 },
-  { a: 10, b: 11, strength: 0.70 },
-  { a: 11, b: 12, strength: 0.74 },
-  { a: 11, b: 13, strength: 0.68 },
-  { a: 10, b: 13, strength: 0.58 },
-
-  // ── right lower hindwing ────────────────────────────────────────────────
-  { a:  0, b: 15, strength: 0.88 },
-  { a: 15, b: 16, strength: 0.72 },
-  { a: 16, b: 17, strength: 0.68 },
-  { a: 16, b: 18, strength: 0.76 },
-  { a: 17, b: 18, strength: 0.65 },
-  { a: 15, b: 17, strength: 0.58 },
-];
-
-// ─── Geometry buffers ─────────────────────────────────────────────────────────
-
-function buildEdgeGeometry(nodes: BNode[], edges: readonly BEdge[]) {
-  const linePos = new Float32Array(edges.length * 6);
-  const lineCol = new Float32Array(edges.length * 6);
-  const hi  = new Color("#EDEFF6");  // bright white — strong edges
-  const lo  = new Color("#4A5070");  // dim blue-grey — weak edges
-  const tmp = new Color();
-
-  for (let i = 0; i < edges.length; i++) {
-    const e  = edges[i];
-    const sa = nodes[e.a];
-    const sb = nodes[e.b];
-    const o  = i * 6;
-    linePos[o]     = sa.pos[0]; linePos[o + 1] = sa.pos[1]; linePos[o + 2] = sa.pos[2];
-    linePos[o + 3] = sb.pos[0]; linePos[o + 4] = sb.pos[1]; linePos[o + 5] = sb.pos[2];
-    tmp.copy(lo).lerp(hi, e.strength * 0.85 + 0.10).toArray(lineCol, o);
-    tmp.copy(lo).lerp(hi, e.strength * 0.85 + 0.10).toArray(lineCol, o + 3);
-  }
-
-  return { linePos, lineCol };
-}
-
-const NODE_COUNT = 18; // wing nodes only (excludes centre)
-
-// ─── Animated network ─────────────────────────────────────────────────────────
+const WING_COUNT  = 18;
+const EXPAND_DUR  = 1.85; // seconds
+const IDLE_SPEED  = 0.46;
 
 function NetworkVisualization() {
-  const nodes    = useMemo(buildNodes, []);
-  const edges    = useMemo(() => EDGES, []);
-  const geometry = useMemo(() => buildEdgeGeometry(nodes, edges), [nodes, edges]);
+  const nodes = useMemo(buildNodes, []);
+  const edges = useMemo(() => EDGES, []);
 
-  const nodesInstRef = useRef<InstancedMesh>(null);
-  const linesRef     = useRef<LineSegments>(null);
-  const centerRef    = useRef<Mesh>(null);
-  const glowRef      = useRef<Mesh>(null);
-  const tmpObj       = useMemo(() => new Object3D(), []);
+  const meshRef   = useRef<InstancedMesh>(null);
+  const linesRef  = useRef<LineSegments>(null);
+  const centreRef = useRef<Mesh>(null);
+  const glowRef   = useRef<Mesh>(null);
+  const groupRef  = useRef<Group>(null);
+  const dummy     = useMemo(() => new Object3D(), []);
 
-  useFrame(({ clock }) => {
-    const t  = clock.elapsedTime * 0.48;
-    const lp = geometry.linePos;
-    const lc = geometry.lineCol;
+  // Animation state
+  const phase  = useRef<"expand" | "idle">("expand");
+  const tExp   = useRef(0);
 
-    // ── wing nodes: float + visible breathing scale ─────────────────────────
-    for (let i = 1; i < nodes.length; i++) {
-      const n  = nodes[i];
-      const lt = t + n.phase;
+  // Current world positions for all 19 nodes (for edge drawing)
+  const curPos = useRef(new Float32Array(19 * 3));
 
-      n.pos[1] = n.anchor[1] + Math.sin(lt)        * 0.055;
-      n.pos[2] = n.anchor[2] + Math.cos(lt * 0.82) * 0.014;
+  // Mouse parallax (target + smoothed current)
+  const mouse  = useRef({ tx: 0, ty: 0, x: 0, y: 0 });
 
-      const breath = 1 + Math.sin(lt * 0.85) * 0.22;
-      const s = (0.030 + n.importance * 0.024) * breath;
+  // Geometry buffers — allocated once
+  const linePos = useMemo(() => new Float32Array(edges.length * 6), [edges.length]);
+  const lineCol = useMemo(() => new Float32Array(edges.length * 6), [edges.length]);
 
-      tmpObj.position.set(n.pos[0], n.pos[1], n.pos[2]);
-      tmpObj.scale.setScalar(s);
-      tmpObj.updateMatrix();
-      nodesInstRef.current?.setMatrixAt(i - 1, tmpObj.matrix);
+  // Start expand immediately (300 ms logo-pause before motion begins)
+  useEffect(() => {
+    const id = setTimeout(() => { tExp.current = 0; }, 300);
+    return () => clearTimeout(id);
+  }, []);
+
+  // Mouse parallax listener
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      mouse.current.tx =  (e.clientX / window.innerWidth  - 0.5) * 0.13;
+      mouse.current.ty = -(e.clientY / window.innerHeight - 0.5) * 0.09;
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, []);
+
+  useFrame(({ clock }, delta) => {
+    const t  = clock.elapsedTime;
+    const ph = phase.current;
+
+    // ── Advance expand ───────────────────────────────────────────────────
+    if (ph === "expand") {
+      tExp.current = Math.min(tExp.current + delta / EXPAND_DUR, 1);
+      if (tExp.current >= 1) phase.current = "idle";
     }
 
-    if (nodesInstRef.current) {
-      nodesInstRef.current.instanceMatrix.needsUpdate = true;
-    }
+    const tE = tExp.current;
 
-    // ── edges: position + flow pulse rippling through network ───────────────
+    // ── Compute current positions for all nodes ──────────────────────────
+    nodes.forEach((n, i) => {
+      // Per-node progress: starts only after its stagger delay
+      const raw  = (tE - n.delay) / (1 - n.delay + 0.001);
+      const nT   = expandEase(Math.max(0, raw));
+
+      let x = lerp(n.start[0], n.end[0], nT);
+      let y = lerp(n.start[1], n.end[1], nT);
+      let z = lerp(n.start[2], n.end[2], nT);
+
+      // Idle organic breathing (wing nodes only)
+      if (ph === "idle" && i > 0) {
+        const lt = t * IDLE_SPEED + n.phase;
+        y += Math.sin(lt)        * 0.026;
+        z += Math.cos(lt * 0.82) * 0.009;
+      }
+
+      curPos.current[i * 3]     = x;
+      curPos.current[i * 3 + 1] = y;
+      curPos.current[i * 3 + 2] = z;
+    });
+
+    // ── Update wing node instanced mesh ──────────────────────────────────
+    for (let i = 1; i <= WING_COUNT; i++) {
+      const n   = nodes[i];
+      const raw = (tE - n.delay) / (1 - n.delay + 0.001);
+      const nT  = expandEase(Math.max(0, raw));
+
+      const lt     = t * IDLE_SPEED + n.phase;
+      const breath = ph === "idle" ? 1 + Math.sin(lt * 0.85) * 0.20 : 1;
+      const sBase  = 0.013 + n.importance * 0.009;
+      const s      = lerp(0, sBase * breath, nT); // scale in from zero
+
+      dummy.position.set(
+        curPos.current[i * 3],
+        curPos.current[i * 3 + 1],
+        curPos.current[i * 3 + 2],
+      );
+      dummy.scale.setScalar(Math.max(s, 0));
+      dummy.updateMatrix();
+      meshRef.current?.setMatrixAt(i - 1, dummy.matrix);
+    }
+    if (meshRef.current) meshRef.current.instanceMatrix.needsUpdate = true;
+
+    // ── Update edges ─────────────────────────────────────────────────────
+    const globalAlpha = easeOutCubic(tE); // edges fade in with overall expand
+
     for (let i = 0; i < edges.length; i++) {
       const e  = edges[i];
-      const sa = nodes[e.a];
-      const sb = nodes[e.b];
-      const o  = i * 6;
-      lp[o]     = sa.pos[0]; lp[o + 1] = sa.pos[1]; lp[o + 2] = sa.pos[2];
-      lp[o + 3] = sb.pos[0]; lp[o + 4] = sb.pos[1]; lp[o + 5] = sb.pos[2];
+      const ax = curPos.current[e.a * 3],
+            ay = curPos.current[e.a * 3 + 1],
+            az = curPos.current[e.a * 3 + 2];
+      const bx = curPos.current[e.b * 3],
+            by = curPos.current[e.b * 3 + 1],
+            bz = curPos.current[e.b * 3 + 2];
 
-      // flow: each edge pulses at a different phase → ripple from centre out
-      const flow   = 0.28 + Math.sin(t * 2.2 + i * 0.55) * 0.22;
-      const bright = (0.18 + e.strength * 0.55) * flow;
-      lc[o]     = bright; lc[o + 1] = bright; lc[o + 2] = bright;
-      lc[o + 3] = bright; lc[o + 4] = bright; lc[o + 5] = bright;
+      const o = i * 6;
+      linePos[o]   = ax; linePos[o+1] = ay; linePos[o+2] = az;
+      linePos[o+3] = bx; linePos[o+4] = by; linePos[o+5] = bz;
+
+      // Flow pulse ripples during idle; flat during expand
+      const flow = ph === "idle"
+        ? 0.28 + Math.sin(t * 2.2 + i * 0.55) * 0.22
+        : globalAlpha;
+      const bright = (0.18 + e.s * 0.48) * flow;
+
+      // Purple-tinted edges (brand secondary #A78BFA ≈ 0.65, 0.55, 0.98)
+      lineCol[o]   = bright * 0.65; lineCol[o+1] = bright * 0.55; lineCol[o+2] = bright * 0.98;
+      lineCol[o+3] = bright * 0.65; lineCol[o+4] = bright * 0.55; lineCol[o+5] = bright * 0.98;
     }
 
     if (linesRef.current) {
@@ -218,39 +258,58 @@ function NetworkVisualization() {
       linesRef.current.geometry.attributes.color.needsUpdate    = true;
     }
 
-    // ── centre breathing ────────────────────────────────────────────────────
-    const breath = 1 + Math.sin(t * 1.15) * 0.08 + Math.cos(t * 0.58) * 0.03;
-    centerRef.current?.scale.setScalar(breath);
-    glowRef.current?.scale.setScalar(breath);
+    // ── Centre nucleus ────────────────────────────────────────────────────
+    const cRaw = (tE - 0) / (1 - 0 + 0.001);
+    const cT   = expandEase(Math.max(0, cRaw));
+    const cx   = curPos.current[0],
+          cy   = curPos.current[1],
+          cz   = curPos.current[2];
+
+    centreRef.current?.position.set(cx, cy, cz);
+    glowRef.current?.position.set(cx, cy, cz);
+
+    const breathCentre = ph === "idle"
+      ? 1 + Math.sin(t * 1.15) * 0.08 + Math.cos(t * 0.58) * 0.03
+      : 1;
+    const centreScale = lerp(0, breathCentre, cT);
+    centreRef.current?.scale.setScalar(centreScale);
+    glowRef.current?.scale.setScalar(centreScale);
+
+    // ── Mouse parallax (smooth damp) ─────────────────────────────────────
+    mouse.current.x += (mouse.current.tx - mouse.current.x) * 0.04;
+    mouse.current.y += (mouse.current.ty - mouse.current.y) * 0.04;
+    if (groupRef.current) {
+      groupRef.current.position.x = mouse.current.x;
+      groupRef.current.position.y = mouse.current.y;
+    }
   });
 
-  const centre = nodes[0];
-
   return (
-    <>
-      {/* Wing nodes — instanced spheres with emissive glow */}
+    <group ref={groupRef}>
+
+      {/* Wing nodes — instanced, 1 draw call */}
       <instancedMesh
-        ref={nodesInstRef}
-        args={[undefined, undefined, NODE_COUNT]}
+        ref={meshRef}
+        args={[undefined, undefined, WING_COUNT]}
         frustumCulled={false}
       >
-        <sphereGeometry args={[1, 8, 8]} />
+        <sphereGeometry args={[1, 7, 7]} />
         <meshStandardMaterial
-          color="#EDEFF6"
-          emissive="#EDEFF6"
-          emissiveIntensity={0.9}
+          color="#A78BFA"
+          emissive="#7B61FF"
+          emissiveIntensity={1.4}
           transparent
-          opacity={0.82}
+          opacity={0.90}
           depthWrite={false}
           toneMapped={false}
         />
       </instancedMesh>
 
-      {/* Wing edges */}
-      <lineSegments ref={linesRef}>
+      {/* Edges — 1 draw call */}
+      <lineSegments ref={linesRef} frustumCulled={false}>
         <bufferGeometry>
-          <bufferAttribute attach="attributes-position" args={[geometry.linePos, 3]} />
-          <bufferAttribute attach="attributes-color"    args={[geometry.lineCol, 3]} />
+          <bufferAttribute attach="attributes-position" args={[linePos, 3]} />
+          <bufferAttribute attach="attributes-color"    args={[lineCol, 3]} />
         </bufferGeometry>
         <lineBasicMaterial
           vertexColors
@@ -260,22 +319,22 @@ function NetworkVisualization() {
         />
       </lineSegments>
 
-      {/* Centre body — core with emissive */}
-      <mesh ref={centerRef} position={centre.pos}>
-        <sphereGeometry args={[0.06, 20, 20]} />
+      {/* Centre nucleus */}
+      <mesh ref={centreRef}>
+        <sphereGeometry args={[0.055, 16, 16]} />
         <meshStandardMaterial
           color="#7B61FF"
           emissive="#7B61FF"
-          emissiveIntensity={1.6}
+          emissiveIntensity={2.2}
           transparent
           opacity={0.95}
           toneMapped={false}
         />
       </mesh>
 
-      {/* Centre body — soft glow halo */}
-      <mesh ref={glowRef} position={centre.pos}>
-        <sphereGeometry args={[0.42, 24, 24]} />
+      {/* Glow halo */}
+      <mesh ref={glowRef}>
+        <sphereGeometry args={[0.22, 16, 16]} />
         <meshBasicMaterial
           color="#7B61FF"
           transparent
@@ -284,20 +343,21 @@ function NetworkVisualization() {
           blending={AdditiveBlending}
         />
       </mesh>
-    </>
+
+    </group>
   );
 }
 
-// ─── Scene wrapper ─────────────────────────────────────────────────────────────
+// ─── Canvas wrapper ───────────────────────────────────────────────────────────
 
 const NetworkScene = () => (
   <div className="absolute inset-0 pointer-events-none">
     <Canvas
       gl={{ antialias: true, alpha: true }}
-      camera={{ position: [0, 0, 3.5], fov: 40 }}
+      camera={{ position: [0, 0, 4.2], fov: 42 }}
       style={{ background: "transparent" }}
     >
-      <ambientLight intensity={0.08} />
+      <ambientLight intensity={0.06} />
       <NetworkVisualization />
     </Canvas>
   </div>

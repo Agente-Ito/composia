@@ -85,7 +85,7 @@ function truncateAddr(addr: string): string {
 
 function statusColor(s: KeeperLogEntry["status"]) {
   if (s === "created") return "text-[#00FF88]";
-  if (s === "updated") return "text-[#00D4FF]";
+  if (s === "updated") return "text-[#00C896]";
   return "text-[#FF4060]";
 }
 function statusLabel(s: KeeperLogEntry["status"]) {
@@ -220,7 +220,7 @@ export default function KeeperDashboard() {
         {[
           { label: "Total runs", value: stats?.total   ?? "—", color: "text-[#c8e6ea]" },
           { label: "Created",    value: stats?.created ?? "—", color: "text-[#00FF88]" },
-          { label: "Updated",    value: stats?.updated ?? "—", color: "text-[#00D4FF]" },
+          { label: "Updated",    value: stats?.updated ?? "—", color: "text-[#00C896]" },
           { label: "Failed",     value: stats?.failed  ?? "—", color: "text-[#FF4060]" },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-[#080b12] border border-[#0d1a24] rounded-xl p-4 text-center">
@@ -235,7 +235,7 @@ export default function KeeperDashboard() {
         <button
           onClick={handleRun}
           disabled={running}
-          className="px-6 py-2.5 rounded-xl bg-[#00D4FF]/10 border border-[#00D4FF]/40 text-[#00D4FF] font-semibold text-sm hover:bg-[#00D4FF]/20 disabled:opacity-50 transition"
+          className="px-6 py-2.5 rounded-xl bg-[#00C896]/10 border border-[#00C896]/40 text-[#00C896] font-semibold text-sm hover:bg-[#00C896]/20 disabled:opacity-50 transition"
         >
           {running ? "Running…" : "▶ Run Now"}
         </button>
@@ -311,11 +311,11 @@ export default function KeeperDashboard() {
                       <div className="flex items-start gap-2 overflow-x-auto pb-1">
                         <PipelineBox label="Trigger" color="cyan">
                           <div className="font-mono font-medium">{wf.trigger.contract}</div>
-                          <div className="text-[#00D4FF]">.{wf.trigger.event}</div>
+                          <div className="text-[#00C896]">.{wf.trigger.event}</div>
                           <div className="text-[#4a6670] mt-0.5">{chain?.name ?? wf.trigger.chain}</div>
                           {contractAddr ? (
                             <a href={`${explorerBase}/address/${contractAddr}`} target="_blank" rel="noreferrer"
-                              className="text-[#4a6670] hover:text-[#00D4FF] transition-colors font-mono">
+                              className="text-[#4a6670] hover:text-[#00C896] transition-colors font-mono">
                               {truncateAddr(contractAddr)} ↗
                             </a>
                           ) : <span className="text-[#2a3a44]">address pending</span>}
@@ -326,7 +326,7 @@ export default function KeeperDashboard() {
                         {wf.condition && (
                           <>
                             <PipelineBox label="Condition" color="yellow">
-                              <div className="text-[#FFC033] font-medium">Health Check</div>
+                              <div className="text-[#FF8C5A] font-medium">Health Check</div>
                               <div className="font-mono text-[#4a6670]">{wf.condition.method ?? "GET"} {condPath}</div>
                               <div className="text-[#4a6670]">{wf.condition.passWhen}</div>
                             </PipelineBox>
@@ -363,7 +363,7 @@ export default function KeeperDashboard() {
                       <div className="space-y-1">
                         <div className="text-[10px] text-[#4a6670] uppercase tracking-wide">Contract</div>
                         <a href={`${explorerBase}/address/${contractAddr}`} target="_blank" rel="noreferrer"
-                          className="font-mono text-xs text-[#c8e6ea] hover:text-[#00D4FF] transition-colors break-all">
+                          className="font-mono text-xs text-[#c8e6ea] hover:text-[#00C896] transition-colors break-all">
                           {contractAddr} ↗
                         </a>
                       </div>
@@ -402,7 +402,7 @@ export default function KeeperDashboard() {
               <button key={v} onClick={() => setView(v)}
                 className={`text-[10px] px-3 py-1 rounded-lg capitalize transition ${
                   view === v
-                    ? "bg-[#0d1a24] text-[#c8e6ea] border border-[#00D4FF]/30"
+                    ? "bg-[#0d1a24] text-[#c8e6ea] border border-[#00C896]/30"
                     : "text-[#4a6670] hover:text-[#c8e6ea]"
                 }`}>
                 {v}
@@ -456,12 +456,12 @@ export default function KeeperDashboard() {
                   <span className="font-mono text-[#c8e6ea] truncate flex-1 text-xs">{e.agent}</span>
                   {e.upAddress && (
                     <a href={`${LUKSO_EXPLORER}/address/${e.upAddress}`} target="_blank" rel="noreferrer"
-                      className="text-[#00D4FF] text-xs hover:underline">UP ↗</a>
+                      className="text-[#00C896] text-xs hover:underline">UP ↗</a>
                   )}
                   {e.txHash && (
                     <a href={`${e.chain === "sepolia" ? SEPOLIA_EXPLORER : LUKSO_EXPLORER}/tx/${e.txHash}`}
                       target="_blank" rel="noreferrer"
-                      className="text-[#4a6670] text-xs hover:text-[#00D4FF] font-mono">
+                      className="text-[#4a6670] text-xs hover:text-[#00C896] font-mono">
                       {e.txHash.slice(0, 10)}… ↗
                     </a>
                   )}
@@ -497,8 +497,8 @@ function PipelineBox({
   children: React.ReactNode;
 }) {
   const labelColor =
-    color === "cyan"   ? "text-[#00D4FF]" :
-    color === "yellow" ? "text-[#FFC033]" :
+    color === "cyan"   ? "text-[#00C896]" :
+    color === "yellow" ? "text-[#FF8C5A]" :
     color === "purple" ? "text-[#605CFF]" :
     "text-[#00FF88]";
   return (
@@ -513,7 +513,7 @@ function PipelineBox({
 
 function ChainBadge({ chain }: { chain: "LUKSO" | "SEPOLIA" }) {
   const cls = chain === "LUKSO"
-    ? "bg-[#00D4FF]/10 text-[#00D4FF] border-[#00D4FF]/20"
+    ? "bg-[#00C896]/10 text-[#00C896] border-[#00C896]/20"
     : "bg-[#605CFF]/10 text-[#605CFF] border-[#605CFF]/20";
   return (
     <span className={`text-[9px] px-1.5 py-0.5 rounded border font-mono shrink-0 ${cls}`}>{chain}</span>
@@ -545,7 +545,7 @@ function StepCell({
 
   const isDone   = entry.status !== "failed";
   const dotColor = isDone
-    ? (meta.chain === "LUKSO" ? "bg-[#00D4FF]" : "bg-[#605CFF]")
+    ? (meta.chain === "LUKSO" ? "bg-[#00C896]" : "bg-[#605CFF]")
     : "bg-[#FF4060]";
 
   return (
@@ -559,7 +559,7 @@ function StepCell({
       <div className="text-[10px] text-[#c8e6ea] font-medium">{meta.label}</div>
       {entry.upAddress && (
         <a href={`${luksoExplorer}/address/${entry.upAddress}`} target="_blank" rel="noreferrer"
-          className="text-[9px] font-mono text-[#4a6670] hover:text-[#00D4FF]">
+          className="text-[9px] font-mono text-[#4a6670] hover:text-[#00C896]">
           {entry.upAddress.slice(0, 10)}… ↗
         </a>
       )}
@@ -568,7 +568,7 @@ function StepCell({
       )}
       {entry.txHash && (
         <a href={`${explorer}/tx/${entry.txHash}`} target="_blank" rel="noreferrer"
-          className="text-[9px] font-mono text-[#4a6670] hover:text-[#00D4FF]">
+          className="text-[9px] font-mono text-[#4a6670] hover:text-[#00C896]">
           tx {entry.txHash.slice(0, 8)}… ↗
         </a>
       )}
@@ -634,7 +634,7 @@ function SimulateModal({
           <label className="block space-y-1">
             <span className="text-[10px] text-[#4a6670] uppercase tracking-wide">Agent Address</span>
             <input value={agent} onChange={e => setAgent(e.target.value)}
-              className="w-full bg-[#050508] border border-[#0d1a24] rounded-lg px-3 py-2 text-xs font-mono text-[#c8e6ea] focus:outline-none focus:border-[#00D4FF]/40"
+              className="w-full bg-[#050508] border border-[#0d1a24] rounded-lg px-3 py-2 text-xs font-mono text-[#c8e6ea] focus:outline-none focus:border-[#00C896]/40"
               placeholder="0x..." />
           </label>
 
@@ -644,14 +644,14 @@ function SimulateModal({
             </span>
             <input type="range" min={1} max={100} value={accuracy}
               onChange={e => setAccuracy(Number(e.target.value))}
-              className="w-full accent-[#00D4FF]" />
+              className="w-full accent-[#00C896]" />
           </label>
 
           <label className="block space-y-1">
             <span className="text-[10px] text-[#4a6670] uppercase tracking-wide">Verifications</span>
             <input type="number" min={1} value={verifs}
               onChange={e => setVerifs(Number(e.target.value))}
-              className="w-full bg-[#050508] border border-[#0d1a24] rounded-lg px-3 py-2 text-xs font-mono text-[#c8e6ea] focus:outline-none focus:border-[#00D4FF]/40" />
+              className="w-full bg-[#050508] border border-[#0d1a24] rounded-lg px-3 py-2 text-xs font-mono text-[#c8e6ea] focus:outline-none focus:border-[#00C896]/40" />
           </label>
         </div>
 

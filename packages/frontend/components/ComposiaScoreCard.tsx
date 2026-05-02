@@ -42,17 +42,17 @@ const COMPONENT_META = [
 
 function tierBgClass(tier: ComposiaScore["tier"]): string {
   switch (tier) {
-    case "elite":       return "bg-[#00FF88]/10 text-[#00FF88] border-[#00FF88]/30";
-    case "trustworthy": return "bg-[#00D4FF]/10 text-[#00D4FF] border-[#00D4FF]/30";
-    case "developing":  return "bg-[#FFC033]/10 text-[#FFC033] border-[#FFC033]/30";
+    case "elite":       return "bg-[#A78BFA]/10 text-[#A78BFA] border-[#A78BFA]/30";
+    case "trustworthy": return "bg-[#7B61FF]/10 text-[#7B61FF] border-[#7B61FF]/30";
+    case "developing":  return "bg-[#FF8C5A]/10 text-[#FF8C5A] border-[#FF8C5A]/30";
     default:            return "bg-[#FF4060]/10 text-[#FF4060] border-[#FF4060]/30";
   }
 }
 
 function scoreToBarColor(score: number): string {
-  if (score >= 75) return "#00FF88";
-  if (score >= 60) return "#00D4FF";
-  if (score >= 40) return "#FFC033";
+  if (score >= 75) return "#A78BFA";
+  if (score >= 60) return "#7B61FF";
+  if (score >= 40) return "#FF8C5A";
   return "#FF4060";
 }
 
@@ -98,7 +98,7 @@ export default function ComposiaScoreCard({ score, compact = false }: Props) {
           <h2 className="font-sora font-bold text-[#c8e6ea] text-base">Composia Score</h2>
           <p className="text-xs text-[#4a6670] mt-0.5">
             Multidimensional reputation — weighted across 5 signals
-            {trendBonus && <span className="ml-1.5 text-[#00FF88]">↑ trend bonus</span>}
+            {trendBonus && <span className="ml-1.5 text-[#A78BFA]">↑ trend bonus</span>}
           </p>
         </div>
         <span className={`shrink-0 text-xs px-2.5 py-1 rounded-full border font-semibold ${tierBgClass(tier)}`}>
