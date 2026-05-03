@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { Job } from "./queue";
 import { encodeReputation } from "./reputation";
-import { registerENSSubdomain } from "./ens-registrar";
+import { registerENSSubdomain, updateENSReputation } from "./ens-registrar";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { ERC725 } = require("@erc725/erc725.js");
@@ -229,6 +229,10 @@ export class UPManager {
 
     const updateTx = await this.registry.updateReputation(job.agent, job.accuracy, job.verifications);
     await updateTx.wait();
+
+    // Sync Sepolia ReputationState + Namespace text records (non-blocking)
+    updateENSReputation(job.agent, job.accuracy, job.verifications, 0)
+      .catch((e) => console.error("[up-manager] ENS reputation update error:", e));
   }
 
   async getUP(agent: string): Promise<string> {

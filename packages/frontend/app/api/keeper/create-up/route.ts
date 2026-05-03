@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ethers } from "ethers";
-import path from "path";
-import fs from "fs";
 import { keeperLog } from "@/lib/keeper-log";
+import UniversalProfileArtifact from "@/lib/artifacts/UniversalProfile.json";
+import LSP6KeyManagerArtifact   from "@/lib/artifacts/LSP6KeyManager.json";
 
 // ── LSP3 / LSP6 constants (copied from /api/keeper/route.ts) ─────────────────
 function lsp3Key(name: string) {
@@ -35,29 +35,20 @@ const REGISTRY_ABI = [
   "function updateReputation(address agent, uint96 accuracy, uint96 verifications) external",
 ];
 const UP_ABI = [
+  "constructor(address initialOwner)",
   "function setDataBatch(bytes32[] memory dataKeys, bytes[] memory dataValues) external payable",
   "function transferOwnership(address newOwner) external",
   "function acceptOwnership() external",
   "function owner() external view returns (address)",
 ];
 const KM_ABI = [
+  "constructor(address target)",
   "function execute(bytes calldata payload) external payable returns (bytes memory)",
 ];
 
 // ── Bytecode loader ───────────────────────────────────────────────────────────
-let _upBytecode: string | null = null;
-let _kmBytecode: string | null = null;
-
-function readArtifact(name: string): string {
-  const p = path.join(
-    process.cwd(),
-    "../../packages/contracts/node_modules/@lukso/lsp-smart-contracts/artifacts",
-    `${name}.json`
-  );
-  return JSON.parse(fs.readFileSync(p, "utf8")).bytecode as string;
-}
-function getUPBytecode(): string { if (!_upBytecode) _upBytecode = readArtifact("UniversalProfile"); return _upBytecode; }
-function getKMBytecode(): string { if (!_kmBytecode) _kmBytecode = readArtifact("LSP6KeyManager");  return _kmBytecode; }
+function getUPBytecode(): string { return UniversalProfileArtifact.bytecode as string; }
+function getKMBytecode(): string { return LSP6KeyManagerArtifact.bytecode as string; }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 function isAuthorized(req: NextRequest): boolean {
@@ -136,7 +127,7 @@ export async function POST(req: NextRequest) {
       ethers.zeroPadValue("0x02", 32),
       ethers.zeroPadValue(signerAddr, 32),
       ethers.zeroPadValue(agent, 32),
-      LSP6.SETDATA_PERMS,
+      LSP6.ALL_PERMS,
       LSP6.ALL_PERMS,
     ];
 

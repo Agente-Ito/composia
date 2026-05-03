@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "@base-ui/react": "^1.4.1",
     "@react-three/drei": "^9.121.0",
     "@react-three/fiber": "^8.17.10",

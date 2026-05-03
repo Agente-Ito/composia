@@ -3,6 +3,7 @@ import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
 import NavWalletButton from "@/components/NavWalletButton";
 import ComposiaLogoHorizontal from "@/components/ComposiaLogoHorizontal";
+import { Analytics } from "@vercel/analytics/next";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -72,6 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </nav>
         <main>{children}</main>
+        <Analytics />
         </WalletProvider>
       </body>
     </html>

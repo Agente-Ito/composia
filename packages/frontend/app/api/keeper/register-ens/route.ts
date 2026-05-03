@@ -4,7 +4,7 @@ import { keeperLog } from "@/lib/keeper-log";
 import { nsCreateSubname, nsLabel } from "@/lib/namespace";
 
 const REPUTATION_STATE_ABI = [
-  "function registerAgent(address agent, address upAddress, bytes32 ensNode, string calldata label) external",
+  "function registerAgent(address agent, address upAddress, bytes32 ensNode, string label) external",
   "function updateVerificationStatus(bytes32 node, uint256 newReputation, bool shouldBeVerified) external",
   "function syncFollowerCount(bytes32 node, uint256 count) external",
   "function agentToNode(address agent) external view returns (bytes32)",
@@ -60,12 +60,11 @@ export async function POST(req: NextRequest) {
     const nsOk = await nsCreateSubname({ agentEoa: agent, upAddress, accuracy: 0, verifications: 0 });
     if (!nsOk) console.warn(`[register-ens] Namespace subname creation failed for ${label} — continuing with L2`);
 
-    // L2: seed ReputationState on-chain (one-time gas per agent)
-    await Promise.all([
-      repState.registerAgent(agent, upAddress, ensNode, label).then((tx: { wait: () => Promise<unknown> }) => tx.wait()),
-      repState.updateVerificationStatus(ensNode, 0, false).then((tx: { wait: () => Promise<unknown> }) => tx.wait()),
-      repState.syncFollowerCount(ensNode, 0).then((tx: { wait: () => Promise<unknown> }) => tx.wait()),
-    ]);
+    // L2: seed ReputationState on-chain (sequential, explicit gas to avoid OOG on cold slots)
+    const GAS = 300000;
+    await (await repState.registerAgent(agent, upAddress, ensNode, label, { gasLimit: GAS })).wait();
+    await (await repState.updateVerificationStatus(ensNode, 0, false, { gasLimit: GAS })).wait();
+    await (await repState.syncFollowerCount(ensNode, 0, { gasLimit: GAS })).wait();
 
     keeperLog.append({
       timestamp: Math.floor(Date.now() / 1000),
