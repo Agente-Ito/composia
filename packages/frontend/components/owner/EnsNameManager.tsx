@@ -132,6 +132,29 @@ export default function EnsNameManager({ agentAddress }: Props) {
         </div>
       </div>
 
+      {/* Text records stored under this name */}
+      <div className="space-y-2">
+        <div className="text-[10px] text-gray-500 uppercase tracking-wide">Text records stored under this name</div>
+        <div className="grid grid-cols-1 gap-1.5 text-[10px]">
+          {([
+            ["gensyn:accuracy",      "updated after each verification round"],
+            ["gensyn:verifications", "updated after each verification round"],
+            ["gensyn:up_address",    "your LUKSO Universal Profile address"],
+            ["gensyn:verified_since","set at first verification"],
+            ["url",                  `https://composia.xyz/agent/${agentAddress}`],
+            ["erc8004:agentURI",     `https://composia.xyz/api/agent/${agentAddress}/erc8004`],
+          ] as [string, string][]).map(([key, note]) => (
+            <div key={key} className="flex items-start justify-between gap-3 bg-composia-dark/60 rounded px-2 py-1.5">
+              <span className="font-mono text-gray-400 shrink-0">{key}</span>
+              <span className="text-gray-600 text-right break-all">{note}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[9px] text-gray-600 pt-0.5">
+          Values are updated automatically after each Gensyn verification round.
+        </p>
+      </div>
+
       {/* Wrong-chain warning */}
       {onWrongChain && (
         <div className="text-xs text-[#A78BFA] bg-[#1A1C23] border border-[#1A1C23] rounded px-3 py-2 flex items-center justify-between gap-3">
@@ -222,11 +245,42 @@ export default function EnsNameManager({ agentAddress }: Props) {
         </div>
       )}
 
-      {/* Info */}
-      <div className="text-[10px] text-gray-600 space-y-0.5 pt-1">
-        <div>· Custom names require a small amount of ETH on Sepolia for gas</div>
-        <div>· Your auto-generated name ({agentAddress.slice(2, 10).toLowerCase()}.composia.eth) stays active</div>
-        <div>· Custom name becomes your primary displayed name immediately</div>
+      {/* What this name enables */}
+      <div className="space-y-2 pt-1">
+        <div className="text-[10px] text-gray-500 uppercase tracking-wide">What this name enables</div>
+        <div className="text-[10px] text-gray-600 space-y-1.5">
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <span>
+              Your auto-generated name{" "}
+              <span className="font-mono text-gray-400">{agentAddress.slice(2, 10).toLowerCase()}.composia.eth</span>{" "}
+              stays active — a custom name becomes your primary displayed name
+            </span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <span>
+              Smart contracts call{" "}
+              <span className="font-mono text-gray-400">isCurrentlyVerified(node)</span>{" "}
+              using this name to gate DeFi access — your ENS node is the on-chain key
+            </span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <span>Custom names require a small amount of ETH on Sepolia for gas</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <a
+              href={`https://app.ens.domains/${agentAddress.slice(2, 10).toLowerCase()}.composia.eth`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[#7B61FF] hover:text-[#A78BFA] transition-colors"
+            >
+              View on ENS app ↗
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

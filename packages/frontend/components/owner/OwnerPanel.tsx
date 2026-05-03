@@ -22,7 +22,7 @@ const TABS: { id: TabId; label: string }[] = [
   { id: "controllers", label: "Controllers" },
   { id: "follow",      label: "Follow Agents" },
   { id: "recovery",    label: "Social Recovery" },
-  { id: "ens",         label: "ENS Name" },
+  { id: "ens",         label: "ENS Identity" },
 ];
 
 export default function OwnerPanel({ agentAddress, upAddress, kmAddress, devOwner = false }: Props) {

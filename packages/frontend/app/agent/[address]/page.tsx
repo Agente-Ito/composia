@@ -411,6 +411,80 @@ export default async function AgentProfilePage({
         )}
       </div>
 
+      {/* ── 3b. COMPOSIA IDENTITY POWERS ────────────────────────────────── */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold text-sm" style={{ color: "#EDEFF6" }}>What your reputation enables</h2>
+          {isReactiveMock && <PreviewBadge />}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+          {/* Governance */}
+          <div className="flex flex-col gap-2 p-4 rounded-xl" style={{
+            background: "linear-gradient(135deg, #050508 0%, #080b12 100%)",
+            border: reactive?.slashed ? "1px solid rgba(239,68,68,0.25)" : "1px solid rgba(123,97,255,0.25)",
+          }}>
+            <div className="text-sm font-bold" style={{ color: "#EDEFF6" }}>Governance</div>
+            <div className="text-[11px] leading-relaxed" style={{ color: "rgba(237,239,246,0.45)" }}>
+              Propose slash or restore votes via token-weighted quorum. Followers elect whether to act on a governance signal.
+            </div>
+            {reactive && (
+              <div className="font-mono text-[10px] mt-auto" style={{ color: "#7B61FF" }}>
+                {reactive.followerCount} follower{reactive.followerCount !== 1 ? "s" : ""} · quorum {reactive.quorum} →
+              </div>
+            )}
+          </div>
+
+          {/* DeFi Hooks */}
+          <div className="flex flex-col gap-2 p-4 rounded-xl" style={{
+            background: "linear-gradient(135deg, #050508 0%, #080b12 100%)",
+            border: "1px solid rgba(123,97,255,0.25)",
+          }}>
+            <div className="text-sm font-bold" style={{ color: "#EDEFF6" }}>DeFi Hooks</div>
+            <div className="text-[11px] leading-relaxed" style={{ color: "rgba(237,239,246,0.45)" }}>
+              Any smart contract can gate access by querying this agent&apos;s live verification status on-chain.
+            </div>
+            <div className="font-mono text-[10px] mt-auto" style={{ color: "#7B61FF" }}>
+              isCurrentlyVerified(node) →{" "}
+              <span style={{ color: reactive?.verified && !reactive?.slashed ? "#00C896" : "#ef4444" }}>
+                {String(!!(reactive?.verified && !reactive?.slashed))}
+              </span>
+            </div>
+          </div>
+
+          {/* Cross-chain */}
+          <div className="flex flex-col gap-2 p-4 rounded-xl" style={{
+            background: "linear-gradient(135deg, #050508 0%, #080b12 100%)",
+            border: "1px solid rgba(123,97,255,0.25)",
+          }}>
+            <div className="text-sm font-bold" style={{ color: "#EDEFF6" }}>Cross-chain Identity</div>
+            <div className="text-[11px] leading-relaxed" style={{ color: "rgba(237,239,246,0.45)" }}>
+              Reputation follows the agent — LUKSO identity, Ethereum settlement. One name resolves across every synced chain.
+            </div>
+            <div className="font-mono text-[10px] mt-auto" style={{ color: "#7B61FF" }}>
+              Synced to {profile.syncedChains.filter(c => c.synced).length} chain{profile.syncedChains.filter(c => c.synced).length !== 1 ? "s" : ""} →
+            </div>
+          </div>
+
+          {/* Marketplace */}
+          <div className="flex flex-col gap-2 p-4 rounded-xl" style={{
+            background: "linear-gradient(135deg, #050508 0%, #080b12 100%)",
+            border: reactive?.verified ? "1px solid rgba(123,97,255,0.25)" : "1px solid rgba(74,78,98,0.25)",
+          }}>
+            <div className="text-sm font-bold" style={{ color: "#EDEFF6" }}>Marketplace</div>
+            <div className="text-[11px] leading-relaxed" style={{ color: "rgba(237,239,246,0.45)" }}>
+              {reactive?.verified
+                ? "Verified agents can offer services and be discovered by protocols requiring trusted execution."
+                : "Build reputation past the verification threshold to unlock marketplace access."}
+            </div>
+            <div className="font-mono text-[10px] mt-auto" style={{ color: reactive?.verified ? "#7B61FF" : "#4A4E62" }}>
+              {reactive?.verified ? "Services unlocked →" : `Needs ${reactive?.thresholdPct.toFixed(0) ?? "60"}% threshold →`}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       {/* ── 4. PROFILE GRID ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="bg-composia-card border border-composia-border rounded-xl p-5">
@@ -508,6 +582,26 @@ export default async function AgentProfilePage({
         <p className="text-[10px] text-gray-600">
           Auto-generated on UP creation. Custom names can be set from the Owner Panel.
         </p>
+
+        {/* ENS text records */}
+        <div className="pt-2 border-t border-composia-border/40 space-y-2">
+          <div className="text-[10px] text-[#4a6670] uppercase tracking-wide">Text records</div>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {([
+              ["gensyn:accuracy",       `${rep.accuracy}%`],
+              ["gensyn:verifications",  rep.verifications.toLocaleString()],
+              ["gensyn:up_address",     profile.upAddress ? `${profile.upAddress.slice(0, 10)}…${profile.upAddress.slice(-4)}` : "—"],
+              ["gensyn:verified_since", "set at registration"],
+              ["url",                   `composia.xyz/agent/${address.slice(0, 8)}…`],
+              ["erc8004:agentURI",      `/api/agent/${address.slice(0, 8)}…/erc8004`],
+            ] as [string, string][]).map(([key, val]) => (
+              <div key={key} className="bg-composia-dark/60 rounded px-2 py-1.5 space-y-0.5">
+                <div className="font-mono text-[9px] text-gray-500">{key}</div>
+                <div className="text-gray-300 text-[10px] break-all">{val}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* ENS NameWrapper Fuses */}
         {ensFuses && (
