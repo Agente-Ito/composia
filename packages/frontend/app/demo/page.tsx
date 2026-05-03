@@ -527,13 +527,20 @@ export default function DemoPage() {
             </div>
 
             <div className="flex gap-3">
-              <button
-                onClick={handleSimulate}
-                disabled={simulating}
-                className="flex-1 bg-composia-cyan hover:bg-composia-cyan/90 disabled:opacity-50 text-black font-medium py-2.5 rounded-lg transition-colors text-sm"
-              >
-                {simulating ? "Simulating…" : "Simulate Gensyn Event"}
-              </button>
+              <div className="btn-energy-wrapper flex-1">
+                <div className="energy-orbs">
+                  <span className="orb orb-a" />
+                  <span className="orb orb-b" />
+                  <span className="orb orb-c" />
+                </div>
+                <button
+                  onClick={handleSimulate}
+                  disabled={simulating}
+                  className="w-full bg-composia-cyan hover:bg-composia-cyan/90 disabled:opacity-50 text-black font-medium py-2.5 rounded-lg transition-all text-sm active:scale-95"
+                >
+                  {simulating ? "Simulating…" : "Simulate Gensyn Event"}
+                </button>
+              </div>
               <button
                 onClick={handleSync}
                 disabled={syncing}
@@ -704,30 +711,31 @@ export default function DemoPage() {
             )}
           </div>
 
-          {/* Journey */}
-          <div className="demo-card bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
-            <h2 className="font-semibold text-sm uppercase tracking-wide text-gray-400">
-              How it works
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {CARDS.map((card) => (
-                <div
-                  key={card.title}
-                  className="demo-card bg-composia-dark/60 border border-composia-border rounded-lg p-3 min-w-[108px] flex-1"
-                >
-                  <div className="text-xs font-semibold text-white">{card.title}</div>
-                  <div className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{card.desc}</div>
-                </div>
-              ))}
+        </div>
+      </div>
+
+      {/* ── How it works ─────────────────────────────────────────────────────── */}
+      <div className="demo-card bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
+        <h2 className="font-semibold text-sm uppercase tracking-wide text-gray-400">
+          How it works
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {CARDS.map((card) => (
+            <div
+              key={card.title}
+              className="demo-card bg-composia-dark/60 border border-composia-border rounded-lg p-3 min-w-[120px] flex-1"
+            >
+              <div className="text-xs font-semibold text-white">{card.title}</div>
+              <div className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{card.desc}</div>
             </div>
-          </div>
+          ))}
         </div>
       </div>
 
       {/* ── GENSYN REAL DATA PANEL ───────────────────────────────────────────── */}
       <div className="bg-composia-card border border-composia-border rounded-xl overflow-hidden">
         <div
-          className="flex items-center justify-between px-6 py-4 border-b border-composia-border cursor-pointer hover:bg-white/[0.02] transition-colors"
+          className="flex items-center justify-between px-6 py-4 border-b border-composia-border cursor-pointer hover:bg-[#7B61FF]/[0.05] transition-all"
           onClick={() => setGensynOpen(v => !v)}
         >
           <div className="flex items-center gap-3">
@@ -748,7 +756,7 @@ export default function DemoPage() {
           </div>
         </div>
 
-        {gensynOpen && <div className="p-5 space-y-4">
+        {gensynOpen && <div className="collapsible-body p-5 space-y-4">
           {/* Explanation */}
           <div className="text-xs text-gray-500 space-y-1">
             <p>
@@ -891,7 +899,7 @@ export default function DemoPage() {
           </div>
         </div>
 
-        {keeperOpen && <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-composia-border">
+        {keeperOpen && <div className="collapsible-body grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-composia-border">
 
           {/* Detected events */}
           <div className="p-5 space-y-3">
