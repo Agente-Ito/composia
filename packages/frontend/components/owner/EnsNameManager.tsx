@@ -222,7 +222,6 @@ export default function EnsNameManager({ agentAddress }: Props) {
             ? `Register ${label}.composia.eth`
             : "Enter an available name"}
         </button>
-      </div>
 
       {txState === "done" && txHash && (
         <div className="text-xs text-[#00C896] bg-[#00C896]/5 border border-[#00C896]/20 rounded px-3 py-2">
