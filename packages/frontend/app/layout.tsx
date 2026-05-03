@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
-import NavWalletButton from "@/components/NavWalletButton";
-import ComposiaLogoHorizontal from "@/components/ComposiaLogoHorizontal";
+import NavBar from "@/components/NavBar";
 import { Analytics } from "@vercel/analytics/next";
 import { cn } from "@/lib/utils";
 
@@ -28,51 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         
     >
         <WalletProvider>
-        <nav
-          className="flex items-center justify-between px-6 py-3.5 sticky top-0 z-50"
-          style={{
-            borderBottom: "1px solid #1A1C23",
-            background: "rgba(10,10,15,0.92)",
-            backdropFilter: "blur(14px)",
-          }}
-        >
-          {/* Brand */}
-          <a href="/" className="flex items-center">
-            <ComposiaLogoHorizontal />
-          </a>
-
-          {/* Links */}
-          <div className="flex items-center gap-1">
-            {[
-              { href: "/grid",    label: "Grid" },
-              { href: "/demo",    label: "Demo" },
-              { href: "/agent/0x70997970C51812dc3A010C7d01b50e0d17dc79C8", label: "Profile" },
-            ].map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="text-xs font-mono px-3 py-1.5 rounded-lg transition-colors hover:text-ds-primary hover:bg-ds-primary/5"
-                style={{ color: "#4A4E62" }}
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-
-          {/* Chain indicator + wallet */}
-          <div className="flex items-center gap-3">
-            <NavWalletButton />
-            <div className="flex items-center gap-1.5">
-              <span className="text-[9px] font-mono" style={{ color: "#4A4E62" }}>Lukso Testnet</span>
-              <span
-                className="w-1.5 h-1.5 rounded-full animate-live-pulse"
-                style={{ background: "#7B61FF" }}
-              />
-            </div>
-          </div>
-        </nav>
-        <main>{children}</main>
-        <Analytics />
+          <NavBar />
+          <main>{children}</main>
+          <Analytics />
         </WalletProvider>
       </body>
     </html>

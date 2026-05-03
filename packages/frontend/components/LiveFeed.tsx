@@ -42,10 +42,21 @@ function scoreColor(s: number): string {
   return "#FF4060";
 }
 
+// Detect protocol from event content to determine particle color
+function entryParticleColor(entry: Pick<FeedEntry, "action" | "detail">): string {
+  const text = `${entry.action} ${entry.detail ?? ""}`.toLowerCase();
+  if (text.includes("gensyn")) return "#FF4F8B";   // Gensyn pink
+  if (text.includes("keeper")) return "#00C896";   // KeeperHub green
+  return "#A78BFA";                                // brand secondary
+}
+
+interface Particle {
+  id: number;
+  color: string;
+}
+
 interface Props {
-  /** External entries pushed from the parent (real on-chain events) */
   externalEntries?: FeedEntry[];
-  /** Interval in ms between synthetic demo entries (0 = disabled) */
   demoInterval?: number;
   className?: string;
 }
@@ -55,18 +66,22 @@ export default function LiveFeed({
   demoInterval = 5000,
   className = "",
 }: Props) {
-  // Initialize with empty time to avoid SSR/client timestamp mismatch
   const [entries, setEntries] = useState<FeedEntry[]>(() =>
     DEMO_POOL.slice(0, 6).map((e) => ({ ...e, id: nextId(), time: "" }))
   );
-  const listRef = useRef<HTMLDivElement>(null);
+  const [particle, setParticle] = useState<Particle | null>(null);
 
-  // Populate timestamps only on the client to avoid hydration mismatch
+  const listRef        = useRef<HTMLDivElement>(null);
+  const latestIdRef    = useRef<number>(-1);
+  const particleTimer  = useRef<ReturnType<typeof setTimeout>>();
+  const isFirstRender  = useRef(true);
+
+  // Populate timestamps only on the client
   useEffect(() => {
     setEntries((prev) => prev.map((e) => e.time ? e : { ...e, time: now() }));
   }, []);
 
-  // Auto-scroll to top when new entry added
+  // Auto-scroll to top on new entry
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = 0;
   }, [entries.length]);
@@ -78,7 +93,7 @@ export default function LiveFeed({
       const template = pickRandom(DEMO_POOL);
       setEntries((prev) => [
         { ...template, id: nextId(), time: now() },
-        ...prev.slice(0, 29), // cap at 30
+        ...prev.slice(0, 29),
       ]);
     }, demoInterval);
     return () => clearInterval(id);
@@ -90,12 +105,35 @@ export default function LiveFeed({
     setEntries((prev) => [...externalEntries, ...prev].slice(0, 30));
   }, [externalEntries]);
 
+  // Trigger moth particle on each new entry (skip initial mount)
+  useEffect(() => {
+    if (!entries.length) return;
+
+    const latest = entries[0];
+
+    if (isFirstRender.current) {
+      latestIdRef.current = latest.id;
+      isFirstRender.current = false;
+      return;
+    }
+
+    if (latest.id === latestIdRef.current) return;
+    latestIdRef.current = latest.id;
+
+    const color = entryParticleColor(latest);
+    setParticle({ id: Date.now(), color });
+
+    clearTimeout(particleTimer.current);
+    particleTimer.current = setTimeout(() => setParticle(null), 700);
+  }, [entries]);
+
   return (
     <aside
-      className={`flex flex-col h-full ${className}`}
+      className={`flex flex-col h-full relative ${className}`}
       style={{
         background: "#050508",
         borderLeft: "1px solid #0d1a24",
+        overflow: "visible",
       }}
     >
       {/* Header */}
@@ -115,14 +153,29 @@ export default function LiveFeed({
         </span>
       </div>
 
-      {/* Feed list */}
-      <div
-        ref={listRef}
-        className="flex-1 overflow-y-auto px-3 py-2 space-y-2"
-      >
-        {entries.map((entry, i) => (
-          <FeedItem key={entry.id} entry={entry} index={i} />
-        ))}
+      {/* Feed list — particle is positioned relative to this wrapper */}
+      <div className="relative flex-1 overflow-hidden">
+        {/* Moth particle — appears near new entry, drifts toward grid */}
+        {particle && (
+          <div
+            key={particle.id}
+            className="particle-event"
+            style={{
+              width: 6,
+              height: 6,
+              top: 20,
+              left: 18,
+              background: particle.color,
+              boxShadow: `0 0 8px ${particle.color}, 0 0 18px ${particle.color}88`,
+            }}
+          />
+        )}
+
+        <div ref={listRef} className="h-full overflow-y-auto px-3 py-2 space-y-2">
+          {entries.map((entry, i) => (
+            <FeedItem key={entry.id} entry={entry} index={i} />
+          ))}
+        </div>
       </div>
 
       {/* Footer */}

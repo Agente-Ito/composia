@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { SimulateResponse } from "@/lib/types";
+import { ChevronDown } from "lucide-react";
 
 interface LogEntry {
   time: string;
@@ -44,7 +45,7 @@ function gaugeColor(a: number) {
   if (a >= 90) return "#A78BFA";
   if (a >= 75) return "#7B61FF";
   if (a >= 60) return "#A78BFA";
-  return "#FF4060";
+  return "#6B7280";
 }
 function tierLabel(a: number) {
   if (a >= 90) return "Excellent";
@@ -53,9 +54,9 @@ function tierLabel(a: number) {
   return "Low";
 }
 function consistencyLabel(a: number) {
-  if (a >= 90) return { text: "↑ Rising", cls: "text-[#00C896]" };
-  if (a >= 75) return { text: "→ Stable", cls: "text-gray-400" };
-  return { text: "↓ Declining", cls: "text-red-400" };
+  if (a >= 90) return { text: "↑ Rising", cls: "text-[#A78BFA]" };
+  if (a >= 75) return { text: "→ Stable", cls: "text-gray-500" };
+  return { text: "↓ Declining", cls: "text-gray-500" };
 }
 
 function MiniGauge({ accuracy }: { accuracy: number }) {
@@ -81,6 +82,106 @@ function MiniGauge({ accuracy }: { accuracy: number }) {
       </div>
       <span className={`text-xs font-medium ${consist.cls}`}>{consist.text}</span>
       <span className="text-[10px] text-gray-600">Reputation Score</span>
+    </div>
+  );
+}
+
+// ── Profile moth build-up ────────────────────────────────────────────────────
+function ProfileMoth({ accuracy, buildStep }: { accuracy: number; buildStep: 0 | 1 | 2 | 3 }) {
+  const color   = gaugeColor(accuracy);
+  const consist = consistencyLabel(accuracy);
+
+  if (buildStep === 0) return <MiniGauge accuracy={accuracy} />;
+
+  const CX = 42, CY = 32;
+  const isComplete = buildStep === 3;
+
+  const NODES = [
+    { x: CX,    y: CY,    r: 4.5, delay: 0,   glow: true  },
+    { x: CX,    y: CY-12, r: 2.2, delay: 180, glow: false },
+    { x: CX-14, y: CY-8,  r: 2.2, delay: 360, glow: false },
+    { x: CX+14, y: CY-8,  r: 2.2, delay: 360, glow: false },
+    { x: CX-30, y: CY,    r: 1.8, delay: 540, glow: false },
+    { x: CX+30, y: CY,    r: 1.8, delay: 540, glow: false },
+    { x: CX-14, y: CY+14, r: 1.8, delay: 540, glow: false },
+    { x: CX+14, y: CY+14, r: 1.8, delay: 540, glow: false },
+  ] as const;
+
+  const EDGES: [number, number, number][] = [
+    [0,1,260], [0,2,440], [0,3,440], [0,6,440], [0,7,440],
+    [1,2,450], [1,3,450],
+    [2,4,630], [3,5,630], [2,6,630], [3,7,630],
+  ];
+
+  const anim = (delay: number) => ({
+    animation: `moth-node-appear 0.4s ease both`,
+    animationDelay: `${delay}ms`,
+  });
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <svg viewBox="0 0 84 84" className="w-28 h-28">
+        <defs>
+          <filter id="pm-glow" x="-120%" y="-120%" width="340%" height="340%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+
+        {EDGES.map(([a, b, d], i) => (
+          <line key={i}
+            x1={NODES[a].x} y1={NODES[a].y}
+            x2={NODES[b].x} y2={NODES[b].y}
+            stroke={color} strokeWidth={0.6} strokeOpacity={0.35}
+            style={anim(d)}
+          />
+        ))}
+
+        {NODES.map((n, i) => (
+          <circle key={i}
+            cx={n.x} cy={n.y} r={n.r}
+            fill={color}
+            fillOpacity={i === 0 ? 0.9 : 0.65}
+            filter={n.glow ? "url(#pm-glow)" : undefined}
+            style={anim(n.delay)}
+          />
+        ))}
+
+        {isComplete && (
+          <circle cx={CX} cy={CY} r={6} fill="none" stroke={color} strokeWidth={0.6} strokeOpacity={0}>
+            <animate attributeName="r" values="6;20;6" dur="2.5s" repeatCount="indefinite" />
+            <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.5s" repeatCount="indefinite" />
+          </circle>
+        )}
+
+        {isComplete && (
+          <text x={CX} y={CY + 5}
+            textAnchor="middle" fontSize="8"
+            fontFamily="monospace" fontWeight="bold"
+            fill={color}
+            style={anim(300)}
+          >
+            {accuracy}
+          </text>
+        )}
+      </svg>
+
+      <span className={`text-xs font-medium ${consist.cls}`}>{consist.text}</span>
+      <span className="text-[10px] text-gray-600 flex items-center gap-1">
+        {isComplete ? (
+          <>
+            <svg viewBox="0 0 12 8" className="w-3 h-2 shrink-0" fill="none">
+              <circle cx="6" cy="4" r="1" fill={color} />
+              <ellipse cx="3" cy="3" rx="2.5" ry="1.5" fill={color} fillOpacity="0.5" />
+              <ellipse cx="9" cy="3" rx="2.5" ry="1.5" fill={color} fillOpacity="0.5" />
+            </svg>
+            Composia Identity Activated
+          </>
+        ) : "Activating…"}
+      </span>
     </div>
   );
 }
@@ -124,6 +225,17 @@ const JOURNEY = [
   },
 ];
 
+// ── How it works cards ──────────────────────────────────────────────────────
+const CARDS = [
+  { title: "Verification", desc: "Gensyn proves agent performance" },
+  { title: "Automation",   desc: "Events trigger identity updates" },
+  { title: "Identity",     desc: "Universal Profile created on LUKSO" },
+  { title: "Naming",       desc: "ENS links identity to readable name" },
+  { title: "Reputation",   desc: "Data stored and synced on-chain" },
+  { title: "Ownership",    desc: "Agent controls its identity" },
+  { title: "Composable",   desc: "Usable across protocols" },
+];
+
 // ── Main component ────────────────────────────────────────────────────────────
 export default function DemoPage() {
   const [agent, setAgent]               = useState("0x70997970C51812dc3A010C7d01b50e0d17dc79C8");
@@ -134,6 +246,8 @@ export default function DemoPage() {
   const [syncing, setSyncing]           = useState(false);
   const [lastSimulatedAgent, setLastSimulatedAgent] = useState<string | null>(null);
   const [profileCreated, setProfileCreated]         = useState(false);
+  const [buildStep, setBuildStep] = useState<0 | 1 | 2 | 3>(0);
+  const [simKey, setSimKey]       = useState(0);
 
   // ── Gensyn seed state ───────────────────────────────────────────────────────
   const [seedRunning, setSeedRunning]     = useState(false);
@@ -152,6 +266,8 @@ export default function DemoPage() {
   const [keeperError, setKeeperError]     = useState<string | null>(null);
   const [keeperConfigured, setKeeperConfigured] = useState<boolean | null>(null);
   const keeperTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [gensynOpen, setGensynOpen] = useState(false);
+  const [keeperOpen, setKeeperOpen] = useState(false);
 
   async function runKeeper(action: "scan" | "run" = "scan") {
     setKeeperRunning(true);
@@ -270,6 +386,8 @@ export default function DemoPage() {
   async function handleSimulate() {
     setSimulating(true);
     setProfileCreated(false);
+    setBuildStep(1);
+    setSimKey(k => k + 1);
     addLog("info", `Simulating Gensyn event — agent ${agent.slice(0, 10)}… accuracy=${accuracy}% verifications=${verifications}`);
 
     try {
@@ -285,6 +403,7 @@ export default function DemoPage() {
         addLog("success", "VerificationCompleted event emitted on Lukso Testnet ✓");
         addLog("info", "KeeperHub detected event — deploying Universal Profile + KeyManager…");
         setLastSimulatedAgent(agent);
+      setTimeout(() => setBuildStep(2), 600);
 
         if (data.preview) {
           setTimeout(() => {
@@ -292,6 +411,7 @@ export default function DemoPage() {
             addLog("success", "LSP6 KeyManager deployed and linked ✓");
             addLog("info", "LSP3 reputation data written via setDataBatch ✓");
             setProfileCreated(true);
+            setBuildStep(3);
           }, 1200);
         } else {
           let attempts = 0;
@@ -306,6 +426,7 @@ export default function DemoPage() {
                   addLog("success", "LSP6 KeyManager deployed and linked ✓");
                   addLog("info", "Agent can now claim ownership via /claim");
                   setProfileCreated(true);
+                  setBuildStep(3);
                   clearInterval(poll);
                 }
               }
@@ -318,9 +439,11 @@ export default function DemoPage() {
         }
       } else {
         addLog("error", `Failed: ${data.error}`);
+        setBuildStep(0);
       }
     } catch (err: unknown) {
       addLog("error", `Network error: ${err instanceof Error ? err.message : String(err)}`);
+      setBuildStep(0);
     } finally {
       setSimulating(false);
     }
@@ -350,9 +473,9 @@ export default function DemoPage() {
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
       <div>
-        <h1 className="text-3xl font-bold glow-cyan">Demo Simulator</h1>
+        <h1 className="text-3xl font-bold glow-cyan">Portable Identity</h1>
         <p className="text-composia-muted mt-2 text-sm">
-          Simulate a Gensyn verification event and watch Composia build an on-chain identity in real time.
+          Simulate a Gensyn verification and watch it become a portable identity.
         </p>
       </div>
 
@@ -362,7 +485,7 @@ export default function DemoPage() {
         <div className="space-y-5">
 
           {/* Controls */}
-          <div className="bg-composia-card border border-composia-border rounded-xl p-6 space-y-5">
+          <div className="demo-card bg-composia-card border border-composia-border rounded-xl p-6 space-y-5">
             <h2 className="font-semibold text-sm uppercase tracking-wide text-gray-400">
               Simulate Gensyn Event
             </h2>
@@ -422,7 +545,7 @@ export default function DemoPage() {
           </div>
 
           {/* Event log */}
-          <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-3">
+          <div className="demo-card bg-composia-card border border-composia-border rounded-xl p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-sm">Event Log</h2>
               {logs.length > 0 && (
@@ -439,9 +562,9 @@ export default function DemoPage() {
                   <div
                     key={i}
                     className={`flex gap-3 ${
-                      log.type === "success" ? "text-[#00C896]" :
-                      log.type === "error"   ? "text-red-400"   :
-                      log.type === "tx"      ? "text-[#7B61FF]"  :
+                      log.type === "success" ? "text-[#A78BFA]" :
+                      log.type === "error"   ? "text-gray-400"  :
+                      log.type === "tx"      ? "text-[#7B61FF]" :
                       "text-gray-400"
                     }`}
                   >
@@ -458,7 +581,7 @@ export default function DemoPage() {
         <div className="space-y-5">
 
           {/* Live preview card */}
-          <div className="bg-composia-card border border-composia-border rounded-xl p-6 space-y-5">
+          <div className="demo-card bg-composia-card border border-composia-border rounded-xl p-6 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-sm uppercase tracking-wide text-gray-400">
                 Profile Preview
@@ -469,7 +592,7 @@ export default function DemoPage() {
             </div>
 
             <div className="flex items-center gap-6">
-              <MiniGauge accuracy={accuracy} />
+              <ProfileMoth key={simKey} accuracy={accuracy} buildStep={buildStep} />
               <div className="flex-1 space-y-3">
                 <div className="space-y-0.5">
                   <div className="font-mono text-xs text-gray-500 break-all">
@@ -486,7 +609,7 @@ export default function DemoPage() {
                     { label: "Accuracy Tier",   value: tierLabel(accuracy) },
                     { label: "Sync Status",     value: "Pending" },
                   ].map((s) => (
-                    <div key={s.label} className="bg-composia-dark/60 rounded-lg p-2">
+                    <div key={s.label} className="demo-card bg-composia-dark/60 rounded-lg p-2">
                       <div className="text-[9px] text-gray-500">{s.label}</div>
                       <div className="text-xs font-bold mt-0.5 text-white">{s.value}</div>
                     </div>
@@ -494,6 +617,31 @@ export default function DemoPage() {
                 </div>
               </div>
             </div>
+
+            {/* Verification → Identity → Composable flow */}
+            {buildStep > 0 && (
+              <div className="flex items-center gap-1.5 pt-1">
+                {(["Verification", "Identity", "Composable"] as const).map((label, i) => {
+                  const active = buildStep > i;
+                  const c = gaugeColor(accuracy);
+                  return (
+                    <span key={label} className="flex items-center gap-1.5">
+                      {i > 0 && (
+                        <span style={{ fontSize: 8, color: active ? c : "#2A2C3A", transition: "color 0.5s ease" }}>→</span>
+                      )}
+                      <span style={{
+                        fontSize: 9, fontFamily: "Space Grotesk, sans-serif",
+                        letterSpacing: "0.05em", textTransform: "uppercase",
+                        color: active ? c : "#2A2C3A",
+                        transition: "color 0.6s ease",
+                      }}>
+                        {label}
+                      </span>
+                    </span>
+                  );
+                })}
+              </div>
+            )}
 
             {/* What Composia writes */}
             <div className="border-t border-composia-border pt-4 space-y-2">
@@ -519,12 +667,12 @@ export default function DemoPage() {
             {lastSimulatedAgent && (
               <div className={`rounded-lg p-4 space-y-2 transition-all ${
                 profileCreated
-                  ? "bg-[#00C896]/10 border border-[#00C896]/25"
+                  ? "bg-[#7B61FF]/10 border border-[#7B61FF]/25"
                   : "bg-composia-dark/60 border border-composia-border"
               }`}>
                 {profileCreated ? (
                   <>
-                    <div className="text-[#00C896] font-medium text-sm">
+                    <div className="text-[#A78BFA] font-medium text-sm">
                       ✓ Universal Profile created on Lukso
                     </div>
                     <p className="text-xs text-gray-400">
@@ -557,25 +705,18 @@ export default function DemoPage() {
           </div>
 
           {/* Journey */}
-          <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
+          <div className="demo-card bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
             <h2 className="font-semibold text-sm uppercase tracking-wide text-gray-400">
               How it works
             </h2>
-            <div className="space-y-3">
-              {JOURNEY.map((step, i) => (
-                <div key={step.label} className="flex gap-3 items-start">
-                  <div className="flex flex-col items-center shrink-0">
-                    <span className="w-7 h-7 rounded-full bg-composia-dark border border-composia-border flex items-center justify-center text-sm">
-                      {step.icon}
-                    </span>
-                    {i < JOURNEY.length - 1 && (
-                      <div className="w-px flex-1 bg-composia-border mt-1 h-5" />
-                    )}
-                  </div>
-                  <div className="pb-3">
-                    <div className="text-xs font-semibold text-white">{step.label}</div>
-                    <div className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{step.desc}</div>
-                  </div>
+            <div className="flex flex-wrap gap-2">
+              {CARDS.map((card) => (
+                <div
+                  key={card.title}
+                  className="demo-card bg-composia-dark/60 border border-composia-border rounded-lg p-3 min-w-[108px] flex-1"
+                >
+                  <div className="text-xs font-semibold text-white">{card.title}</div>
+                  <div className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">{card.desc}</div>
                 </div>
               ))}
             </div>
@@ -585,23 +726,29 @@ export default function DemoPage() {
 
       {/* ── GENSYN REAL DATA PANEL ───────────────────────────────────────────── */}
       <div className="bg-composia-card border border-composia-border rounded-xl overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-composia-border">
+        <div
+          className="flex items-center justify-between px-6 py-4 border-b border-composia-border cursor-pointer hover:bg-white/[0.02] transition-colors"
+          onClick={() => setGensynOpen(v => !v)}
+        >
           <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-[#00C896] animate-pulse" />
-            <span className="font-semibold text-sm">Real Gensyn Data</span>
+            <div className="w-2 h-2 rounded-full bg-[#7B61FF] animate-pulse" />
+            <span className="font-semibold text-sm">Gensyn Verification (Simulated)</span>
             <span className="text-[10px] text-gray-500 border border-composia-border rounded-full px-2 py-0.5">
               SwarmCoordinator · chain 685685
             </span>
           </div>
-          {chainStats && (
-            <div className="flex items-center gap-4 text-[10px] text-gray-500">
-              <span><span className="text-white font-medium">{chainStats.round.toLocaleString()}</span> rounds</span>
-              <span><span className="text-white font-medium">{chainStats.voters.toLocaleString()}</span> unique voters</span>
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {chainStats && (
+              <div className="flex items-center gap-4 text-[10px] text-gray-500">
+                <span><span className="text-white font-medium">{chainStats.round.toLocaleString()}</span> rounds</span>
+                <span><span className="text-white font-medium">{chainStats.voters.toLocaleString()}</span> unique voters</span>
+              </div>
+            )}
+            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${gensynOpen ? "rotate-180" : ""}`} />
+          </div>
         </div>
 
-        <div className="p-5 space-y-4">
+        {gensynOpen && <div className="p-5 space-y-4">
           {/* Explanation */}
           <div className="text-xs text-gray-500 space-y-1">
             <p>
@@ -641,13 +788,13 @@ export default function DemoPage() {
           </div>
 
           {seedError && (
-            <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded p-3">
+            <div className="text-xs text-gray-400 bg-white/5 border border-white/[0.08] rounded p-3">
               {seedError}
             </div>
           )}
 
           {seedResult && (
-            <div className="text-xs text-[#00C896] bg-[#00C896]/10 border border-[#00C896]/20 rounded p-3 space-y-1">
+            <div className="text-xs text-[#A78BFA] bg-[#7B61FF]/10 border border-[#7B61FF]/20 rounded p-3 space-y-1">
               <div className="font-medium">✓ {seedResult.count} real Gensyn agent(s) bridged to Lukso testnet</div>
               <div className="font-mono text-gray-400">TX: {seedResult.txHash.slice(0, 20)}…</div>
               <div className="text-gray-500">Run the KeeperHub panel below to create their Universal Profiles.</div>
@@ -667,7 +814,7 @@ export default function DemoPage() {
                       <div className="text-[9px] text-gray-600 truncate font-mono">{a.peerId}</div>
                       <div className="font-mono text-[10px] text-gray-400">
                         EOA: {a.eoa === "0x0000000000000000000000000000000000000000"
-                          ? <span className="text-red-400">not registered</span>
+                          ? <span className="text-gray-500">not registered</span>
                           : <>{a.eoa.slice(0, 10)}…{a.eoa.slice(-4)}</>
                         }
                       </div>
@@ -694,19 +841,23 @@ export default function DemoPage() {
               <span className="font-mono">Your peer ID is QmXXX…</span>
             </p>
           )}
-        </div>
+        </div>}
       </div>
 
       {/* ── KEEPERHUB PANEL ──────────────────────────────────────────────────── */}
       <div className="bg-composia-card border border-composia-border rounded-xl overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-composia-border">
-          <div className="flex items-center gap-3">
-            <div className={`w-2 h-2 rounded-full ${keeperAuto ? "bg-[#00C896] animate-pulse" : "bg-gray-600"}`} />
-            <span className="font-semibold text-sm">KeeperHub Automation</span>
+          <div
+            className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setKeeperOpen(v => !v)}
+          >
+            <div className={`w-2 h-2 rounded-full ${keeperAuto ? "bg-[#7B61FF] animate-pulse" : "bg-[#2A2C3A]"}`} />
+            <span className="font-semibold text-sm">Automation (Local Execution)</span>
             <span className="text-[10px] text-gray-500 border border-composia-border rounded-full px-2 py-0.5">
               decentralized keeper
             </span>
+            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${keeperOpen ? "rotate-180" : ""}`} />
           </div>
           <div className="flex items-center gap-3">
             {keeperLastRun && (
@@ -715,7 +866,7 @@ export default function DemoPage() {
             <button
               onClick={() => setKeeperAuto((v) => !v)}
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                keeperAuto ? "bg-[#00C896]" : "bg-gray-700"
+                keeperAuto ? "bg-[#7B61FF]" : "bg-[#1E1F2E]"
               }`}
             >
               <span className={`inline-block h-3 w-3 rounded-full bg-white transition-transform ${
@@ -740,7 +891,7 @@ export default function DemoPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-composia-border">
+        {keeperOpen && <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-composia-border">
 
           {/* Detected events */}
           <div className="p-5 space-y-3">
@@ -750,14 +901,8 @@ export default function DemoPage() {
                 last 500 blocks
               </span>
             </div>
-            {keeperConfigured === false ? (
-              <p className="text-[11px] text-gray-600 italic">
-                Configure MOCK_GENSYN_ADDRESS + COMPOSIA_REGISTRY_ADDRESS to enable live scanning.
-              </p>
-            ) : keeperEvents.length === 0 ? (
-              <p className="text-[11px] text-gray-600 italic">
-                {keeperLastRun ? "No events in last 500 blocks." : "Click Scan to check the chain."}
-              </p>
+            {keeperEvents.length === 0 ? (
+              <p className="text-[11px] text-gray-600 italic">Waiting for events</p>
             ) : (
               <div className="space-y-2 max-h-52 overflow-y-auto">
                 {keeperEvents.map((ev) => (
@@ -774,7 +919,7 @@ export default function DemoPage() {
                         {ev.agent.slice(0, 10)}…{ev.agent.slice(-4)}
                       </span>
                       <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${
-                        ev.hasUP ? "bg-[#00C896]/10 text-[#00C896]" : "bg-[#A78BFA]/10 text-[#A78BFA]"
+                        ev.hasUP ? "bg-[#7B61FF]/15 text-[#A78BFA]" : "bg-white/[0.04] text-gray-500"
                       }`}>
                         {ev.hasUP ? "✓ UP ready" : "pending"}
                       </span>
@@ -795,10 +940,10 @@ export default function DemoPage() {
               {[
                 { label: "Events detected", value: keeperEvents.length, color: "text-white" },
                 { label: "Pending (no UP)",  value: keeperEvents.filter(e => !e.hasUP).length, color: "text-[#A78BFA]" },
-                { label: "Already processed", value: keeperEvents.filter(e => e.hasUP).length, color: "text-[#00C896]" },
+                { label: "Already processed", value: keeperEvents.filter(e => e.hasUP).length, color: "text-[#A78BFA]" },
                 { label: "UPs created", value: keeperResults.filter(r => r.action === "created").length, color: "text-composia-violet" },
               ].map((s) => (
-                <div key={s.label} className="bg-composia-dark/60 rounded-lg p-3">
+                <div key={s.label} className="demo-card bg-composia-dark/60 rounded-lg p-3">
                   <div className={`text-xl font-sora font-bold ${s.color}`}>{s.value}</div>
                   <div className="text-[9px] text-gray-500 mt-0.5">{s.label}</div>
                 </div>
@@ -813,7 +958,7 @@ export default function DemoPage() {
                 "Updates LSP3 reputation via KeyManager",
               ].map((step) => (
                 <div key={step} className="flex items-start gap-1.5 text-[10px] text-gray-400">
-                  <span className="text-[#00C896] shrink-0">›</span>
+                  <span className="text-[#A78BFA] shrink-0">›</span>
                   {step}
                 </div>
               ))}
@@ -823,11 +968,6 @@ export default function DemoPage() {
           {/* Action log */}
           <div className="p-5 space-y-3">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Action Log</h3>
-            {keeperError && (
-              <div className="text-[10px] text-red-400 bg-red-500/10 border border-red-500/20 rounded p-2">
-                {keeperError}
-              </div>
-            )}
             {keeperResults.length === 0 ? (
               <p className="text-[11px] text-gray-600 italic">
                 {keeperLastRun ? "No new actions — all events already processed." : "Run the keeper to process pending events."}
@@ -838,10 +978,10 @@ export default function DemoPage() {
                   <div
                     key={i}
                     className={`rounded-lg p-2.5 border text-[10px] space-y-1 ${
-                      r.action === "created" ? "border-[#00C896]/25 bg-[#00C896]/5" :
+                      r.action === "created" ? "border-[#7B61FF]/25 bg-[#7B61FF]/5" :
                       r.action === "updated" ? "border-[#7B61FF]/25 bg-[#7B61FF]/5" :
-                      r.action === "error"   ? "border-red-500/25 bg-red-500/5" :
-                      "border-gray-700 bg-composia-dark/40"
+                      r.action === "error"   ? "border-[#1A1C23] bg-composia-dark/40" :
+                      "border-[#1A1C23] bg-composia-dark/40"
                     }`}
                   >
                     <div className="flex items-center justify-between">
@@ -849,9 +989,9 @@ export default function DemoPage() {
                         {r.agent.slice(0, 10)}…{r.agent.slice(-4)}
                       </span>
                       <span className={`font-medium ${
-                        r.action === "created" ? "text-[#00C896]" :
+                        r.action === "created" ? "text-[#A78BFA]" :
                         r.action === "updated" ? "text-[#7B61FF]" :
-                        r.action === "error"   ? "text-red-400" : "text-gray-500"
+                        r.action === "error"   ? "text-gray-500" : "text-gray-500"
                       }`}>
                         {r.action === "created" ? "✓ UP created" :
                          r.action === "updated" ? "↑ Updated" :
@@ -863,20 +1003,13 @@ export default function DemoPage() {
                         View profile →
                       </Link>
                     )}
-                    {r.error && <div className="text-red-400 break-all">{r.error.slice(0, 100)}</div>}
+                    {r.error && <div className="text-gray-500 break-all">{r.error.slice(0, 100)}</div>}
                   </div>
                 ))}
               </div>
             )}
           </div>
-        </div>
-
-        <div className="px-6 py-3 border-t border-composia-border bg-composia-dark/30 flex items-center justify-between gap-4">
-          <span className="text-[10px] text-gray-600">
-            In production this runs as a Gelato Web3 Function or Chainlink Automation — no servers, no cron, fully on-chain.
-          </span>
-          <span className="text-[10px] text-composia-cyan font-medium shrink-0">Powered by KeeperHub</span>
-        </div>
+        </div>}
       </div>
 
     </div>
