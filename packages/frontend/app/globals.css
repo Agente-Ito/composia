@@ -12,7 +12,7 @@
   --ds-primary:   #7B61FF;
   --ds-secondary: #A78BFA;
   /* Semantic score colors */
-  --score-amber:  #FFC033;
+  --score-warn:   #A78BFA;
   --score-red:    #FF4060;
 }
 
@@ -28,8 +28,9 @@ body {
   background-attachment: fixed;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.02em;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
@@ -40,7 +41,7 @@ h1, h2, h3 {
 
 /* ── Glow utilities ───────────────────────────────────────────────────────── */
 .glow-purple { text-shadow: 0 0 20px rgba(123,97,255,0.7), 0 0 40px rgba(123,97,255,0.3); }
-.glow-amber  { text-shadow: 0 0 20px rgba(255,192,51,0.8),  0 0 40px rgba(255,192,51,0.3); }
+.glow-cyan   { text-shadow: 0 0 20px rgba(123,97,255,0.7), 0 0 40px rgba(123,97,255,0.3); }
 .glow-red    { text-shadow: 0 0 20px rgba(255,64,96,0.8),   0 0 40px rgba(255,64,96,0.3); }
 
 .ring-glow-purple { box-shadow: 0 0 0 1px rgba(123,97,255,0.25), 0 0 24px rgba(123,97,255,0.08); }
@@ -56,6 +57,57 @@ h1, h2, h3 {
   animation: float 6s ease-in-out infinite;
 }
 
+/* Moth entrance: flies in from navbar, settles near CTA, then hovers */
+.moth-fly {
+  animation:
+    moth-entrance 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    moth-hover    8s ease-in-out infinite 2.6s;
+  will-change: transform, opacity;
+}
+@keyframes moth-entrance {
+  0%   { transform: translate(-340px, -280px) rotate(-10deg) scale(0.65); opacity: 0; }
+  30%  { opacity: 0.7; }
+  70%  { transform: translate(18px, 22px) rotate(3deg) scale(1.04); opacity: 1; }
+  100% { transform: translate(0px, 0px)  rotate(0deg) scale(1);    opacity: 1; }
+}
+@keyframes moth-hover {
+  0%   { transform: translateY(0px)   rotate(0deg); }
+  20%  { transform: translateY(-12px) rotate(1deg); }
+  45%  { transform: translateY(-5px)  rotate(-0.6deg); }
+  65%  { transform: translateY(-16px) rotate(0.8deg); }
+  82%  { transform: translateY(-7px)  rotate(-1deg); }
+  100% { transform: translateY(0px)   rotate(0deg); }
+}
+
+/* Wing breathing — expands outward from body center */
+@keyframes wing-breathe {
+  0%, 100% { transform: scale(1,    1);    }
+  50%       { transform: scale(1.06, 0.96); }
+}
+
+/* ── CTA cards (dual hero) ────────────────────────────────────────────────── */
+.cta-card {
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+}
+.cta-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 32px rgba(123,97,255,0.22);
+  border-color: rgba(123,97,255,0.55) !important;
+}
+.cta-card:active {
+  transform: scale(0.98);
+}
+
+/* ── Pillar card — static, no pulse ──────────────────────────────────────── */
+.pillar-card {
+  transition: opacity 0.2s ease;
+}
+.pillar-card:hover {
+  opacity: 0.85;
+}
+
 /* ── Tile hover expand ────────────────────────────────────────────────────── */
 .agent-tile {
   transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1),
@@ -68,6 +120,10 @@ h1, h2, h3 {
 /* ── Feed entry animation ─────────────────────────────────────────────────── */
 .feed-entry {
   animation: fade-in-up 0.35s ease forwards;
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Grid noise texture ───────────────────────────────────────────────────── */
@@ -102,4 +158,10 @@ h1, h2, h3 {
     radial-gradient(1.5px 1.5px at 60% 10%, rgba(237,239,246,0.20) 0%, transparent 100%),
     radial-gradient(1px 1px at 75% 75%, rgba(123,97,255,0.18)  0%, transparent 100%),
     radial-gradient(1px 1px at 50% 50%, rgba(237,239,246,0.08) 0%, transparent 100%);
+}
+
+@layer base {
+  * {
+    border-color: var(--ds-line);
+  }
 }

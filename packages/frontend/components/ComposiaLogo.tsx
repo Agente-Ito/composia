@@ -28,8 +28,7 @@ type NodeColor = keyof typeof COL;
 // Moth silhouette: broad rounded forewing, compact hindwing.
 // UL3/UR3 are the wing apices — lower than the upper arc UL2/UR2
 // because moth forewings have an angled apex, not a top corner.
-
-const P = {
+ const P = {
   C:   [60, 40] as Pt,
 
   // Upper-left wing

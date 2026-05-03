@@ -1,6 +1,7 @@
 // NetworkMoth — brand butterfly as a system visualization.
-// Tri-color: active nodes #7B85E6, secondary nodes #A1A3B6, edges #1E1F2A.
+// Tri-color: active nodes #7B85E6, secondary nodes #A1A3B6, edges white/silver with flow pulse.
 // viewBox 400×280, centre (200, 136).
+import type React from "react";
 
 interface Props {
   size?:     number
@@ -9,9 +10,9 @@ interface Props {
 }
 
 const COL = {
-  edge:      "#1E1F2A",
+  edge:      "#A78BFA",   // brand secondary purple
   secondary: "#A1A3B6",
-  active:    "#7B85E6",
+  active:    "#7B61FF",   // brand primary purple
 } as const;
 
 const C = { x: 200, y: 136 };
@@ -19,9 +20,8 @@ const C = { x: 200, y: 136 };
 type Node = { x: number; y: number; r: number; o: number; a?: boolean };
 
 // ── Nodes ─────────────────────────────────────────────────────────────────────
-// a=true → active color (#7B85E6)  |  a=false/undefined → secondary (#A1A3B6)
 const NODES: Node[] = [
-  // Left upper wing — 12 nodes, body cluster + leading edge + outer sweep
+  // Left upper wing
   { x: 174, y: 116, r: 3.2, o: 0.92, a: true  },  // 0  inner shoulder
   { x: 162, y: 106, r: 2.4, o: 0.68            },  // 1  shoulder companion
   { x: 156, y: 122, r: 2.0, o: 0.56            },  // 2  shoulder lower
@@ -65,52 +65,39 @@ const NODES: Node[] = [
 ];
 
 // ── Edges — [i, j, weight] ────────────────────────────────────────────────────
-// weight 0 = SO 1.00  (centre spokes)
-// weight 1 = SO 0.65  (inner perimeter + key diagonals)
-// weight 2 = SO 0.28  (outer perimeter + subtle)
-// -1 = centre node
 type Edge = [number | -1, number | -1, 0 | 1 | 2];
 
 const EDGES: Edge[] = [
-  // ── centre spokes — left upper ──
-  [-1,  0, 0], [-1,  4, 0], [-1,  7, 0], [-1, 11, 0],
-
-  // ── centre spokes — right upper ──
-  [-1, 12, 0], [-1, 16, 0], [-1, 19, 0], [-1, 23, 0],
-
-  // ── centre spokes — lower wings ──
+  // centre spokes — left upper (7 and 11 removed: cross too harshly)
+  [-1,  0, 0], [-1,  4, 0],
+  // centre spokes — right upper (19 and 23 removed: mirrors of 7/11)
+  [-1, 12, 0], [-1, 16, 0],
+  // centre spokes — lower wings
   [-1, 24, 1], [-1, 29, 1],
-
-  // ── left upper — main perimeter ──
+  // left upper — main perimeter
   [0,  3, 1], [3,  4, 1], [4,  5, 1],
   [5,  6, 2], [6,  7, 2], [7,  8, 2],
   [8,  9, 1], [9, 10, 1], [10, 11, 1], [11, 0, 1],
-
-  // ── left upper — shoulder sub-cluster ──
+  // left upper — shoulder sub-cluster
   [0,  1, 1], [1,  2, 2], [2, 11, 1],
-
-  // ── left upper — interior diagonals ──
+  // left upper — interior diagonals
   [0, 10, 1], [3,  9, 2],
-
-  // ── right upper — main perimeter ──
+  // right upper — main perimeter
   [12, 15, 1], [15, 16, 1], [16, 17, 1],
   [17, 18, 2], [18, 19, 2], [19, 20, 2],
   [20, 21, 1], [21, 22, 1], [22, 23, 1], [23, 12, 1],
-
-  // ── right upper — shoulder sub-cluster ──
+  // right upper — shoulder sub-cluster
   [12, 13, 1], [13, 14, 2], [14, 23, 1],
-
-  // ── right upper — interior diagonals ──
+  // right upper — interior diagonals
   [12, 22, 1], [15, 21, 2],
-
-  // ── left lower wing ──
+  // left lower wing
   [24, 25, 1], [25, 26, 2], [26, 27, 2], [27, 28, 2], [28, 24, 1],
-
-  // ── right lower wing ──
+  // right lower wing
   [29, 30, 1], [30, 31, 2], [31, 32, 2], [32, 33, 2], [33, 29, 1],
 ];
 
-const SO = [1.00, 0.65, 0.28] as const;
+// Base opacities per weight
+const BASE_SO = [0.55, 0.32, 0.14] as const;
 
 function nx(i: number | -1) { return i === -1 ? C.x : NODES[i].x; }
 function ny(i: number | -1) { return i === -1 ? C.y : NODES[i].y; }
@@ -137,19 +124,47 @@ export default function NetworkMoth({
             <feMergeNode in="SourceGraphic" />
           </feMerge>
         </filter>
+        <filter id="nm-node-glow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
       </defs>
 
-      {/* ── Edges ─────────────────────────────────────────────────────────── */}
-      {EDGES.map(([a, b, w], i) => (
-        <line
-          key={i}
-          x1={nx(a)} y1={ny(a)}
-          x2={nx(b)} y2={ny(b)}
-          stroke={COL.edge}
-          strokeWidth="0.9"
-          strokeOpacity={SO[w]}
-        />
-      ))}
+      {/* ── Wings group — breathes from body centre (200, 136) ──────────── */}
+      <g style={{
+        transformOrigin: '200px 136px',
+        transformBox: 'view-box' as React.CSSProperties['transformBox'],
+        animation: 'wing-breathe 4.2s ease-in-out infinite',
+      }}>
+
+      {/* ── Edges with flow pulse ─────────────────────────────────────────── */}
+      {EDGES.map(([a, b, w], i) => {
+        const baseO  = BASE_SO[w];
+        const peakO  = Math.min(baseO * 2.4, 0.85);
+        const dur    = 2.8 + (i % 5) * 0.22;
+        const begin  = `${((i * 0.13) % dur).toFixed(2)}s`;
+        return (
+          <line
+            key={i}
+            x1={nx(a)} y1={ny(a)}
+            x2={nx(b)} y2={ny(b)}
+            stroke={COL.edge}
+            strokeWidth={w === 0 ? 1.1 : 0.75}
+            strokeOpacity={baseO}
+          >
+            <animate
+              attributeName="stroke-opacity"
+              values={`${baseO};${peakO};${baseO}`}
+              dur={`${dur}s`}
+              begin={begin}
+              repeatCount="indefinite"
+            />
+          </line>
+        );
+      })}
 
       {/* ── Wing nodes ────────────────────────────────────────────────────── */}
       {NODES.map((n, i) => (
@@ -158,20 +173,30 @@ export default function NetworkMoth({
           cx={n.x} cy={n.y} r={n.r}
           fill={n.a ? COL.active : COL.secondary}
           fillOpacity={n.o}
-          className={n.a ? "moth-node" : undefined}
-          style={n.a ? { animationDelay: `${((i * 0.4) % 2.4).toFixed(2)}s` } : undefined}
-        />
+          filter={n.a ? "url(#nm-node-glow)" : undefined}
+        >
+          {n.a && (
+            <>
+              <animate attributeName="r"            values={`${n.r};${n.r * 1.35};${n.r}`} dur="2.6s" begin={`${(i * 0.18) % 2.6}s`} repeatCount="indefinite" />
+              <animate attributeName="fill-opacity" values={`${n.o};1;${n.o}`}               dur="2.6s" begin={`${(i * 0.18) % 2.6}s`} repeatCount="indefinite" />
+            </>
+          )}
+        </circle>
       ))}
+
+      </g>{/* end wings-breathe group */}
 
       {/* ── Central nucleus ───────────────────────────────────────────────── */}
       <g filter="url(#nm-glow)">
-        <circle cx={C.x} cy={C.y} r="5" fill={COL.active} fillOpacity="0.22">
-          <animate attributeName="r"            values="5;18;5"       dur="3s" repeatCount="indefinite" />
-          <animate attributeName="fill-opacity" values="0.22;0;0.22"  dur="3s" repeatCount="indefinite" />
+        {/* pulse ring */}
+        <circle cx={C.x} cy={C.y} r="6" fill={COL.active} fillOpacity="0.18">
+          <animate attributeName="r"            values="6;22;6"        dur="3s" repeatCount="indefinite" />
+          <animate attributeName="fill-opacity" values="0.18;0;0.18"   dur="3s" repeatCount="indefinite" />
         </circle>
+        {/* core dot */}
         <circle cx={C.x} cy={C.y} r="5" fill={COL.active}>
-          <animate attributeName="r"            values="4;7;4"        dur="3s" repeatCount="indefinite" />
-          <animate attributeName="fill-opacity" values="0.90;1;0.90"  dur="3s" repeatCount="indefinite" />
+          <animate attributeName="r"            values="4;7;4"         dur="3s" repeatCount="indefinite" />
+          <animate attributeName="fill-opacity" values="0.90;1;0.90"   dur="3s" repeatCount="indefinite" />
         </circle>
       </g>
     </svg>

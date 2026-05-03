@@ -304,12 +304,12 @@ export default function ProfileEditor({ agentAddress, upAddress, kmAddress }: Pr
                   key={t}
                   className="text-[10px] font-mono px-2 py-0.5 rounded-full border"
                   style={{
-                    borderColor: "rgba(0,212,255,0.2)",
-                    color: "#00D4FF",
-                    background: "rgba(0,212,255,0.05)",
+                    borderColor: "rgba(123,97,255,0.3)",
+                    color: "#7B61FF",
+                    background: "rgba(123,97,255,0.1)",
                   }}
                 >
-                  🔒 {t}
+                  {t}
                 </span>
               ))}
               {profile.userTags.map((t) => (
@@ -357,7 +357,7 @@ export default function ProfileEditor({ agentAddress, upAddress, kmAddress }: Pr
               onClick={save}
               disabled={saving}
               className="text-sm px-5 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
-              style={{ background: "#00D4FF", color: "#000" }}
+              style={{ background: "#7B61FF", color: "#000" }}
             >
               {saving ? "Saving…" : "Save to UP"}
             </button>
@@ -365,7 +365,7 @@ export default function ProfileEditor({ agentAddress, upAddress, kmAddress }: Pr
               <span
                 className="text-xs"
                 style={{
-                  color: status.startsWith("Profile updated") ? "#00FF88" : "#FF4060",
+                  color: status.startsWith("Profile updated") ? "#A78BFA" : "#FF4060",
                 }}
               >
                 {status}

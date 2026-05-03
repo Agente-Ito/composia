@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: ["class"],
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -10,76 +11,83 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Canonical tokens — mirrors lib/tokens.ts. Brand Guideline v1.0.
+        // 🔥 Brand base
+        background: "#0A0A0F",
+        surface: "#11121A",
+        line: "#1A1C23",
+        text: "#EDEFF6",
+
+        primary: "#7B61FF",
+        secondary: "#A78BFA",
+
+        muted: "#6B7280",
+
+        // 🧠 Design system (opcional pero útil)
         ds: {
-          bg:        "#0A0A0F",   // Background   — brand §3
-          surface:   "#11121A",   // Surface      — brand §3
-          elev:      "#161720",   // elevated / nested (one step above surface)
-          line:      "#1A1C23",   // Line         — brand §3
-          text:      "#EDEFF6",   // Text/Note    — brand §3
-          muted:     "#4A4E62",   // secondary labels
-          primary:   "#7B61FF",   // Primary      — brand §3 (purple = state/activity)
-          secondary: "#A78BFA",   // Secondary    — brand §3
+          bg: "#0A0A0F",
+          surface: "#11121A",
+          elev: "#161720",
+          line: "#1A1C23",
+          text: "#EDEFF6",
+          muted: "#4A4E62",
+          primary: "#7B61FF",
+          secondary: "#A78BFA",
         },
+
+        // 🚀 Composia extended (puedes usar luego)
         composia: {
-          cyan:     "#00D4FF",   // glow principal
-          electric: "#0099CC",   // secondary / links
-          green:    "#00FF88",   // score alto (≥ 90)
-          amber:    "#FFC033",   // score medio / umbral
-          red:      "#FF4060",   // score bajo / error
-          dark:     "#000000",   // fondo negro absoluto
-          void:     "#050508",   // fondo cards
-          surface:  "#080b12",   // superficies elevadas
-          border:   "#0d1a24",   // bordes
-          dim:      "#0a1520",   // hover states
-          text:     "#c8e6ea",   // texto principal
-          muted:    "#4a6670",   // texto secundario
-          // legacy aliases (used in demo/agent pages – keep so they compile)
-          purple:   "#605CFF",
-          violet:   "#9676FF",
+          green: "#00C896",
+          pink:  "#FF4F8B",
+          warn:  "#FF8C5A",
+          red:   "#FF4060",
+          cyan:  "#7B61FF",
+          dark:  "#000000",
+          void:  "#050508",
+          surface: "#080b12",
+          border:  "#0d1a24",
+          dim:     "#0a1520",
+          text:    "#c8e6ea",
+          muted:   "#4a6670",
+          purple:  "#605CFF",
+          violet:  "#9676FF",
           lavender: "#EDE7FF",
-          card:     "#080b12",
-          gold:     "#FFC033",
+          card:    "#080b12",
         },
       },
+
+      borderRadius: {
+        xl: "14px",
+      },
+
       fontFamily: {
-        sora:    ["Space Grotesk", "sans-serif"],
         grotesk: ["Space Grotesk", "sans-serif"],
-        body:    ["Sora", "sans-serif"],
+        body: ["Sora", "sans-serif"],
+        sora: ["Sora", "sans-serif"],
       },
+
       animation: {
-        "moth-pulse":  "moth-pulse 3s ease-in-out infinite",
-        "node-glow":   "node-glow 2s ease-in-out infinite",
-        "float":       "float 6s ease-in-out infinite",
-        "float-slow":  "float 9s ease-in-out infinite",
-        "live-pulse":  "live-pulse 1.5s ease-in-out infinite",
-        "fade-in-up":  "fade-in-up 0.4s ease forwards",
-        "scan-line":   "scan-line 4s linear infinite",
+        "moth-pulse": "moth-pulse 3s ease-in-out infinite",
+        "node-glow": "node-glow 2s ease-in-out infinite",
+        "float": "float 6s ease-in-out infinite",
+        "live-pulse": "live-pulse 2s ease-in-out infinite",
       },
+
       keyframes: {
         "moth-pulse": {
           "0%, 100%": { opacity: "0.55" },
-          "50%":       { opacity: "1" },
+          "50%": { opacity: "1" },
         },
         "node-glow": {
           "0%, 100%": { filter: "drop-shadow(0 0 2px #7B85E6)" },
-          "50%":       { filter: "drop-shadow(0 0 7px #7B85E6)" },
+          "50%": { filter: "drop-shadow(0 0 7px #7B85E6)" },
         },
-        "float": {
+        float: {
           "0%, 100%": { transform: "translateY(0px)" },
-          "50%":       { transform: "translateY(-8px)" },
+          "50%": { transform: "translateY(-8px)" },
         },
         "live-pulse": {
           "0%, 100%": { opacity: "1" },
-          "50%":       { opacity: "0.3" },
-        },
-        "fade-in-up": {
-          "0%":   { opacity: "0", transform: "translateY(8px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        "scan-line": {
-          "0%":   { transform: "translateY(-100%)" },
-          "100%": { transform: "translateY(100vh)" },
+          "50%": { opacity: "0.3" },
         },
       },
     },

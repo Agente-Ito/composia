@@ -84,7 +84,7 @@ export default function GovernancePanel({
       <div className="space-y-1.5">
         <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
           <div
-            className="h-full bg-[#00D4FF] rounded-full transition-all"
+            className="h-full bg-[#7B61FF] rounded-full transition-all"
             style={{ width: `${quorumPct}%` }}
           />
         </div>
@@ -98,7 +98,7 @@ export default function GovernancePanel({
       <div
         className={`text-[11px] rounded-lg border px-3 py-2 ${
           isSepFollower
-            ? "bg-[#00FF88]/5 border-[#00FF88]/20 text-[#00FF88]"
+            ? "bg-[#A78BFA]/5 border-[#A78BFA]/20 text-[#A78BFA]"
             : "bg-composia-dark/40 border-composia-border text-[#4a6670]"
         }`}
       >
@@ -140,7 +140,7 @@ export default function GovernancePanel({
               <button
                 onClick={() => handlePropose("restore")}
                 disabled={proposing}
-                className="text-xs px-4 py-2 rounded-lg border border-[#00FF88]/30 text-[#00FF88] hover:bg-[#00FF88]/08 transition-colors disabled:opacity-50"
+                className="text-xs px-4 py-2 rounded-lg border border-[#A78BFA]/30 text-[#A78BFA] hover:bg-[#A78BFA]/08 transition-colors disabled:opacity-50"
               >
                 {proposing ? "Submitting…" : "Propose Restore"}
               </button>
@@ -151,7 +151,7 @@ export default function GovernancePanel({
 
       {/* Proposal result */}
       {result && (
-        <p className={`text-xs ${result.ok ? "text-[#00FF88]" : "text-[#FF4060]"}`}>
+        <p className={`text-xs ${result.ok ? "text-[#A78BFA]" : "text-[#FF4060]"}`}>
           {result.message}
         </p>
       )}

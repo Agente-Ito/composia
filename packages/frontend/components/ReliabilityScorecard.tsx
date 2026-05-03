@@ -19,16 +19,16 @@ function Bar({ value, color }: { value: number; color: string }) {
 export default function ReliabilityScorecard({ reliability, history }: Props) {
   const uptimeColor =
     reliability.uptime >= 95
-      ? "bg-green-500"
+      ? "bg-[#A78BFA]"
       : reliability.uptime >= 88
-      ? "bg-yellow-500"
+      ? "bg-[#A78BFA]"
       : "bg-red-500";
 
   const uptimeTextColor =
     reliability.uptime >= 95
-      ? "text-green-400"
+      ? "text-[#A78BFA]"
       : reliability.uptime >= 88
-      ? "text-yellow-400"
+      ? "text-[#A78BFA]"
       : "text-red-400";
 
   const statusLabel =
@@ -36,8 +36,8 @@ export default function ReliabilityScorecard({ reliability, history }: Props) {
 
   const statusClasses =
     reliability.uptime >= 95
-      ? "bg-green-500/10 border-green-500/20 text-green-400"
-      : "bg-yellow-500/10 border-yellow-500/20 text-yellow-400";
+      ? "bg-[#7B61FF]/10 border-[#7B61FF]/20 text-[#A78BFA]"
+      : "bg-[#1A1C23] border-[#1A1C23] text-[#A78BFA]";
 
   return (
     <div className="space-y-4">
@@ -81,7 +81,8 @@ export default function ReliabilityScorecard({ reliability, history }: Props) {
 
       {/* Status badge */}
       <div className={`text-center text-xs py-1.5 rounded-lg border ${statusClasses}`}>
-        {reliability.uptime >= 95 ? "🟢" : "🟡"} {statusLabel}
+        <span className={`w-2 h-2 rounded-full inline-block mr-1.5 ${reliability.uptime >= 95 ? "bg-[#00C896]" : "bg-[#A78BFA]"}`} />
+        {statusLabel}
       </div>
     </div>
   );

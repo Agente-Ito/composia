@@ -12,7 +12,7 @@ interface Props {
 
 const DOMAIN_COLORS: Record<string, string> = {
   codeReasoning: "#10b981",
-  mathReasoning: "#f59e0b",
+  mathReasoning: "#7B61FF",
   logicReasoning: "#8b5cf6",
 };
 
@@ -58,7 +58,7 @@ export default function SocialNetworkGraph({ agentAddress, partners, collaborato
           })}
 
           {/* Center node — YOU */}
-          <circle cx={CX} cy={CY} r={22} fill="#00D4FF" />
+          <circle cx={CX} cy={CY} r={22} fill="#7B61FF" />
           <text
             x={CX} y={CY - 2}
             textAnchor="middle"
@@ -134,7 +134,7 @@ export default function SocialNetworkGraph({ agentAddress, partners, collaborato
                       {partner.agentAddress.slice(0, 10)}...
                     </text>
                     <text x={x} y={y - r - 12} textAnchor="middle" fill="#9ca3af" fontSize={6}>
-                      ⭐ {partner.avgScore.toFixed(2)} · {DOMAIN_LABELS[partner.primaryDomain]}
+                      {partner.avgScore.toFixed(2)} · {DOMAIN_LABELS[partner.primaryDomain]}
                     </text>
                   </g>
                 )}
@@ -176,8 +176,8 @@ export default function SocialNetworkGraph({ agentAddress, partners, collaborato
                 </span>
               </div>
             </div>
-            <div className="text-sm font-semibold text-yellow-400">
-              ⭐ {p.avgScore.toFixed(2)}
+            <div className="text-sm font-semibold text-[#A78BFA]">
+              {p.avgScore.toFixed(2)}
             </div>
           </Link>
         ))}
