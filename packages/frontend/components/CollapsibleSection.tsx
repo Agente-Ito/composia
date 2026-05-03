@@ -40,15 +40,31 @@ export default function CollapsibleSection({
   const [hovered, setHover] = useState(false);
 
   return (
-    <div className="bg-composia-card border border-composia-border rounded-xl overflow-hidden">
+    <div
+      className="bg-composia-card rounded-xl overflow-hidden"
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        border: `1px solid ${hovered ? "rgba(123,97,255,0.28)" : "rgba(13,26,36,1)"}`,
+        boxShadow: hovered
+          ? "0 0 0 1px rgba(123,97,255,0.08), 0 8px 32px rgba(123,97,255,0.06)"
+          : "none",
+        transition: "border-color 0.25s ease-out, box-shadow 0.25s ease-out",
+      }}
+    >
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
         className="relative w-full flex items-center justify-between px-5 py-4 text-left"
-        style={{ background: open ? "rgba(123,97,255,0.02)" : "transparent", transition: "background 0.2s ease" }}
+        style={{
+          background: open
+            ? "rgba(123,97,255,0.04)"
+            : hovered
+            ? "rgba(123,97,255,0.025)"
+            : "transparent",
+          transition: "background 0.22s ease-out",
+        }}
       >
         {/* Moth glow nodes — fade in on hover */}
         {NODES.map((n, i) => (

@@ -98,7 +98,7 @@ export default function SocialNetworkGraph({ agentAddress, partners, collaborato
           {/* ── Center node — YOU ───────────────────────────────────────────── */}
           <circle cx={CX} cy={CY} r={22} fill="#7B61FF" filter="url(#center-glow)" fillOpacity={0.95} />
           <text x={CX} y={CY - 2}  textAnchor="middle" dominantBaseline="middle" fill="white"   fontSize={8} fontWeight="700">YOU</text>
-          <text x={CX} y={CY +  9} textAnchor="middle" dominantBaseline="middle" fill="#c8e6ea" fontSize={6}>{agentAddress.slice(0, 6)}</text>
+          <text x={CX} y={CY +  9} textAnchor="middle" dominantBaseline="middle" fill="#9ca3af" fontSize={6}>{agentAddress.slice(0, 6)}</text>
 
           {/* ── Partner nodes ───────────────────────────────────────────────── */}
           {partners.map((partner, i) => {

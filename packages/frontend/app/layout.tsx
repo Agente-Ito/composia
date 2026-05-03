@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { WalletProvider } from "@/context/WalletContext";
 import NavBar from "@/components/NavBar";
+import FloatingLinks from "@/components/FloatingLinks";
 import { Analytics } from "@vercel/analytics/next";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <WalletProvider>
           <NavBar />
           <main>{children}</main>
+          <FloatingLinks />
           <Analytics />
         </WalletProvider>
       </body>

@@ -376,6 +376,11 @@ export default async function AgentProfilePage({
         </CollapsibleSection>
       )}
 
+      {/* ── 2c. COLLABORATION NETWORK ────────────────────────────────────── */}
+      <CollapsibleSection title="Collaboration Network">
+        <SocialNetworkGraph agentAddress={address} partners={rep.socialGraph.frequentPartners} collaboratorsCount={rep.socialGraph.collaboratorsCount} />
+      </CollapsibleSection>
+
       {/* ── 3. CAPABILITIES & BADGES ─────────────────────────────────────── */}
       <CollapsibleSection title="Capabilities & Recognition">
         <div className="space-y-4">
@@ -549,11 +554,6 @@ export default async function AgentProfilePage({
         </div>
       </CollapsibleSection>
 
-      {/* ── 6. COLLABORATION NETWORK ─────────────────────────────────────── */}
-      <CollapsibleSection title="Collaboration Network">
-        <SocialNetworkGraph agentAddress={address} partners={rep.socialGraph.frequentPartners} collaboratorsCount={rep.socialGraph.collaboratorsCount} />
-      </CollapsibleSection>
-
       {/* ── 7. IDENTITY NAMES ───────────────────────────────────────────── */}
       <CollapsibleSection
         title="Identity Names"
@@ -700,15 +700,25 @@ export default async function AgentProfilePage({
 
       {/* ── 9. GOVERNANCE ───────────────────────────────────────────────── */}
       {reactive && (
-        <GovernancePanel
-          agentAddress={address}
-          followerCount={reactive.followerCount}
-          quorum={reactive.quorum}
-          isSlashed={reactive.slashed}
-          isVerified={reactive.verified}
-          sepoliaFollowers={reactive.sepoliaFollowers}
-          isMock={isReactiveMock}
-        />
+        <CollapsibleSection
+          title="Governance"
+          badge={isReactiveMock ? <PreviewBadge /> : undefined}
+          titleRight={
+            <span className="text-xs text-[#4a6670]">
+              Quorum: <span className="text-white font-medium">{reactive.quorum}</span> of {reactive.followerCount} followers
+            </span>
+          }
+        >
+          <GovernancePanel
+            agentAddress={address}
+            followerCount={reactive.followerCount}
+            quorum={reactive.quorum}
+            isSlashed={reactive.slashed}
+            isVerified={reactive.verified}
+            sepoliaFollowers={reactive.sepoliaFollowers}
+            isMock={isReactiveMock}
+          />
+        </CollapsibleSection>
       )}
 
       {/* ── 10. VISITOR ACTIONS ─────────────────────────────────────────── */}

@@ -62,24 +62,7 @@ export default function GovernancePanel({
   };
 
   return (
-    <div className="bg-composia-card border border-composia-border rounded-xl p-5 space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <h2 className="font-semibold text-[#c8e6ea]">Governance</h2>
-          {isMock && (
-            <span className="text-[9px] px-1.5 py-0.5 rounded border border-[#4a6670]/30 text-[#4a6670] font-mono tracking-wide">
-              preview
-            </span>
-          )}
-        </div>
-        <span className="text-xs text-[#4a6670]">
-          Quorum:{" "}
-          <span className="text-white font-medium">{quorum}</span>
-          {" "}of {followerCount} followers
-        </span>
-      </div>
-
+    <div className="space-y-4">
       {/* Quorum progress bar */}
       <div className="space-y-1.5">
         <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
@@ -159,7 +142,7 @@ export default function GovernancePanel({
       {/* ENS fuses context note */}
       <p className="text-[10px] text-[#4a6670] border-t border-composia-border/40 pt-3">
         Governance is enforced by ENS NameWrapper fuses:{" "}
-        <span className="font-mono text-[#c8e6ea]">CANNOT_SET_RESOLVER</span>{" "}
+        <span className="font-mono text-[#A78BFA]">CANNOT_SET_RESOLVER</span>{" "}
         locks the reputation resolver in place, preventing a slashed agent from bypassing governance.
         On-chain voting replaces oracle execution post-hackathon.
       </p>
