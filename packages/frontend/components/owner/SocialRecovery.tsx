@@ -148,11 +148,10 @@ export default function SocialRecovery({ upAddress }: Props) {
       {/* Explainer */}
       <div
         className="rounded-lg p-4 space-y-2"
-        style={{ background: "rgba(0,212,255,0.04)", border: "1px solid rgba(0,212,255,0.15)" }}
+        style={{ background: "rgba(123,97,255,0.05)", border: "1px solid rgba(123,97,255,0.2)" }}
       >
         <div className="flex items-center gap-2">
-          <span style={{ color: "#00D4FF" }}>🛡</span>
-          <span className="text-xs font-semibold" style={{ color: "#00D4FF" }}>
+          <span className="text-xs font-semibold" style={{ color: "#7B61FF" }}>
             LSP11 Social Recovery — unique to LUKSO
           </span>
         </div>
@@ -195,7 +194,7 @@ export default function SocialRecovery({ upAddress }: Props) {
         /* Recovery contract found */
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#00FF88" }} />
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#A78BFA" }} />
             <span className="text-xs font-mono" style={{ color: "#c8e6ea" }}>
               {recoveryAddress.slice(0, 10)}…{recoveryAddress.slice(-6)}
             </span>
@@ -280,7 +279,7 @@ export default function SocialRecovery({ upAddress }: Props) {
               onClick={addGuardian}
               disabled={working}
               className="text-sm px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
-              style={{ background: "#00D4FF", color: "#000" }}
+              style={{ background: "#7B61FF", color: "#000" }}
             >
               {working ? "…" : "Add"}
             </button>
@@ -292,7 +291,7 @@ export default function SocialRecovery({ upAddress }: Props) {
               style={{
                 color:
                   status.startsWith("Guardian") || status.startsWith("Threshold")
-                    ? "#00FF88"
+                    ? "#A78BFA"
                     : "#FF4060",
               }}
             >

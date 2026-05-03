@@ -164,12 +164,12 @@ export default function GridPage() {
           style={{ borderBottom: "1px solid #0d1a24", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)" }}
         >
           <div className="flex items-center gap-3">
-            <h1 className="font-sora text-sm font-bold tracking-widest text-composia-text uppercase">
+            <h1 className="text-sm font-bold tracking-widest text-composia-text uppercase">
               Score Grid
             </h1>
             <span
               className="text-[9px] font-mono px-2 py-0.5 rounded-full flex items-center gap-1"
-              style={{ color: "#00FF88", background: "rgba(0,255,136,0.06)", border: "1px solid rgba(0,255,136,0.15)" }}
+              style={{ color: "#A78BFA", background: "rgba(167,139,250,0.06)", border: "1px solid rgba(167,139,250,0.18)" }}
             >
               <span className="animate-live-pulse">●</span> LIVE
             </span>
@@ -186,9 +186,9 @@ export default function GridPage() {
                 onClick={() => setFilter(f)}
                 className="text-[10px] font-mono px-3 py-1 rounded-lg transition-all"
                 style={{
-                  background:   filter === f ? "rgba(0,212,255,0.1)"  : "transparent",
-                  border:       filter === f ? "1px solid rgba(0,212,255,0.3)" : "1px solid transparent",
-                  color:        filter === f ? "#00D4FF" : "#4a6670",
+                  background:   filter === f ? "rgba(123,97,255,0.10)" : "transparent",
+                  border:       filter === f ? "1px solid rgba(123,97,255,0.30)" : "1px solid transparent",
+                  color:        filter === f ? "#A78BFA" : "#4a6670",
                 }}
               >
                 {f === "all" ? "All" : f === "high" ? "Score > 80" : "Active"}

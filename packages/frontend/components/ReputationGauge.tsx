@@ -10,10 +10,10 @@ const RADIUS = 38;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 function getColor(accuracy: number): string {
-  if (accuracy >= 90) return "#00FF88"; // green  — Excellent
-  if (accuracy >= 75) return "#00D4FF"; // cyan  — Good
-  if (accuracy >= 60) return "#FFC033"; // amber — Average
-  return "#FF4060";                     // red   — Low
+  if (accuracy >= 90) return "#A78BFA"; // secondary — Excellent
+  if (accuracy >= 75) return "#7B61FF"; // primary   — Good
+  if (accuracy >= 60) return "#A78BFA"; // secondary — Average
+  return "#FF4060";                     // red       — Low
 }
 
 function getLabel(accuracy: number): string {
@@ -82,7 +82,7 @@ export default function ReputationGauge({ accuracy, trend, consistency }: Props)
         <span
           className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
             consistency === "rising"
-              ? "bg-green-500/10 border-green-500/30 text-green-400"
+              ? "bg-[#00C896]/10 border-[#00C896]/30 text-[#00C896]"
               : consistency === "declining"
               ? "bg-red-500/10 border-red-500/30 text-red-400"
               : "bg-composia-void border-composia-border text-composia-muted"

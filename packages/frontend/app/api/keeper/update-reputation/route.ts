@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ethers } from "ethers";
 import { keeperLog } from "@/lib/keeper-log";
+import { nsUpdateTexts } from "@/lib/namespace";
 
 // ── ABIs ──────────────────────────────────────────────────────────────────────
 const REPUTATION_STATE_ABI = [
@@ -68,13 +69,15 @@ export async function POST(req: NextRequest) {
       followerCount = Number(status.followerCount);
     } catch { /* agent not yet registered — syncFollowerCount(0) is safe */ }
 
-    // Parallel: updateVerificationStatus + syncFollowerCount
-    const repTxs = await Promise.all([
-      repState.updateVerificationStatus(ensNode, repBps, verified),
-      repState.syncFollowerCount(ensNode, followerCount),
-    ]);
-    const receipts = await Promise.all(repTxs.map((tx: { wait: () => Promise<{ hash: string }> }) => tx.wait()));
-    const txHash   = receipts[0].hash;
+    // L1: gasless text record update via Namespace (fire-and-forget)
+    nsUpdateTexts(agent, accuracy, verifications).catch(() => {});
+
+    // L2: on-chain ReputationState update (sequential, explicit gas to avoid OOG on cold slots)
+    const GAS           = 300000;
+    const updateTx      = await repState.updateVerificationStatus(ensNode, repBps, verified, { gasLimit: GAS });
+    const updateReceipt = await updateTx.wait();
+    const txHash        = updateReceipt.hash;
+    await (await repState.syncFollowerCount(ensNode, followerCount, { gasLimit: GAS })).wait();
 
     // Optional: sync to SyncerContract (cross-chain bridge record)
     let syncTxHash: string | undefined;

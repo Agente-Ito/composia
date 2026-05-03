@@ -1,133 +1,143 @@
 import Link from "next/link";
-import MothLogo from "@/components/MothLogo";
+import dynamic from "next/dynamic";
 
-const PURPLE = "#8B83F5";
-
-const PILLARS = [
-  { label: "GENSYN",    desc: "Verified compute. Every score is a proof.",      variant: "gensyn"  as const },
-  { label: "KEEPERHUB", desc: "Autonomous workflows. No human required.",        variant: "keeper"  as const },
-  { label: "LUKSO",     desc: "Universal Profiles. Identity composable.",        variant: "lukso"   as const },
-  { label: "COMPOSIA",  desc: "The layer that connects them all.",               variant: "core"    as const },
-];
+const NetworkScene = dynamic(() => import("@/components/NetworkScene"), { ssr: false });
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen flex flex-col" style={{ background: "#07080E" }}>
+    <div className="relative min-h-screen flex flex-col" style={{ background: "#0A0A0F" }}>
 
       {/* Background — subtle purple bloom */}
       <div
         className="pointer-events-none fixed inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(98,88,232,0.07) 0%, transparent 70%)",
+            "radial-gradient(ellipse 60% 40% at 50% 50%, rgba(123,97,255,0.07) 0%, transparent 70%)",
         }}
       />
 
       {/* Hero */}
-      <section className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 py-24 text-center">
+      <section className="relative z-10 flex flex-col items-center px-6 pt-8 pb-32 text-center">
 
-        {/* Moth — absolute, centered, slightly above text */}
-        <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
-          aria-hidden="true"
-        >
-          <div
-            className="tile-float"
-            style={{ animationDuration: "8s", opacity: 0.38, transform: "translateY(-32px)" }}
-          >
-            <MothLogo size={400} variant="core" animated glowColor={PURPLE} />
-          </div>
+        {/* Moth — sits above "Composable", fills h-52 container */}
+        <div className="relative w-full max-w-2xl mx-auto h-64 pointer-events-none" style={{ marginBottom: "-2.5rem" }}>
+          <NetworkScene />
         </div>
 
-        {/* Content — sits above moth in z-order */}
-        <div className="relative z-10 flex flex-col items-center space-y-8">
+        {/* Text */}
+        <div className="space-y-4 mb-10">
 
-          {/* Text */}
-          <div className="space-y-4">
+          {/* Badge */}
+          <div className="flex justify-center">
             <div
-              className="text-[10px] font-mono tracking-[0.3em] uppercase"
-              style={{ color: "#4A4E62" }}
-            >
-              Gensyn × Lukso × Hyperlane
-            </div>
-
-            <h1
-              className="font-sora text-5xl md:text-6xl font-bold tracking-tight"
-              style={{ lineHeight: 1.1 }}
-            >
-              <span style={{ color: "#DCE0EF" }}>
-                Composable reputation layer
-              </span>
-              <br />
-              <span style={{ color: "#4A4E62" }}>for agents</span>
-            </h1>
-
-            <p
-              className="text-base max-w-xl mx-auto leading-relaxed"
-              style={{ color: "rgba(220,224,239,0.36)" }}
-            >
-              Observe the network. Every score is verified on-chain.
-              Every profile is portable. You are a spectator.
-            </p>
-          </div>
-
-          {/* CTAs */}
-          <div className="flex flex-col items-center gap-3">
-            <Link
-              href="/grid"
-              className="inline-flex items-center gap-2 font-mono text-sm px-8 py-3.5 rounded-xl transition-all hover:opacity-90"
+              className="inline-flex items-center gap-2"
               style={{
-                background: "rgba(98,88,232,0.10)",
-                border: "1px solid rgba(139,131,245,0.28)",
-                color: PURPLE,
+                padding: "4px 10px",
+                borderRadius: 999,
+                background: "rgba(255,255,255,0.04)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid rgba(123,97,255,0.30)",
               }}
             >
-              Enter Score Grid
-              <span style={{ opacity: 0.55 }}>→</span>
-            </Link>
-
-            <Link
-              href="/demo"
-              className="text-xs font-mono transition-opacity hover:opacity-80"
-              style={{ color: "#4A4E62" }}
-            >
-              Simulate an agent event ↗
-            </Link>
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: "#7B61FF",
+                  boxShadow: "0 0 6px #7B61FF",
+                  flexShrink: 0,
+                  display: "inline-block",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 12,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "#A78BFA",
+                }}
+              >
+                MVP ETHGlobal Open Agents
+              </span>
+            </div>
           </div>
 
-        </div>
-      </section>
+          <h1
+            className="text-5xl md:text-6xl font-bold"
+            style={{ lineHeight: 1.08 }}
+          >
+            <span style={{ color: "#EDEFF6" }}>
+              Composable reputation layer
+            </span>
+            <br />
+            <span style={{ color: "#4A4E62" }}>for agents</span>
+          </h1>
 
-      {/* Protocol pillars */}
-      <section className="relative z-10 px-6 pb-20">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
-          {PILLARS.map((p, i) => (
-            <div
-              key={p.label}
-              className="flex flex-col items-center text-center p-5 rounded-xl space-y-3"
-              style={{ background: "#0D0F18", border: "1px solid #1A1C2B" }}
-            >
-              <MothLogo
-                size={64}
-                variant={p.variant}
-                animated
-                animDelay={`${i * 0.8}s`}
-                glowColor={PURPLE}
-              />
-              <div
-                className="text-[10px] font-mono font-bold tracking-widest"
-                style={{ color: PURPLE }}
-              >
-                {p.label}
+          <p
+            className="text-base max-w-xl mx-auto leading-relaxed"
+            style={{ color: "rgba(237,239,246,0.45)" }}
+          >
+            Composia turns verifiable behavior into portable identity.
+            Reputation that moves with agents, across every chain.
+          </p>
+        </div>
+
+        {/* Dual CTA cards */}
+        <div className="flex flex-col sm:flex-row gap-4">
+
+          {/* Human card */}
+          <Link
+            href="/grid"
+            className="cta-card ring-glow-purple group flex flex-col gap-3 text-left p-6 rounded-2xl w-48"
+            style={{
+              background: "linear-gradient(135deg, #050508 0%, #080b12 100%)",
+              border: "1px solid rgba(123,97,255,0.25)",
+              color: "#EDEFF6",
+            }}
+          >
+            <div>
+              <div className="font-bold text-sm leading-snug">
+                Interact as<br />Human
               </div>
               <div
-                className="text-[11px] leading-relaxed"
-                style={{ color: "#4A4E62" }}
+                className="text-[11px] leading-relaxed mt-1"
+                style={{ color: "rgba(237,239,246,0.45)" }}
               >
-                {p.desc}
+                Browse scores and explore agent rankings.
               </div>
             </div>
-          ))}
+            <div className="font-mono text-xs mt-auto" style={{ color: "rgba(123,97,255,0.80)" }}>
+              Enter Grid →
+            </div>
+          </Link>
+
+          {/* Agent card */}
+          <Link
+            href="/demo"
+            className="cta-card ring-glow-purple group flex flex-col gap-3 text-left p-6 rounded-2xl w-48"
+            style={{
+              background: "linear-gradient(135deg, #050508 0%, #080b12 100%)",
+              border: "1px solid rgba(123,97,255,0.25)",
+              color: "#EDEFF6",
+            }}
+          >
+            <div>
+              <div className="font-bold text-sm leading-snug">
+                Interact as<br />Agent
+              </div>
+              <div
+                className="text-[11px] leading-relaxed mt-1"
+                style={{ color: "rgba(237,239,246,0.45)" }}
+              >
+                Simulate events and test the pipeline.
+              </div>
+            </div>
+            <div className="font-mono text-xs mt-auto" style={{ color: "rgba(123,97,255,0.80)" }}>
+              Run Demo →
+            </div>
+          </Link>
+
         </div>
       </section>
 

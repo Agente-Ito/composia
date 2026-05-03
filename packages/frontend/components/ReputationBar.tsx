@@ -7,8 +7,8 @@ interface Props {
 
 export default function ReputationBar({ accuracy, verifications }: Props) {
   const color =
-    accuracy >= 90 ? "bg-green-500" :
-    accuracy >= 75 ? "bg-yellow-500" :
+    accuracy >= 90 ? "bg-[#A78BFA]" :
+    accuracy >= 75 ? "bg-[#A78BFA]" :
     "bg-red-500";
 
   return (

@@ -196,14 +196,14 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
       label: "Metadata only",
       perms: ["SETDATA"],
       desc: "Can update profile data — name, description, tags. Nothing else.",
-      color: "#00FF88",
+      color: "#A78BFA",
     },
     {
       id: "app",
       label: "App access",
       perms: ["SETDATA", "CALL"],
       desc: "Typical for dApps: update data and call external contracts (e.g. LSP26 follow, swaps).",
-      color: "#00D4FF",
+      color: "#7B61FF",
     },
     {
       id: "operator",
@@ -211,7 +211,7 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
       perms: ["SETDATA", "CALL", "TRANSFERVALUE", "DEPLOY"],
       desc: "Can also send LYX and deploy contracts. Suitable for automated bots you trust.",
       warning: "Can move funds from your UP.",
-      color: "#FFC033",
+      color: "#A78BFA",
     },
     {
       id: "admin",
@@ -295,12 +295,12 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
                       <span
                         className="text-[9px] px-1.5 py-0.5 rounded border"
                         style={{
-                          borderColor: "rgba(0,212,255,0.25)",
-                          color: "#00D4FF",
-                          background: "rgba(0,212,255,0.05)",
+                          borderColor: "rgba(123,97,255,0.3)",
+                          color: "#7B61FF",
+                          background: "rgba(123,97,255,0.1)",
                         }}
                       >
-                        🔒 Composia
+                        Composia
                       </span>
                     )}
                   </div>
@@ -364,7 +364,7 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
               </div>
               {p.warning && preset === p.id && (
                 <div className="text-[9px] font-medium" style={{ color: "#FF4060" }}>
-                  ⚠ {p.warning}
+                  {p.warning}
                 </div>
               )}
             </button>
@@ -410,7 +410,7 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
             onClick={addController}
             disabled={adding}
             className="text-sm px-4 py-1.5 rounded-lg font-semibold transition-colors disabled:opacity-50"
-            style={{ background: "#00D4FF", color: "#000" }}
+            style={{ background: "#7B61FF", color: "#000" }}
           >
             {adding ? "Adding…" : "Add"}
           </button>
@@ -419,7 +419,7 @@ export default function ControllersManager({ upAddress, kmAddress }: Props) {
               className="text-xs"
               style={{
                 color: status.startsWith("Controller") || status.startsWith("Revoked")
-                  ? "#00FF88"
+                  ? "#A78BFA"
                   : "#FF4060",
               }}
             >

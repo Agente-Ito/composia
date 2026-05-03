@@ -35,7 +35,7 @@ Gensyn chain (LUKSO Testnet)
           └─ transferOwnership(agent)  ← agent claims via acceptOwnership()  ┘
                     │
                     └─ (Ethereum Sepolia, non-blocking)
-                            ├─ AttestorSubdomainRegistrar
+                            ├─ Namespace SDK (offchain, gasless)
                             │     └─ {hex8}.composia.eth  ←── ENS NameWrapper
                             │           text records: gensyn:accuracy, verifications, up_address…
                             └─ ReputationState.sol
@@ -43,6 +43,46 @@ Gensyn chain (LUKSO Testnet)
                                   ├─ updateVerificationStatus(node, repBps, verified)
                                   └─ syncFollowerCount(node, followers)  ←── LSP26
 ```
+
+---
+
+## Demo vs. production
+
+The core challenge Composia solves is that Gensyn and LUKSO are independent chains — an event on one cannot directly execute code on the other. The bridge is an **oracle**: a process that watches one chain and writes to another.
+
+### How the demo works today
+
+The real Gensyn chain isn't accessible for a hackathon demo, so `MockGensyn.sol` is deployed on **LUKSO testnet itself**. The demo page fires:
+
+```
+POST /api/simulate → MockGensyn.simulate(agent, accuracy, verifications) on LUKSO testnet
+                          │
+                          └─ emits VerificationCompleted on LUKSO testnet
+                                    │
+                                    ▼
+                          KeeperHub detects the event → runs the 3-step workflow
+```
+
+Source and destination are the same chain (LUKSO testnet), but the architecture is identical to production — KeeperHub polls `VerificationCompleted`, then calls the API endpoints in sequence to create the UP, register the ENS subdomain, and sync reputation to Sepolia.
+
+### How it would work in production
+
+```
+Gensyn chain (685685)
+  └─ CumulativeRewardsUpdated(account, peerId, totalRewards)
+            │
+            │  KeeperHub polls the Gensyn contract
+            ▼
+  same 3-step workflow → UP on LUKSO → ENS on Sepolia → ReputationState on Sepolia
+```
+
+KeeperHub handles the event detection on both sides. The only change from demo to production is replacing `MockGensyn` on LUKSO with the real Gensyn contract on chain 685685 and pointing the KeeperHub trigger at that address.
+
+### The oracle problem
+
+The bridge is currently a **trusted oracle** — the server holding `COMPOSIA_PRIVATE_KEY` writes to LUKSO on behalf of agents, and KeeperHub calls the Composia API endpoints. For an MVP this is a reasonable tradeoff: the oracle can only create and update identity records, never access funds, and agents take full custody after claiming their UP.
+
+The path toward decentralization would require Gensyn to expose a state proof or a cross-chain messaging channel (Hyperlane, Axelar, etc.) that a verifier contract on LUKSO could check trustlessly — not something that exists in Gensyn's current infrastructure. Composia positions itself as that missing bridge layer, with the oracle as a temporary placeholder until the underlying infrastructure matures.
 
 ---
 
@@ -139,12 +179,14 @@ All ENS operations use the **canonical Sepolia NameWrapper** and **PublicResolve
 
 #### Two-tier name system
 
-| Tier | Example | Created by | When |
+| Tier | Example | Created by | How |
 |---|---|---|---|
-| Auto | `a1b2c3d4.composia.eth` | Oracle (automatic) | On UP creation |
-| Custom | `alice.composia.eth` | Agent (from their EOA) | Anytime after registration |
+| Auto | `a1b2c3d4.composia.eth` | Oracle (automatic) | Gasless via [Namespace SDK](https://namespace.ninja) |
+| Custom | `alice.composia.eth` | Agent (from their EOA) | On-chain via `ENSNameManager.sol` |
 
-The auto name uses the first 8 hex chars of the agent's EOA as the label — always unique, always available. It is registered by `AttestorSubdomainRegistrar.sol` via the ENS NameWrapper's `setSubnodeOwner` call.
+The auto name uses the first 8 hex chars of the agent's EOA as the label — always unique, always available.
+
+Auto names are created gaslessly through the **Namespace SDK** (`lib/namespace.ts`), which writes the subname and all text records in a single API call to Namespace's offchain manager. No gas required from the oracle for auto-registration. Custom names use `ENSNameManager.sol` and require the agent to pay gas from their own wallet.
 
 #### NameWrapper and Fuses
 
@@ -182,7 +224,7 @@ These records are human-readable (any ENS-compatible app can display them) and m
 `ENSNameManager.sol` lets verified agents register a second, human-friendly label. The contract:
 1. Checks `ReputationState.isRegisteredAgent(msg.sender)` — must be a registered agent
 2. Checks label availability (3–32 chars, lowercase alphanumeric + dash)
-3. Calls `AttestorSubdomainRegistrar.createSubdomain(label, agentEOA)` — Composia sponsors gas
+3. Calls `ComposiaSubdomainRegistrar.createSubdomain(label, agentEOA)` — Composia sponsors gas
 4. Stores the custom name as the agent's primary label in `ReputationState`
 
 The auto-generated name remains active. Both names resolve to the same agent. The profile page always displays the primary (custom) name.
@@ -261,6 +303,8 @@ After claiming UP ownership on LUKSO (Step 3), agents see an optional Step 4 on 
 ---
 
 
+### KeeperHub — Automation
+
 [KeeperHub](https://keeperhub.dev/) is a decentralised automation protocol that triggers on-chain actions based on contract events or conditions. Composia uses it as the production trigger mechanism for UP creation.
 
 #### Workflow: Gensyn Listener (LUKSO → Composia)
@@ -315,10 +359,10 @@ The in-memory execution log (capped at 100 entries) is exposed at `GET /api/keep
 
 | Contract | Chain | Purpose |
 |---|---|---|
-| `AttestorRegistry.sol` | LUKSO Testnet | Maps `agentEOA → upAddress + kmAddress`; stores reputation snapshots; emits `ReputationUpdated` |
+| `ComposiaRegistry.sol` | LUKSO Testnet | Maps `agentEOA → upAddress + kmAddress`; stores reputation snapshots; emits `ReputationUpdated` |
 | `MockGensyn.sol` | LUKSO Testnet | Emits `VerificationCompleted` events for development and testing |
 | `SyncerContract.sol` | Ethereum Sepolia | Receives cross-chain reputation updates from the oracle |
-| `AttestorSubdomainRegistrar.sol` | Ethereum Sepolia | Creates `*.composia.eth` subdomains via ENS NameWrapper; writes text records to PublicResolver |
+| `ComposiaSubdomainRegistrar.sol` | Ethereum Sepolia | Wraps the ENS NameWrapper parent; used only for on-chain custom-name registration — auto names are created gaslessly via Namespace SDK |
 | `ReputationState.sol` | Ethereum Sepolia | Reactive live state: verification status, slashing, quorum, bidirectional identity resolution |
 | `ENSNameManager.sol` | Ethereum Sepolia | Two-tier ENS name system; agents register custom names from their wallet |
 | `ERC8004IdentityRegistry.sol` | Ethereum Sepolia | ERC-8004 Identity Registry — agents self-mint an ERC-721 identity token pointing to their `agentURI` |
@@ -330,23 +374,26 @@ The in-memory execution log (capped at 100 entries) is exposed at `GET /api/keep
 ```
 /
 ├── keeperhub-workflows/         KeeperHub workflow definitions (import into your fork)
-│   ├── gensyn-listener-lukso.ts Trigger: VerificationCompleted → Action: POST /api/keeper
-│   ├── cross-chain-sync.ts      Trigger: ReputationUpdated → Action: POST /api/sync
-│   └── index.ts                 Re-exports both workflows
+│   ├── step1-create-up.ts       Action: POST /api/keeper — deploy UP + KM for new agents
+│   ├── step2-register-ens.ts    Action: POST /api/keeper/register-ens — create ENS subdomain
+│   ├── step3-update-reputation.ts Action: POST /api/keeper/update-reputation — sync Gensyn data
+│   └── index.ts                 Re-exports all workflows
 │
 ├── packages/
 │   ├── contracts/               Solidity contracts + Hardhat
 │   │   ├── contracts/
-│   │   │   ├── AttestorRegistry.sol
-│   │   │   ├── AttestorSubdomainRegistrar.sol
+│   │   │   ├── ComposiaRegistry.sol
+│   │   │   ├── ComposiaSubdomainRegistrar.sol
 │   │   │   ├── ENSNameManager.sol
 │   │   │   ├── ERC8004IdentityRegistry.sol
 │   │   │   ├── MockGensyn.sol
 │   │   │   └── ReputationState.sol
 │   │   └── scripts/
-│   │       ├── deploy-lukso.ts      Deploy AttestorRegistry + MockGensyn
+│   │       ├── deploy-lukso.ts      Deploy ComposiaRegistry + MockGensyn
 │   │       ├── deploy-ens.ts        Deploy ENS stack to Sepolia (4 contracts)
 │   │       ├── deploy-sepolia.ts    Deploy SyncerContract to Sepolia
+│   │       ├── deploy-local.ts      Deploy full stack to local Hardhat node
+│   │       ├── wrap-composia-ens.ts Wrap composia.eth into ENS NameWrapper
 │   │       └── simulate.ts          Emit a test VerificationCompleted event
 │   │
 │   ├── listener/                Always-on oracle process
@@ -357,6 +404,9 @@ The in-memory execution log (capped at 100 entries) is exposed at `GET /api/keep
 │   │       ├── processor.ts          Drains queue; calls UP manager
 │   │       ├── up-manager.ts         Deploys UP + KM; writes LSP3; routes through KM.execute
 │   │       ├── ens-registrar.ts      Registers ENS subdomain + seeds ReputationState
+│   │       ├── namespace-client.ts   Namespace SDK client for gasless ENS subname creation
+│   │       ├── axl-client.ts         Axelar cross-chain messaging client
+│   │       ├── axl-service.ts        Axelar service layer for cross-chain sync
 │   │       ├── reputation.ts         Encodes LSP3 data keys / values
 │   │       └── notify.ts             Optional Discord webhook notifications
 │   │
@@ -370,7 +420,7 @@ The in-memory execution log (capped at 100 entries) is exposed at `GET /api/keep
 │       │   ├── keeper/               Keeper Hub dashboard + Run Now button
 │       │   └── api/
 │       │       ├── agent/[address]/       Agent profile JSON
-│       │       ├── agents/                All agents list from AttestorRegistry
+│       │       ├── agents/                All agents list from ComposiaRegistry
 │       │       ├── ens/check-name/        GET ?name= — checks label availability
 │       │       ├── keeper/                KeeperHub webhook (POST) + history (GET)
 │       │       ├── keeperhub/auto-config/ Self-describing KeeperHub config (GET)
@@ -380,12 +430,14 @@ The in-memory execution log (capped at 100 entries) is exposed at `GET /api/keep
 │       │       └── sync/                  Cross-chain sync trigger
 │       ├── components/
 │       │   ├── ComposiaScoreCard.tsx  Arc gauge + 5-component breakdown
-│       │   ├── owner/                 OwnerPanel + 4 tabs (Profile/Controllers/Follow/Recovery)
-│       │   └── ...                    ReputationGauge, BadgeList, ChainSyncStatus, etc.
+│       │   ├── owner/                 OwnerPanel + 5 tabs (Profile/Controllers/Follow/Recovery/ENS Identity)
+│       │   └── ...                    ReputationGauge, BadgeList, ChainSyncStatus, GovernancePanel, etc.
 │       └── lib/
 │           ├── score.ts               Composia Score calculators (5 components)
+│           ├── namespace.ts           Namespace SDK client — gasless ENS subname creation + text record updates
 │           ├── keeper-log.ts          In-memory keeper execution log (singleton, cap 100)
 │           ├── contracts.ts           ethers.js contract helpers
+│           ├── mock-data.ts           Deterministic mock data generator (address-seeded, stable)
 │           └── types.ts               Shared TypeScript types
 ```
 
@@ -435,7 +487,7 @@ NEXT_PUBLIC_LSP26_ADDRESS=0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA
 ### 3. Deploy contracts
 
 ```bash
-# LUKSO Testnet — AttestorRegistry + MockGensyn
+# LUKSO Testnet — ComposiaRegistry + MockGensyn
 pnpm deploy:lukso
 
 # Ethereum Sepolia — full ENS stack + ReputationState + ENSNameManager
@@ -484,17 +536,22 @@ curl -X POST http://localhost:3000/api/simulate \
 - **Reliability scorecard** — uptime, streak, velocity
 - **Activity timeline** — monthly problem count + accuracy trend
 - **Collaboration network** — frequent partners graph
+- **Composia Identity Powers** — 4 styled cards (matching the landing page design language) explaining what verified reputation enables: Governance voting, DeFi Hooks (`isCurrentlyVerified`), Cross-chain identity, Marketplace access
 - **ENS Identity panel** — live data from ReputationState.sol:
   - Verified / Slashed / Below threshold badge
+  - All registered subdomains with primary badge
+  - Text records stored under the ENS name (`gensyn:accuracy`, `gensyn:verifications`, `gensyn:up_address`, `url`, `erc8004:agentURI`)
+  - NameWrapper fuses (CANNOT_UNWRAP, CANNOT_SET_RESOLVER) with expiry
   - Quorum display and slash expiry countdown
   - DeFi composability callout (`isCurrentlyVerified`, `getQuorum`)
 - **Universal Profile panel** — UP / KM addresses, LSP3 keys, link to universalprofile.cloud
 - **Cross-chain sync status** — LUKSO + Sepolia sync indicator
-- **Owner panel** (wallet-gated, LSP6-enforced) — 4 tabs:
+- **Owner panel** (wallet-gated, LSP6-enforced) — 5 tabs:
   - **Edit Profile** — reads/writes LSP3 JSON directly from UP via KM.execute
   - **Controllers** — add/remove addresses with preset permission bundles
   - **Follow Agents** — LSP26 follow/unfollow other Composia agents
   - **Social Recovery** — LSP11 guardian setup
+  - **ENS Identity** — shows stored text records, explains what the ENS node enables, lets the agent register a custom subdomain alias
 
 ---
 
@@ -563,6 +620,7 @@ Response includes `reputation`, `reputationPct`, `verified`, `slashed`, `slashEx
 | OpenZeppelin | ERC725Y, AccessControl, IERC1155, ERC721URIStorage | 5.x |
 | LUKSO identity | LSP0 UniversalProfile, LSP6 KeyManager, LSP3 Metadata, LSP26 Followers | `@lukso/lsp-smart-contracts` |
 | ENS | NameWrapper, PublicResolver (canonical Sepolia), NameHash | ENS v2 |
+| Namespace SDK | Offchain ENS subname manager — gasless auto-registration | [namespace.ninja](https://namespace.ninja) |
 | ERC-8004 | Trustless Agents (draft) — identity, ENS text records, registration file | [eip-8004](https://eips.ethereum.org/EIPS/eip-8004) |
 | Oracle / listener | Node.js, ethers.js | 18 / 6.13 |
 | Frontend | Next.js App Router, React, Tailwind CSS, Recharts | 14.2 / 18.3 / 3.4 |

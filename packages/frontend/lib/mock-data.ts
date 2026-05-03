@@ -284,9 +284,9 @@ export function generateMockExtendedData(
 // These ensure the grid tiles and the profile page always agree on UP / claimed
 // / synced status for any given address, with no runtime randomness.
 
-/** ~80 % of preview agents have a Universal Profile deployed. */
-export function previewHasUP(address: string): boolean {
-  return fh(address, "up_exists") % 10 >= 2;
+/** All preview agents have a Universal Profile deployed (demo always shows a UP). */
+export function previewHasUP(_address: string): boolean {
+  return true;
 }
 
 /** Stable fake UP address derived from agent address (same input → same output). */

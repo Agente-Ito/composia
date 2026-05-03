@@ -132,13 +132,36 @@ export default function EnsNameManager({ agentAddress }: Props) {
         </div>
       </div>
 
+      {/* Text records stored under this name */}
+      <div className="space-y-2">
+        <div className="text-[10px] text-gray-500 uppercase tracking-wide">Text records stored under this name</div>
+        <div className="grid grid-cols-1 gap-1.5 text-[10px]">
+          {([
+            ["gensyn:accuracy",      "updated after each verification round"],
+            ["gensyn:verifications", "updated after each verification round"],
+            ["gensyn:up_address",    "your LUKSO Universal Profile address"],
+            ["gensyn:verified_since","set at first verification"],
+            ["url",                  `https://composia.xyz/agent/${agentAddress}`],
+            ["erc8004:agentURI",     `https://composia.xyz/api/agent/${agentAddress}/erc8004`],
+          ] as [string, string][]).map(([key, note]) => (
+            <div key={key} className="flex items-start justify-between gap-3 bg-composia-dark/60 rounded px-2 py-1.5">
+              <span className="font-mono text-gray-400 shrink-0">{key}</span>
+              <span className="text-gray-600 text-right break-all">{note}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[9px] text-gray-600 pt-0.5">
+          Values are updated automatically after each Gensyn verification round.
+        </p>
+      </div>
+
       {/* Wrong-chain warning */}
       {onWrongChain && (
-        <div className="text-xs text-yellow-400 bg-yellow-500/5 border border-yellow-500/20 rounded px-3 py-2 flex items-center justify-between gap-3">
+        <div className="text-xs text-[#A78BFA] bg-[#1A1C23] border border-[#1A1C23] rounded px-3 py-2 flex items-center justify-between gap-3">
           <span>Switch to Ethereum Sepolia to register a custom name</span>
           <button
             onClick={switchToSepolia}
-            className="text-[10px] border border-yellow-500/30 px-2 py-1 rounded hover:bg-yellow-500/10 transition-colors whitespace-nowrap"
+            className="text-[10px] border border-[#A78BFA]/30 px-2 py-1 rounded hover:bg-[#A78BFA]/10 transition-colors whitespace-nowrap"
           >
             Switch →
           </button>
@@ -168,16 +191,16 @@ export default function EnsNameManager({ agentAddress }: Props) {
         {label && (
           <div className={`text-xs px-2 py-1 rounded ${
             checkState === "checking"  ? "text-gray-400" :
-            checkState === "available" ? "text-green-400" :
+            checkState === "available" ? "text-[#A78BFA]" :
             checkState === "taken"     ? "text-red-400" :
-            checkState === "invalid"   ? "text-yellow-400" :
+            checkState === "invalid"   ? "text-[#A78BFA]" :
             "text-gray-500"
           }`}>
             {checkState === "checking"  && "Checking availability…"}
             {checkState === "available" && `✓ ${label}.composia.eth is available`}
             {checkState === "taken"     && `✗ ${label}.composia.eth is taken`}
             {checkState === "invalid"   && `✗ ${checkReason}`}
-            {checkState === "error"     && `⚠ ${checkReason}`}
+            {checkState === "error"     && checkReason}
           </div>
         )}
 
@@ -187,9 +210,9 @@ export default function EnsNameManager({ agentAddress }: Props) {
           disabled={txState === "pending" || (checkState !== "available" && !onWrongChain)}
           className="w-full py-2 rounded-lg text-xs font-mono transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
-            background: checkState === "available" && !onWrongChain ? "rgba(0,212,255,0.15)" : "rgba(255,255,255,0.05)",
-            border: "1px solid rgba(0,212,255,0.25)",
-            color: "#00D4FF",
+            background: checkState === "available" && !onWrongChain ? "rgba(123,97,255,0.1)" : "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(123,97,255,0.3)",
+            color: "#7B61FF",
           }}
         >
           {txState === "pending"
@@ -204,7 +227,7 @@ export default function EnsNameManager({ agentAddress }: Props) {
 
       {/* Tx feedback */}
       {txState === "done" && txHash && (
-        <div className="text-xs text-green-400 bg-green-500/5 border border-green-500/20 rounded px-3 py-2">
+        <div className="text-xs text-[#00C896] bg-[#00C896]/5 border border-[#00C896]/20 rounded px-3 py-2">
           Name registered!{" "}
           <a
             href={`https://sepolia.etherscan.io/tx/${txHash}`}
@@ -222,11 +245,42 @@ export default function EnsNameManager({ agentAddress }: Props) {
         </div>
       )}
 
-      {/* Info */}
-      <div className="text-[10px] text-gray-600 space-y-0.5 pt-1">
-        <div>· Custom names require a small amount of ETH on Sepolia for gas</div>
-        <div>· Your auto-generated name ({agentAddress.slice(2, 10).toLowerCase()}.composia.eth) stays active</div>
-        <div>· Custom name becomes your primary displayed name immediately</div>
+      {/* What this name enables */}
+      <div className="space-y-2 pt-1">
+        <div className="text-[10px] text-gray-500 uppercase tracking-wide">What this name enables</div>
+        <div className="text-[10px] text-gray-600 space-y-1.5">
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <span>
+              Your auto-generated name{" "}
+              <span className="font-mono text-gray-400">{agentAddress.slice(2, 10).toLowerCase()}.composia.eth</span>{" "}
+              stays active — a custom name becomes your primary displayed name
+            </span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <span>
+              Smart contracts call{" "}
+              <span className="font-mono text-gray-400">isCurrentlyVerified(node)</span>{" "}
+              using this name to gate DeFi access — your ENS node is the on-chain key
+            </span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <span>Custom names require a small amount of ETH on Sepolia for gas</span>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="text-[#7B61FF] shrink-0 mt-px">·</span>
+            <a
+              href={`https://app.ens.domains/${agentAddress.slice(2, 10).toLowerCase()}.composia.eth`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[#7B61FF] hover:text-[#A78BFA] transition-colors"
+            >
+              View on ENS app ↗
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   );

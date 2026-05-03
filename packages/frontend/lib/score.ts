@@ -95,19 +95,19 @@ const TIERS: ScoreTierInfo[] = [
   {
     tier: "elite",
     label: "Elite",
-    color: "#00FF88",
+    color: "#A78BFA",
     description: "Exceptional track record. High trust, high volume, consistently active.",
   },
   {
     tier: "trustworthy",
     label: "Trustworthy",
-    color: "#00D4FF",
+    color: "#7B61FF",
     description: "Reliable and well-established. Good basis for agent collaboration.",
   },
   {
     tier: "developing",
     label: "Developing",
-    color: "#FFC033",
+    color: "#A78BFA",
     description: "Building a track record. Validate before high-stakes work.",
   },
   {

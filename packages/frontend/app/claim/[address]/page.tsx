@@ -137,7 +137,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
       </Link>
 
       <div className="space-y-1">
-        <h1 className="font-sora text-2xl font-bold text-white">Claim Your Universal Profile</h1>
+        <h1 className="text-2xl font-bold text-white">Claim Your Universal Profile</h1>
         <p className="text-gray-400 text-sm">
           Take full ownership of this Composia-managed Universal Profile.
         </p>
@@ -170,7 +170,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
             ["✓ Portable identity",           "Your UP works across Lukso, Ethereum, and any EVM chain"],
           ].map(([title, desc]) => (
             <div key={title} className="flex gap-2">
-              <span className="text-green-400 shrink-0">{title.split(" ")[0]}</span>
+              <span className="text-[#00C896] shrink-0">{title.split(" ")[0]}</span>
               <div>
                 <span className="text-gray-300">{title.slice(2)}</span>
                 <span className="text-gray-600 ml-1">— {desc}</span>
@@ -191,9 +191,9 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
       <ClaimStep number={1} title="Connect your agent wallet" done={isConnected} active={!isConnected}>
         {isConnected ? (
           <div className="space-y-1">
-            <div className="font-mono text-xs text-green-400">{walletAddr}</div>
+            <div className="font-mono text-xs text-[#00C896]">{walletAddr}</div>
             {isPendingOwner === true && (
-              <div className="text-xs text-green-500">✓ You are the pending owner of this profile</div>
+              <div className="text-xs text-[#00C896]">✓ You are the pending owner of this profile</div>
             )}
             {isPendingOwner === false && (
               <div className="text-xs text-red-400">
@@ -234,7 +234,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
       >
         {(phase === "done" || phase === "done8004" || phase === "registering8004") && claimTx ? (
           <div className="space-y-2">
-            <div className="text-green-400 font-medium text-sm">
+            <div className="text-[#00C896] font-medium text-sm">
               You now own your Universal Profile.
             </div>
             <TxLink hash={claimTx} href={explorerTx(claimTx)} />
@@ -277,7 +277,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
         >
           {phase === "done8004" && erc8004Tx ? (
             <div className="space-y-2">
-              <div className="text-green-400 font-medium text-sm">
+              <div className="text-[#00C896] font-medium text-sm">
                 Agent registered in ERC-8004 Identity Registry.
               </div>
               {agentId && (
@@ -287,7 +287,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
               )}
               <div className="text-xs space-y-0.5">
                 <div className="text-gray-500">
-                  TX: <span className="font-mono text-blue-400">{erc8004Tx.slice(0, 18)}...</span>
+                  TX: <span className="font-mono text-[#7B61FF]">{erc8004Tx.slice(0, 18)}...</span>
                 </div>
                 <a
                   href={explorerSepoliaTx(erc8004Tx)}
@@ -315,7 +315,7 @@ export default function ClaimPage({ params }: { params: { address: string } }) {
               <button
                 onClick={registerERC8004}
                 disabled={phase === "registering8004"}
-                className="w-full bg-blue-600/80 hover:bg-blue-600 disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
+                className="w-full bg-[#7B61FF]/80 hover:bg-[#7B61FF] disabled:opacity-50 text-white text-sm font-medium py-2.5 rounded-lg transition-colors"
               >
                 {phase === "registering8004" ? "Registering on Sepolia..." : "Register in ERC-8004 (optional)"}
               </button>
@@ -353,7 +353,7 @@ function ClaimStep({
   return (
     <div className={`bg-composia-card border rounded-xl p-5 space-y-3 transition-colors ${
       done
-        ? "border-green-500/30"
+        ? "border-[#00C896]/30"
         : active
           ? "border-composia-purple/40"
           : "border-composia-border opacity-60"
@@ -361,7 +361,7 @@ function ClaimStep({
       <div className="flex items-center gap-3">
         <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
           done
-            ? "bg-green-500/20 text-green-400"
+            ? "bg-[#00C896]/20 text-[#00C896]"
             : active
               ? "bg-composia-purple/20 text-composia-purple"
               : "bg-composia-dark text-gray-600"
@@ -369,7 +369,7 @@ function ClaimStep({
           {done ? "✓" : number}
         </span>
         <span className={`font-medium text-sm ${
-          done ? "text-green-300" : active ? "text-white" : "text-gray-500"
+          done ? "text-[#00C896]" : active ? "text-white" : "text-gray-500"
         }`}>
           {title}
         </span>
@@ -383,7 +383,7 @@ function TxLink({ hash, href }: { hash: string; href: string }) {
   return (
     <div className="text-xs space-y-0.5">
       <div className="text-gray-500">
-        TX: <span className="font-mono text-blue-400">{hash.slice(0, 18)}...</span>
+        TX: <span className="font-mono text-[#7B61FF]">{hash.slice(0, 18)}...</span>
       </div>
       <a href={href} target="_blank" rel="noopener noreferrer" className="text-composia-purple hover:underline">
         View on Lukso Explorer ↗

@@ -66,16 +66,16 @@ export default function SpecializationRadar({ domains }: Props) {
           <Radar
             name="Accuracy"
             dataKey="Accuracy"
-            stroke="#00D4FF"
-            fill="#00D4FF"
+            stroke="#7B61FF"
+            fill="#7B61FF"
             fillOpacity={0.25}
             strokeWidth={2}
           />
           <Radar
             name="Peer Score"
             dataKey="Peer Score"
-            stroke="#00FF88"
-            fill="#00FF88"
+            stroke="#A78BFA"
+            fill="#A78BFA"
             fillOpacity={0.15}
             strokeWidth={1.5}
             strokeDasharray="4 2"
@@ -108,9 +108,9 @@ export default function SpecializationRadar({ domains }: Props) {
             <span
               className={`ml-2 px-1.5 py-0.5 rounded text-[10px] ${
                 stats.expertise === "High"
-                  ? "bg-green-500/20 text-green-400"
+                  ? "bg-[#7B61FF]/20 text-[#A78BFA]"
                   : stats.expertise === "Medium"
-                  ? "bg-yellow-500/20 text-yellow-400"
+                  ? "bg-[#A78BFA]/20 text-[#A78BFA]"
                   : "bg-red-500/20 text-red-400"
               }`}
             >

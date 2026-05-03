@@ -1,6 +1,6 @@
 "use client";
 
-export type MothVariant = "default" | "gensyn" | "keeper" | "lukso" | "core";
+export type MothVariant = "default" | "gensyn" | "keeper" | "ens" | "lukso" | "core";
 
 interface Props {
   size?: number;
@@ -27,12 +27,6 @@ const BODY = { cx: THORAX_CX, cy: THORAX_CY + 10, rx: 6, ry: 16 };
 
 // Head
 const HEAD = { cx: THORAX_CX, cy: THORAX_CY - 14, r: 5 };
-
-// Antennae
-const ANTENNAE = [
-  { x1: 97, y1: 46, x2: 82, y2: 20 },
-  { x1: 103, y1: 46, x2: 118, y2: 20 },
-];
 
 // ── Wing polygons ─────────────────────────────────────────────────────────────
 // Each wing is defined as a set of triangles (network mesh).
@@ -76,7 +70,6 @@ const GENSYN_EXTRA_NODES = [
   [55, 48], [66, 42], [44, 58], [58, 62], [72, 52],
 ];
 
-const KEEPER_EXTRA_NODES: [number, number][] = []; // keeper gets curve lines instead
 
 const LUKSO_ANCHOR_NODES = [
   [85, 100], [100, 110], [115, 100],
@@ -85,9 +78,9 @@ const LUKSO_ANCHOR_NODES = [
 
 // ── Colour per score ──────────────────────────────────────────────────────────
 export function scoreColor(score: number): string {
-  if (score >= 90) return "#9B8FF5";   // violet — top tier
-  if (score >= 75) return "#7B6EE8";   // purple — strong
-  if (score >= 60) return "#FFC033";   // amber — caution
+  if (score >= 90) return "#A78BFA";   // ds-secondary — top tier
+  if (score >= 75) return "#7B61FF";   // ds-primary — strong
+  if (score >= 60) return "#A78BFA";   // secondary — developing
   return "#FF4060";                    // red — low
 }
 
@@ -101,9 +94,9 @@ export default function MothLogo({
   animated = true,
   className = "",
 }: Props) {
-  const color = glowColor ?? (score !== null ? scoreColor(score) : "#8B83F5");
-  const wingOpacity = 0.22;
-  const strokeWidth = 0.6;
+  const color = glowColor ?? (score !== null ? scoreColor(score) : "#7B61FF");
+  const wingOpacity = 0.32;
+  const strokeWidth = 0.7;
 
   // Mirror helpers
   function mirrorX(pts: number[][]): number[][] {
@@ -140,17 +133,22 @@ export default function MothLogo({
     ));
   }
 
-  function renderNodes(nodes: number[][], r = 1.5) {
-    return nodes.map(([x, y], i) => (
-      <circle
-        key={i}
-        cx={x} cy={y} r={r}
-        fill={color}
-        fillOpacity={0.9}
-        className={animated ? "moth-node" : ""}
-        style={animated ? { animationDelay: `${parseFloat(animDelay) + i * 0.12}s` } : {}}
-      />
-    ));
+  function renderNodes(nodes: number[][], r = 1.5, outerStart = 2) {
+    const filterId = `nglow-${color.replace("#", "")}`;
+    return nodes.map(([x, y], i) => {
+      const isOuter = i >= outerStart;
+      return (
+        <circle
+          key={i}
+          cx={x} cy={y} r={isOuter ? r * 0.85 : r}
+          fill={color}
+          fillOpacity={isOuter ? 0.55 : 0.95}
+          filter={!isOuter ? `url(#${filterId})` : undefined}
+          className={animated ? "moth-node" : ""}
+          style={animated ? { animationDelay: `${parseFloat(animDelay) + i * 0.12}s` } : {}}
+        />
+      );
+    });
   }
 
   // ── Keeper variant: curved spine lines on wings ───────────────────────────
@@ -163,6 +161,26 @@ export default function MothLogo({
     return [...curves, ...mirrored].map((d, i) => (
       <path key={i} d={d} stroke={color} strokeWidth={0.8} strokeOpacity={0.35} fill="none" />
     ));
+  }
+
+  // ── ENS variant: dotted name record lines below body ─────────────────────
+  function ensRecords() {
+    const lines = [
+      { x1: 78, x2: 122, y: 86, o: 0.55 },
+      { x1: 82, x2: 118, y: 93, o: 0.38 },
+      { x1: 87, x2: 113, y: 100, o: 0.24 },
+    ];
+    return (
+      <>
+        {lines.map((l, i) => (
+          <line key={i} x1={l.x1} y1={l.y} x2={l.x2} y2={l.y}
+            stroke={color} strokeWidth={0.7} strokeOpacity={l.o}
+            strokeDasharray="2 2" />
+        ))}
+        <circle cx={75} cy={86} r={1.2} fill={color} fillOpacity={0.7} />
+        <circle cx={125} cy={86} r={1.2} fill={color} fillOpacity={0.7} />
+      </>
+    );
   }
 
   // ── Lukso anchor ─────────────────────────────────────────────────────────
@@ -192,8 +210,17 @@ export default function MothLogo({
       aria-label="Composia moth logo"
     >
       <defs>
-        <filter id={`glow-${color.replace("#", "")}`} x="-40%" y="-40%" width="180%" height="180%">
-          <feGaussianBlur stdDeviation="2.5" result="blur" />
+        {/* nucleus glow — strong */}
+        <filter id={`glow-${color.replace("#", "")}`} x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        {/* node glow — subtle */}
+        <filter id={`nglow-${color.replace("#", "")}`} x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="1.4" result="blur" />
           <feMerge>
             <feMergeNode in="blur" />
             <feMergeNode in="SourceGraphic" />
@@ -226,20 +253,12 @@ export default function MothLogo({
       {variant === "gensyn" && renderNodes(GENSYN_EXTRA_NODES.map(([x, y]) => [x, y]))}
       {variant === "gensyn" && renderNodes(mirrorX(GENSYN_EXTRA_NODES))}
 
+      {/* ── ENS: dotted record lines below body ──────────────────────── */}
+      {variant === "ens" && ensRecords()}
+
       {/* ── Lukso: anchor structure below body ───────────────────────── */}
       {variant === "lukso" && luksoAnchors()}
 
-      {/* ── Antennae ─────────────────────────────────────────────────── */}
-      {ANTENNAE.map((a, i) => (
-        <line
-          key={i}
-          x1={a.x1} y1={a.y1} x2={a.x2} y2={a.y2}
-          stroke={color} strokeWidth={0.7} strokeOpacity={0.7}
-        />
-      ))}
-      {/* Antenna tip nodes */}
-      <circle cx={82} cy={20} r={1.5} fill={color} fillOpacity={0.9} />
-      <circle cx={118} cy={20} r={1.5} fill={color} fillOpacity={0.9} />
 
       {/* ── Body ─────────────────────────────────────────────────────── */}
       <ellipse
@@ -256,16 +275,29 @@ export default function MothLogo({
       />
 
       {/* ── Nucleus (thorax core) — brightest element ─────────────────── */}
+      {/* pulse ring — expands outward and fades */}
+      <circle cx={THORAX_CX} cy={THORAX_CY} r={10} fill="none"
+        stroke={color} strokeWidth={0.8} strokeOpacity={0}>
+        {animated && <>
+          <animate attributeName="r"            values="10;22;10"   dur="2.8s" repeatCount="indefinite" />
+          <animate attributeName="stroke-opacity" values="0.5;0;0.5" dur="2.8s" repeatCount="indefinite" />
+        </>}
+      </circle>
+      {/* outer ring — static glow halo */}
       <circle
         cx={THORAX_CX} cy={THORAX_CY} r={10}
-        fill={color} fillOpacity={0.12}
-        stroke={color} strokeWidth={1.2} strokeOpacity={1}
+        fill={color} fillOpacity={0.14}
+        stroke={color} strokeWidth={1.4} strokeOpacity={1}
         filter={`url(#glow-${color.replace("#", "")})`}
       />
-      <circle
-        cx={THORAX_CX} cy={THORAX_CY} r={5}
-        fill={color} fillOpacity={0.6}
-      />
+      {/* inner core dot — breathes */}
+      <circle cx={THORAX_CX} cy={THORAX_CY} r={5}
+        fill={color} fillOpacity={0.85}>
+        {animated && <>
+          <animate attributeName="r"            values="4;6;4"       dur="2.8s" repeatCount="indefinite" />
+          <animate attributeName="fill-opacity" values="0.75;1;0.75" dur="2.8s" repeatCount="indefinite" />
+        </>}
+      </circle>
 
       {/* ── Score overlay ─────────────────────────────────────────────── */}
       {score !== null && (

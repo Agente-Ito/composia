@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BarChart,
   Bar,
   XAxis,
   YAxis,
@@ -24,7 +23,7 @@ function CustomTooltip({ active, payload, label }: any) {
     <div className="bg-composia-void border border-composia-border rounded-lg p-3 text-xs space-y-1">
       <div className="font-semibold text-composia-text">{label}</div>
       <div className="text-composia-cyan">Problems: {payload[0]?.value?.toLocaleString()}</div>
-      <div className="text-composia-green">Accuracy: {payload[1]?.value}%</div>
+      <div className="text-[#A78BFA]">Accuracy: {payload[1]?.value}%</div>
     </div>
   );
 }
@@ -64,7 +63,7 @@ export default function ActivityTimeline({ data }: Props) {
         <Bar
           yAxisId="left"
           dataKey="solved"
-          fill="#00D4FF"
+          fill="#7B61FF"
           fillOpacity={0.8}
           radius={[3, 3, 0, 0]}
           name="Problems"
@@ -73,9 +72,9 @@ export default function ActivityTimeline({ data }: Props) {
           yAxisId="right"
           type="monotone"
           dataKey="accuracy"
-          stroke="#00FF88"
+          stroke="#A78BFA"
           strokeWidth={2}
-          dot={{ fill: "#00FF88", r: 3 }}
+          dot={{ fill: "#A78BFA", r: 3 }}
           name="Accuracy"
         />
       </ComposedChart>
