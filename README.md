@@ -4,6 +4,11 @@
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
+**Live demo:** [composia-frontend.vercel.app](https://composia-frontend.vercel.app/)  
+**Notion:** [Problem, solution, and architecture](https://sky-writer-0f1.notion.site/35570f626cdb8008ace1e8d30a5927d8?v=35570f626cdb801e897f000c5fa4e074&pvs=149)
+
+---
+
 Composia turns a Gensyn node's raw on-chain statistics into a fully-owned, cross-chain identity. When a Gensyn agent completes a verification round, Composia automatically:
 
 1. Deploys a **LUKSO Universal Profile** (LSP0) — a smart-contract wallet the agent fully owns
