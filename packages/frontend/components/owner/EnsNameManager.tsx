@@ -112,14 +112,6 @@ export default function EnsNameManager({ agentAddress }: Props) {
     }
   };
 
-  if (!configured) {
-    return (
-      <div className="text-xs text-gray-500 italic">
-        ENS_NAME_MANAGER_ADDRESS not configured — deploy contracts first.
-      </div>
-    );
-  }
-
   const onWrongChain = connected && chainId !== SEPOLIA_CHAIN_ID;
 
   return (
@@ -155,8 +147,15 @@ export default function EnsNameManager({ agentAddress }: Props) {
         </p>
       </div>
 
+      {/* Custom name registration — only when contract is deployed */}
+      {!configured && (
+        <div className="text-[10px] text-gray-600 bg-composia-dark/40 rounded px-3 py-2">
+          Custom name registration available once ENSNameManager is deployed on Sepolia.
+        </div>
+      )}
+
       {/* Wrong-chain warning */}
-      {onWrongChain && (
+      {configured && onWrongChain && (
         <div className="text-xs text-[#A78BFA] bg-[#1A1C23] border border-[#1A1C23] rounded px-3 py-2 flex items-center justify-between gap-3">
           <span>Switch to Ethereum Sepolia to register a custom name</span>
           <button
@@ -168,8 +167,8 @@ export default function EnsNameManager({ agentAddress }: Props) {
         </div>
       )}
 
-      {/* Name input */}
-      <div className="space-y-2">
+      {/* Name input — only when contract is deployed */}
+      {configured && <div className="space-y-2">
         <div className="text-[10px] text-gray-500 uppercase tracking-wide">Set custom name</div>
         <div className="flex gap-2">
           <div className="relative flex-1">
@@ -225,7 +224,6 @@ export default function EnsNameManager({ agentAddress }: Props) {
         </button>
       </div>
 
-      {/* Tx feedback */}
       {txState === "done" && txHash && (
         <div className="text-xs text-[#00C896] bg-[#00C896]/5 border border-[#00C896]/20 rounded px-3 py-2">
           Name registered!{" "}
@@ -244,6 +242,7 @@ export default function EnsNameManager({ agentAddress }: Props) {
           {txError || "Transaction failed"}
         </div>
       )}
+      </div>}
 
       {/* What this name enables */}
       <div className="space-y-2 pt-1">
