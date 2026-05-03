@@ -91,7 +91,7 @@ export default function ReputationGauge({ accuracy, trend, consistency }: Props)
           {getConsistencyIcon(consistency)} {trend}
         </span>
       </div>
-      <span className="text-[11px] text-composia-muted">Reputation Score</span>
+      <span className="text-[11px] text-composia-muted">Gensyn Accuracy</span>
     </div>
   );
 }

@@ -329,6 +329,9 @@ export default async function AgentProfilePage({
               <div>
                 <p className="font-mono text-sm text-gray-400">{rep.history.nodeId}</p>
                 <p className="text-xs text-gray-500 mt-0.5">
+                  Gensyn compute accuracy · {rep.verifications.toLocaleString()} verified rounds
+                </p>
+                <p className="text-xs text-gray-600 mt-0.5">
                   Last updated{" "}
                   {new Date(rep.lastUpdated * 1000).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                 </p>
@@ -405,7 +408,9 @@ export default async function AgentProfilePage({
               />
             )}
             {!reactive.verified && !reactive.meetsThreshold && (
-              <CapabilityRow icon="○" text={`Reputation ${reactive.reputationPct.toFixed(1)}% — needs ${reactive.thresholdPct.toFixed(0)}% to unlock verification`} color="gray" />
+              reactive.reputation === 0
+                ? <CapabilityRow icon="○" text="Identity not yet seeded on Sepolia — on-chain score updates after first sync" color="gray" />
+                : <CapabilityRow icon="○" text={`On-chain score ${reactive.reputationPct.toFixed(1)}% — needs ${reactive.thresholdPct.toFixed(0)}% to unlock verification`} color="gray" />
             )}
           </div>
         )}
