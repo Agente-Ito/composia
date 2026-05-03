@@ -22,14 +22,14 @@ export default function ReliabilityScorecard({ reliability, history }: Props) {
       ? "bg-[#A78BFA]"
       : reliability.uptime >= 88
       ? "bg-[#A78BFA]"
-      : "bg-red-500";
+      : "bg-[#4A4E62]";
 
   const uptimeTextColor =
     reliability.uptime >= 95
       ? "text-[#A78BFA]"
       : reliability.uptime >= 88
       ? "text-[#A78BFA]"
-      : "text-red-400";
+      : "text-[#4A4E62]";
 
   const statusLabel =
     reliability.uptime >= 95 ? "Active & Reliable" : "Active";
@@ -81,7 +81,7 @@ export default function ReliabilityScorecard({ reliability, history }: Props) {
 
       {/* Status badge */}
       <div className={`text-center text-xs py-1.5 rounded-lg border ${statusClasses}`}>
-        <span className={`w-2 h-2 rounded-full inline-block mr-1.5 ${reliability.uptime >= 95 ? "bg-[#00C896]" : "bg-[#A78BFA]"}`} />
+        <span className={`w-2 h-2 rounded-full inline-block mr-1.5 ${reliability.uptime >= 95 ? "bg-[#7B61FF]" : "bg-[#A78BFA]"}`} />
         {statusLabel}
       </div>
     </div>

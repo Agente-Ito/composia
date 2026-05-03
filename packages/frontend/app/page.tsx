@@ -110,31 +110,15 @@ export default function Home() {
             We turn agent reputation into a portable identity usable across any protocol.
           </p>
 
-          {/* CTAs — each button wrapped for the moth-energy hover effect */}
-          <div className="flex gap-4 flex-wrap">
-
-            <div className="btn-energy-wrapper">
-              <Link href="/grid" className="btn-primary">
-                View Agents
-              </Link>
-              <div className="energy-orbs" aria-hidden="true">
-                <span className="orb orb-a" />
-                <span className="orb orb-b" />
-                <span className="orb orb-c" />
-              </div>
+          <div className="btn-energy-wrapper">
+            <Link href="/grid" className="btn-primary">
+              View Agents
+            </Link>
+            <div className="energy-orbs" aria-hidden="true">
+              <span className="orb orb-a" />
+              <span className="orb orb-b" />
+              <span className="orb orb-c" />
             </div>
-
-            <div className="btn-energy-wrapper">
-              <Link href="/demo" className="btn-ghost">
-                Activate Portable Identity
-              </Link>
-              <div className="energy-orbs" aria-hidden="true">
-                <span className="orb orb-a" />
-                <span className="orb orb-b" />
-                <span className="orb orb-c" />
-              </div>
-            </div>
-
           </div>
 
         </div>

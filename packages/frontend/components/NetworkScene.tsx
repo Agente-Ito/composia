@@ -157,7 +157,7 @@ function NetworkVisualization() {
   const pulseT  = useRef(0); // 0–1 heartbeat intensity
 
   const curPos = useRef(new Float32Array(TOTAL_NODES * 3));
-  const mouse  = useRef({ tx: 0, ty: 0, x: 0, y: 0 });
+  const mouse  = useRef({ tx: 0, ty: 0, x: 0, y: 0, lastMove: 0 });
 
   const linePos = useMemo(() => new Float32Array(edges.length * 6), [edges.length]);
   const lineCol = useMemo(() => new Float32Array(edges.length * 6), [edges.length]);
@@ -169,8 +169,9 @@ function NetworkVisualization() {
 
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
-      mouse.current.tx =  (e.clientX / window.innerWidth  - 0.5) * 0.13;
-      mouse.current.ty = -(e.clientY / window.innerHeight - 0.5) * 0.09;
+      mouse.current.tx = Math.max(-0.5, Math.min(0.5,  (e.clientX / window.innerWidth  - 0.5) * 1.2));
+      mouse.current.ty = Math.max(-0.29, Math.min(0.26, -(e.clientY / window.innerHeight - 0.5) * 0.8));
+      mouse.current.lastMove = performance.now();
     };
     window.addEventListener("mousemove", onMove, { passive: true });
     return () => window.removeEventListener("mousemove", onMove);
@@ -287,12 +288,23 @@ function NetworkVisualization() {
     centreRef.current?.scale.setScalar(lerp(0, breathCentre, cT));
     glowRef.current?.scale.setScalar(lerp(0, breathGlow, cT));
 
-    // ── Mouse parallax ───────────────────────────────────────────────────────
-    mouse.current.x += (mouse.current.tx - mouse.current.x) * 0.04;
-    mouse.current.y += (mouse.current.ty - mouse.current.y) * 0.04;
+    // ── Cursor follow ────────────────────────────────────────────────────────
+    // nearBottom: 0 at y = -0.12, ramps to 1 at y = -0.26 (lower canvas boundary)
+    const nearBottom = Math.max(0, Math.min(1, (-mouse.current.y - 0.12) / 0.17));
+    const lerpSpeed  = 0.022 * (1 - nearBottom * 0.5); // decelerates to 0.011 at boundary
+    mouse.current.x += (mouse.current.tx - mouse.current.x) * lerpSpeed;
+    mouse.current.y += (mouse.current.ty - mouse.current.y) * lerpSpeed;
+
     if (groupRef.current) {
-      groupRef.current.position.x = mouse.current.x;
-      groupRef.current.position.y = mouse.current.y;
+      const still     = (performance.now() - mouse.current.lastMove) / 1000;
+      const driftFade = ph === "idle" ? Math.max(0, Math.min(1, (still - 0.4) / 1.4)) : 0;
+      const drift     = driftFade * 0.042;
+      // micro-float kicks in near lower boundary — slow horizontal oscillation
+      const floatX    = Math.sin(t * 0.33 + 0.8) * nearBottom * 0.022;
+      groupRef.current.position.x = mouse.current.x + Math.cos(t * 0.38) * drift + floatX;
+      groupRef.current.position.y = mouse.current.y + Math.sin(t * 0.27) * drift * 0.55;
+      // breathing scale: ±2.8% pulse, fades in/out with nearBottom
+      groupRef.current.scale.setScalar(1 + Math.sin(t * 0.70) * nearBottom * 0.028);
     }
   });
 
@@ -362,8 +374,20 @@ function NetworkVisualization() {
 
 // ─── Canvas wrapper ───────────────────────────────────────────────────────────
 
+const MASK_H = "linear-gradient(to right, transparent 0%, black 14%, black 86%, transparent 100%)";
+const MASK_V = "linear-gradient(to bottom, transparent 0%, black 6%, black 94%, transparent 100%)";
+
 const NetworkScene = () => (
-  <div className="absolute inset-0 pointer-events-none">
+  <div
+    className="absolute pointer-events-none"
+    style={{
+      inset: "0 -120px",
+      WebkitMaskImage: `${MASK_H}, ${MASK_V}`,
+      maskImage:        `${MASK_H}, ${MASK_V}`,
+      WebkitMaskComposite: "source-in",
+      maskComposite:       "intersect",
+    }}
+  >
     <Canvas
       gl={{ antialias: true, alpha: true }}
       camera={{ position: [0, 0, 3.0], fov: 42 }}

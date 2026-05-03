@@ -13,7 +13,7 @@ function getColor(accuracy: number): string {
   if (accuracy >= 90) return "#A78BFA"; // secondary — Excellent
   if (accuracy >= 75) return "#7B61FF"; // primary   — Good
   if (accuracy >= 60) return "#A78BFA"; // secondary — Average
-  return "#FF4060";                     // red       — Low
+  return "#4A4E62";                     // muted     — Low (desaturated, no red)
 }
 
 function getLabel(accuracy: number): string {
@@ -82,9 +82,9 @@ export default function ReputationGauge({ accuracy, trend, consistency }: Props)
         <span
           className={`text-xs px-2 py-0.5 rounded-full border font-medium ${
             consistency === "rising"
-              ? "bg-[#00C896]/10 border-[#00C896]/30 text-[#00C896]"
+              ? "bg-[#7B61FF]/10 border-[#7B61FF]/30 text-[#A78BFA]"
               : consistency === "declining"
-              ? "bg-red-500/10 border-red-500/30 text-red-400"
+              ? "bg-[#1A1C23] border-[#1A1C23] text-[#4A4E62]"
               : "bg-composia-void border-composia-border text-composia-muted"
           }`}
         >
